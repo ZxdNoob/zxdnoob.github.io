@@ -1,0 +1,43 @@
+{
+  /**
+   * 前端（Next.js App Router）TypeScript 配置。
+   * - `moduleResolution: bundler`：与 SWC / Turbopack 搭配
+   * - `jsx: react-jsx`：使用新的 JSX 转换，无需 `import React`
+   * - `paths`：`@/*` → `src/*`，与目录别名一致
+   */
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  /**
+   * 排除 `backend`：NestJS 使用独立 tsconfig 与装饰器设置，避免 Next 的 `tsc` 误编译。
+   */
+  "exclude": ["node_modules", "backend"]
+}

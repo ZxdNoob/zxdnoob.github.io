@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+data
+*.sqlite
+*.db
+.git
+.env
+.env.*
+npm-debug.log*
+**/*.spec.ts
+test

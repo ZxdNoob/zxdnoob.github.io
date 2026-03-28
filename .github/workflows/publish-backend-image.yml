@@ -1,0 +1,56 @@
+# =============================================================================
+# 构建并推送 Nest 后端 Docker 镜像到 GitHub Container Registry (ghcr.io)。
+# 推送 main/master 后自动执行；可在任意支持 Docker 的主机上拉取运行。
+#
+# 拉取示例（将 OWNER/REPO 换成你的仓库）：
+#   docker pull ghcr.io/owner/repo/backend:latest
+#
+# 运行示例（持久化 SQLite）：
+#   docker run -d -p 4000:4000 -v zxd-data:/app/data \
+#     -e CORS_ORIGIN=https://你的前端域名 \
+#     ghcr.io/owner/repo/backend:latest
+# =============================================================================
+name: Publish backend image
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "backend/**"
+      - ".github/workflows/publish-backend-image.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker:
+    name: Build and push to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Image name (lowercase for GHCR)
+        id: meta
+        run: |
+          REPO_LC=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=ghcr.io/${REPO_LC}/backend" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}:latest
+            ${{ steps.meta.outputs.image }}:${{ github.sha }}

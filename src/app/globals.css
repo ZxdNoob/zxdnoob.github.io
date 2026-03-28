@@ -1,0 +1,41 @@
+/* =============================================================================
+   全局样式入口（由 PostCSS + Tailwind 处理）
+   - `@import "tailwindcss"`：Tailwind v4 主入口
+   - `@plugin "@tailwindcss/typography"`：启用 `prose` 系列工具类（文章正文）
+   ============================================================================= */
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* 浅色主题：暖纸色背景 + 石色文字，减少刺眼纯白 */
+:root {
+  --background: #faf8f5;
+  --foreground: #1c1917;
+  --muted: #78716c;
+  --accent: #b45309;
+}
+
+/* 深色主题：跟随系统 `prefers-color-scheme` */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0c0a09;
+    --foreground: #e7e5e4;
+    --muted: #a8a29e;
+    --accent: #fbbf24;
+  }
+}
+
+/*
+ * `@theme inline`：把自定义 CSS 变量注册进 Tailwind 主题，
+ * 以便使用 `bg-background`、`text-foreground`、`font-serif` 等工具类。
+ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-display), ui-serif, Georgia, "Noto Serif SC", serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}

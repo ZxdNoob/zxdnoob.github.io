@@ -1,0 +1,14 @@
+# Dependabot：定期提出依赖更新 PR，与 CI 工作流配合可在合并前自动跑测试。
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: /backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10

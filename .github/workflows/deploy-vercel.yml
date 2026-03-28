@@ -1,0 +1,44 @@
+# =============================================================================
+# 将 Next.js 前端部署到 Vercel（生产环境）。
+#
+# 使用前请在仓库 Settings → Secrets and variables → Actions 中配置：
+#   VERCEL_TOKEN        — Vercel Account Settings → Tokens
+#   VERCEL_ORG_ID       — 项目根目录执行 npx vercel link 后 .vercel/project.json
+#   VERCEL_PROJECT_ID   — 同上
+#
+# 若未配置上述密钥，本工作流中的 deploy job 会自动跳过（不导致 CI 失败）。
+# 也可改用 Vercel 控制台「Import Git Repository」由官方自动构建，无需本文件。
+# =============================================================================
+name: Deploy frontend (Vercel)
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-deploy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Vercel Production
+    runs-on: ubuntu-latest
+    # 未配置 Vercel 密钥时跳过（fork PR / Dependabot 等场景同样跳过）
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--prod"
+          working-directory: ./

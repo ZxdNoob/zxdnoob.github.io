@@ -1,0 +1,8 @@
+{
+  /**
+   * 生产构建专用 tsconfig：`nest build` 会优先读取本文件。
+   * 在基础 `tsconfig.json` 上排除测试与 `dist`，减小编译范围、加快构建。
+   */
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}

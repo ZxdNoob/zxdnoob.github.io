@@ -1,0 +1,31 @@
+{
+  /**
+   * 后端 TypeScript 编译选项（开发 `nest start` 与生产 `nest build` 共用）。
+   * - `module`/`moduleResolution` 使用 `nodenext` 与 Node 20+ ESM/CJS 互操作对齐
+   * - `experimentalDecorators` / `emitDecoratorMetadata` 为 Nest 依赖注入所必需
+   */
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    /** 设为 false 以便在 `dist` 中保留注释（若你需要阅读编译产物） */
+    "removeComments": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}
