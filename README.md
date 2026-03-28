@@ -79,7 +79,7 @@ npm run build:api
    - **`NEXT_PUBLIC_API_URL`**
    
    未配置时，构建会回退到 `127.0.0.1:4000`，在 Actions 上无法连通，页面仍可部署但列表为空；配置好密钥并重新运行工作流后即可显示数据。
-4. 根目录已包含 **`public/.nojekyll`**，避免 GitHub Pages 用 Jekyll 处理时忽略 **`_next`** 等目录。
+4. 根目录已包含 **`public/.nojekyll`**，避免 GitHub Pages 用 Jekyll 处理时忽略 **`_next`** 等目录。工作流上传构件时需 **`actions: write`** 权限（已在 [deploy-github-pages.yml](.github/workflows/deploy-github-pages.yml) 中声明）；若曾精简过 `permissions` 导致上传/部署失败，请恢复该权限。
 
 ### 前端：推荐用 Vercel 连接 GitHub（零配置 Actions）
 

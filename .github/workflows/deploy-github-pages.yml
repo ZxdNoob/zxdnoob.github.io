@@ -11,14 +11,18 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+# 显式声明 permissions 时，未列出的 scope 为 none；上传 Pages 构件需要 actions: write
+# 参考：https://docs.github.com/actions/security-guides/automatic-token-authentication
 permissions:
   contents: read
+  actions: write
   pages: write
   id-token: write
 
 concurrency:
   group: pages-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # 避免取消进行中的生产部署（与官方 Pages 模板一致）
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -31,7 +35,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "20"
           cache: npm
           cache-dependency-path: package-lock.json
 
@@ -43,13 +47,17 @@ jobs:
         env:
           STATIC_EXPORT: "1"
           NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
+          NEXT_TELEMETRY_DISABLED: "1"
+          NODE_OPTIONS: --max-old-space-size=6144
           API_URL: ${{ secrets.API_URL }}
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: out
+          path: ./out
+          # 默认会排除以 . 开头的文件，须包含 public/.nojekyll，否则 Pages 仍可能走 Jekyll
+          include-hidden-files: true
 
   deploy:
     name: Deploy to GitHub Pages
@@ -61,4 +69,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
