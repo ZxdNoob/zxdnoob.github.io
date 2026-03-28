@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[97367,["/_next/static/chunks/04ixp5x3ciom-.js","/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
+3:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","article",null,{"className":"mx-auto max-w-3xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16","children":["$","header",null,{"className":"border-b border-stone-200/90 pb-8 dark:border-stone-800/90","children":[["$","h1",null,{"className":"font-serif text-2xl font-semibold text-stone-900 dark:text-stone-50","children":"暂无文章"}],["$","p",null,{"className":"mt-3 text-stone-600 dark:text-stone-400","children":["构建时未能从 API 获取文章。请在 GitHub Actions 中配置可用的"," ",["$","code",null,{"className":"rounded bg-stone-100 px-1 dark:bg-stone-800","children":"API_URL"}]," ","后重新部署；本地请启动后端并重新执行"," ",["$","code",null,{"className":"rounded bg-stone-100 px-1 dark:bg-stone-800","children":"npm run build:static"}],"。"]}]]}]}],null,["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"_DTjgGT7QCzEob5jzPaIt"}
+4:null

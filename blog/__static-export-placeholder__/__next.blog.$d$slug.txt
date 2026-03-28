@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[39756,["/_next/static/chunks/04ixp5x3ciom-.js","/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
+3:I[37457,["/_next/static/chunks/04ixp5x3ciom-.js","/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
+4:I[22016,["/_next/static/chunks/04ixp5x3ciom-.js","/_next/static/chunks/0d3shmwh5_nmn.js"],""]
+5:[]
+0:{"rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}],"notFound":[["$","main",null,{"className":"mx-auto max-w-lg px-4 py-24 text-center","children":[["$","h1",null,{"className":"font-serif text-2xl font-semibold text-stone-900 dark:text-stone-100","children":"找不到这篇文章"}],["$","p",null,{"className":"mt-3 text-stone-600 dark:text-stone-400","children":"链接可能已失效，或文章尚未发布。"}],["$","$L4",null,{"href":"/blog","className":"mt-8 inline-block text-sm font-medium text-amber-800 hover:underline dark:text-amber-300","children":"← 返回文章列表"}]]}],[]]}]]}],"isPartial":false,"staleTime":300,"varyParams":"$W5","buildId":"_DTjgGT7QCzEob5jzPaIt"}

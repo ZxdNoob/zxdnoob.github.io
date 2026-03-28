@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://zxdnoob.github.io/sitemap.xml
