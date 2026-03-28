@@ -72,17 +72,14 @@ npm run build:api
 
 本仓库名为 **`zxdnoob.github.io`** 时，GitHub 会将站点发布到 **`https://zxdnoob.github.io/`**。
 
-1. 打开仓库 **Settings → Pages**，在 **Build and deployment** 中将 **Source** 设为 **GitHub Actions**。  
-   - **必须**从「**Deploy from a branch**」（例如 **`/ (root)` + `gh-pages` 分支**）切换过来；若仍保留为从 **`gh-pages` 分支**发布，Actions 部署会报错：`Invalid deployment branch … Deployments are only allowed from gh-pages`（或 API 返回 400），因为工作流实际是从 **`main`** 触发、用构件发布，与「仅允许 gh-pages 分支」的配置冲突。  
-   - 切换后旧的分支发布配置会被取代，无需再向 `gh-pages` 推送构建产物。
-2. 若曾给 **`github-pages` 环境** 配过「仅限某分支部署」：打开 **Settings → Environments → `github-pages`**，在 **Deployment branches** 中选 **All branches** 或至少包含 **`main`**，不要仅限 **`gh-pages`**（除非你永远不用 Actions 发布）。
-3. 推送 **main** 后，[Deploy GitHub Pages](.github/workflows/deploy-github-pages.yml) 会执行 **`STATIC_EXPORT=1` 的 `next build`**，并把 **`out/`** 部署为站点根目录。
-4. **文章与版本历史**在构建时通过 HTTP 从 Nest API 拉取。请在 **Settings → Secrets and variables → Actions** 中配置至少一项（指向公网可访问的 API 根 URL，无尾部斜杠）：
-   - **`API_URL`**（推荐，仅构建机使用），或
-   - **`NEXT_PUBLIC_API_URL`**
-   
-   未配置时，构建会回退到 `127.0.0.1:4000`，在 Actions 上无法连通，页面仍可部署但列表为空；配置好密钥并重新运行工作流后即可显示数据。
-5. 根目录已包含 **`public/.nojekyll`**，避免 GitHub Pages 用 Jekyll 处理时忽略 **`_next`** 等目录。工作流上传构件时需 **`actions: write`** 权限（已在 [deploy-github-pages.yml](.github/workflows/deploy-github-pages.yml) 中声明）；若曾精简过 `permissions` 导致上传/部署失败，请恢复该权限。
+[Deploy GitHub Pages](.github/workflows/deploy-github-pages.yml) 在 **`main`** 上构建 **`out/`**，再用 **`peaceiris/actions-gh-pages`** 将静态文件推送到 **`gh-pages` 分支**（与 `main` 源码分离），**不**使用 `actions/deploy-pages`（避免与仓库里「仅允许从 `gh-pages` 部署」等环境策略冲突时出现 `Invalid deployment branch … Deployments are only allowed from gh-pages`）。
+
+1. 打开 **Settings → Pages**，在 **Build and deployment** 中：  
+   - **Source** 选 **Deploy from a branch**（不要选 **GitHub Actions**，否则与当前工作流两套机制并存、易混淆）。  
+   - **Branch** 选 **`gh-pages`**，文件夹 **`/ (root)`**。首次运行工作流后会自动创建 **`gh-pages`** 分支。
+2. 推送 **main** 后，工作流会执行 **`npm run build:static`** 并把 **`out/`** 推到 **`gh-pages`**；几分钟后站点更新。
+3. **文章与版本历史**在构建时通过 HTTP 从 Nest API 拉取。请在 **Settings → Secrets and variables → Actions** 中配置 **`API_URL`** 或 **`NEXT_PUBLIC_API_URL`**（公网 API 根 URL，无尾部斜杠）。未配置时列表可能为空，并可能出现占位页。
+4. 根目录 **`public/.nojekyll`** 会进入 **`out/`**，避免 Jekyll 忽略 **`_next`**。工作流需 **`contents: write`** 以向 **`gh-pages`** 推送（已在 YAML 中声明）。
 
 ### 前端：推荐用 Vercel 连接 GitHub（零配置 Actions）
 

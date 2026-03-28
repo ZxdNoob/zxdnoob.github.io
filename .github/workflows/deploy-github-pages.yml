@@ -1,8 +1,11 @@
 # =============================================================================
-# 将 Next.js 静态导出（out/）部署到 GitHub Pages（用户站：https://<user>.github.io/）。
+# 将 Next.js 静态导出（out/）推送到 gh-pages 分支，由 GitHub Pages 从该分支发布。
 #
-# 仓库 Settings → Pages → Build and deployment：Source 选「GitHub Actions」。
-# 可选 Secrets：API_URL 或 NEXT_PUBLIC_API_URL — 构建时拉取线上 Nest API 的文章与 changelog。
+# 适用于：Settings → Pages 为「Deploy from a branch」且分支为 gh-pages 时；
+# 可避免 deploy-pages 与「仅允许 gh-pages」环境策略冲突导致的 400。
+#
+# 仓库 Settings → Pages：Build and deployment → Source「Deploy from a branch」→ Branch「gh-pages」/「/ (root)」。
+# 可选 Secrets：API_URL 或 NEXT_PUBLIC_API_URL — 构建时拉取线上 Nest API。
 # =============================================================================
 name: Deploy GitHub Pages
 
@@ -11,22 +14,16 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
-# 显式声明 permissions 时，未列出的 scope 为 none；上传 Pages 构件需要 actions: write
-# 参考：https://docs.github.com/actions/security-guides/automatic-token-authentication
 permissions:
-  contents: read
-  actions: write
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages-${{ github.workflow }}-${{ github.ref }}
-  # 避免取消进行中的生产部署（与官方 Pages 模板一致）
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build static site
+  build-and-deploy:
+    name: Build and deploy to gh-pages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -52,21 +49,10 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Push out/ to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: ./out
-          # 默认会排除以 . 开头的文件，须包含 public/.nojekyll，否则 Pages 仍可能走 Jekyll
-          include-hidden-files: true
-
-  deploy:
-    name: Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v5
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          # 单提交历史，避免 gh-pages 分支无限增大
+          force_orphan: true
