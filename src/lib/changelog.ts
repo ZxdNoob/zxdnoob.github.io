@@ -18,6 +18,7 @@ export type ChangelogItem = {
 export type ChangelogEntry = {
   /** 数据库主键，用于稳定 React key */
   id?: string;
+  /** 发布时间：`YYYY-MM-DD` 或含本地/偏移的 ISO 8601（含时分秒） */
   date: string;
   title?: string;
   webVersion?: string;
@@ -64,6 +65,30 @@ export async function fetchChangelogEntries(): Promise<ChangelogEntry[]> {
   } catch {
     return [];
   }
+}
+
+/**
+ * 解析发布时间为 `Date`。
+ * 纯日期 `YYYY-MM-DD` 按本地正午解析，避免仅日期串被解析为 UTC 午夜导致跨日。
+ */
+export function parseChangelogDate(dateStr: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return new Date(`${dateStr}T12:00:00`);
+  }
+  return new Date(dateStr);
+}
+
+/** 版本发布时间展示：本地时区年月日 + 24 小时制时分秒（与文章发布时间风格一致）。 */
+export function formatChangelogReleaseAt(dateStr: string): string {
+  return new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(parseChangelogDate(dateStr));
 }
 
 /** Semver 比较：a > b 返回正数（仅支持数字段，与当前 package 一致） */
@@ -113,7 +138,8 @@ export function sortChangelogEntries(
   entries: ChangelogEntry[],
 ): ChangelogEntry[] {
   return [...entries].sort((a, b) => {
-    const byDate = b.date.localeCompare(a.date);
+    const byDate =
+      parseChangelogDate(b.date).getTime() - parseChangelogDate(a.date).getTime();
     if (byDate !== 0) return byDate;
     const w = semverCompare(
       b.webVersion ?? "0.0.0",
@@ -135,14 +161,15 @@ export function changelogEntryKey(e: ChangelogEntry): string {
 export function groupChangelogByYear(entries: ChangelogEntry[]): ChangelogYearGroup[] {
   const map = new Map<number, ChangelogEntry[]>();
   for (const e of entries) {
-    const y = new Date(e.date + "T12:00:00").getFullYear();
+    const y = parseChangelogDate(e.date).getFullYear();
     const list = map.get(y) ?? [];
     list.push(e);
     map.set(y, list);
   }
   for (const list of map.values()) {
     list.sort((a, b) => {
-      const byDate = b.date.localeCompare(a.date);
+      const byDate =
+        parseChangelogDate(b.date).getTime() - parseChangelogDate(a.date).getTime();
       if (byDate !== 0) return byDate;
       const w = semverCompare(
         b.webVersion ?? "0.0.0",

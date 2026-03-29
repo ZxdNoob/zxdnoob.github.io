@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactElement, type ReactNode } from "react";
 import { toast } from "@/lib/toast";
 import {
   changelogEntryKey,
+  formatChangelogReleaseAt,
   groupChangelogByYear,
   latestApiVersionFromEntries,
   latestWebVersionFromEntries,
@@ -145,15 +146,6 @@ function itemSurfaceLabel(item: ChangelogItem): { text: string; className: strin
     className:
       "border-stone-200/90 bg-stone-100 text-stone-600 dark:border-stone-600 dark:bg-stone-800/90 dark:text-stone-400",
   };
-}
-
-function formatDate(iso: string) {
-  const d = new Date(iso + "T12:00:00");
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(d);
 }
 
 function filterByScope(
@@ -503,7 +495,7 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
                                       dateTime={entry.date}
                                       className="text-sm text-stone-500 dark:text-stone-400"
                                     >
-                                      {formatDate(entry.date)}
+                                      {formatChangelogReleaseAt(entry.date)}
                                     </time>
                                   </div>
                                   {entry.title ? (

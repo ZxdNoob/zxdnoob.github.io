@@ -14,6 +14,7 @@ export type ChangelogItemPayload = {
 
 export type ChangelogReleaseDto = {
   id: string;
+  /** 发布时间：ISO 8601（含时分秒）或 `YYYY-MM-DD` */
   date: string;
   title?: string;
   webVersion?: string;

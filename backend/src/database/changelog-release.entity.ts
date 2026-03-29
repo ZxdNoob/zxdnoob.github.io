@@ -9,8 +9,8 @@ export class ChangelogReleaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  /** 发布日 `YYYY-MM-DD` */
-  @Column({ type: 'varchar', length: 32 })
+  /** 发布时间：ISO 8601（含时分秒）；兼容历史 `YYYY-MM-DD` */
+  @Column({ type: 'varchar', length: 64 })
   date!: string;
 
   @Column({ type: 'varchar', length: 512, nullable: true })

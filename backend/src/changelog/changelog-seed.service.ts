@@ -49,7 +49,7 @@ const SEED_ITEMS: ChangelogItemPayload[] = [
 ];
 
 const SEED_RELEASE: Partial<ChangelogReleaseEntity> = {
-  date: '2026-03-28',
+  date: '2026-03-28T12:00:00',
   title: '初始里程碑（0.0.1）',
   webVersion: '0.0.1',
   apiVersion: '0.0.1',
