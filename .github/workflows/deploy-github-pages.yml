@@ -1,15 +1,14 @@
 # =============================================================================
 # 将 Next.js 静态导出（out/）通过 GitHub Pages 官方 Actions 部署（见 Deployments）。
 #
-# 数据方案（尽量走数据库）：
-# - 默认：在 Runner 上 build 后端、启动 Nest + SQLite（临时库），Next 构建期通过
-#   API_URL=http://127.0.0.1:4000 从数据库读文章与 changelog，再导出静态页。
-# - 仅当配置了 Secret「API_URL」且非空：跳过本地起 API，构建时向该地址拉数据（长期部署的 Nest）。
-#   注意：不要用「NEXT_PUBLIC_API_URL」参与此逻辑——该变量常误配或指向浏览器侧地址，
-#   会导致跳过本地 API 而构建期拉取失败，Pages 上出现「暂无文章」。
+# 注意：GitHub 不允许在 step/job 的 if: 中直接使用 secrets.*，须先写入 env 再判断。
 #
-# Pages：Settings → Build and deployment → Source 选「GitHub Actions」（不要只用「从分支部署」
-# 却依赖本工作流；若选分支，应选 gh-pages 且需其它方式推送到该分支）。
+# 数据方案：
+# - 默认：Runner 上启动 Nest + SQLite（种子文章），构建期 API_URL=http://127.0.0.1:4000。
+# - 可选：在仓库 Secret「PAGES_REMOTE_API_URL」填写公网 API 根 URL，则跳过本地 Nest、从该地址拉数据。
+#   不要使用通用名「API_URL」——易与其它环境误配冲突；本工作流也不再读取该 Secret。
+#
+# Pages：Settings → Build and deployment → Source「GitHub Actions」
 # =============================================================================
 name: Deploy GitHub Pages
 
@@ -32,11 +31,13 @@ jobs:
     name: Build static site
     runs-on: ubuntu-latest
     env:
+      # 供 if: 使用（禁止在 if 里写 secrets.*）；1 = 在 Runner 上起 Nest + SQLite
+      USE_LOCAL_NEST: ${{ secrets.PAGES_REMOTE_API_URL == '' && '1' || '0' }}
       STATIC_EXPORT: "1"
       NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
       NEXT_TELEMETRY_DISABLED: "1"
       NODE_OPTIONS: --max-old-space-size=6144
-      API_URL: ${{ secrets.API_URL != '' && secrets.API_URL || 'http://127.0.0.1:4000' }}
+      API_URL: ${{ secrets.PAGES_REMOTE_API_URL != '' && secrets.PAGES_REMOTE_API_URL || 'http://127.0.0.1:4000' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,15 +55,15 @@ jobs:
         run: npm ci
 
       - name: Install backend dependencies
-        if: ${{ secrets.API_URL == '' }}
+        if: ${{ env.USE_LOCAL_NEST == '1' }}
         run: npm ci --prefix backend
 
       - name: Build backend
-        if: ${{ secrets.API_URL == '' }}
+        if: ${{ env.USE_LOCAL_NEST == '1' }}
         run: npm run build --prefix backend
 
       - name: Start API (SQLite + seed) and wait for health
-        if: ${{ secrets.API_URL == '' }}
+        if: ${{ env.USE_LOCAL_NEST == '1' }}
         run: |
           set -e
           cd backend
@@ -91,12 +92,12 @@ jobs:
           if find out/blog -maxdepth 1 -name '*.html' ! -name '*__static-export-placeholder__*' -print -quit | grep -q .; then
             echo "Static blog pages OK"
           else
-            echo "::error::No post HTML under out/blog (only placeholder). Build could not reach API during SSG — check API_URL secret or local API logs."
+            echo "::error::No post HTML under out/blog (only placeholder). Build could not reach API during SSG — check PAGES_REMOTE_API_URL or API logs."
             exit 1
           fi
 
       - name: Stop local API
-        if: ${{ always() && secrets.API_URL == '' }}
+        if: ${{ always() && env.USE_LOCAL_NEST == '1' }}
         run: |
           if [ -f api.pid ]; then kill "$(cat api.pid)" 2>/dev/null || true; fi
 
