@@ -9,6 +9,23 @@
 #   docker run -d -p 4000:4000 -v zxd-data:/app/data \
 #     -e CORS_ORIGIN=https://你的前端域名 \
 #     ghcr.io/owner/repo/backend:latest
+#
+# 可选：推镜像后自动部署到自有 VPS 或阿里云 ECS（Docker 已安装、用户有权限执行 docker）。
+# 将 DEPLOY_HOST 设为 ECS 公网 IP / 已解析域名，安全组放行 SSH 与 API 端口（见 DEPLOY_HOST_PORT）。
+# SQLite 持久化在 Docker 卷（默认 zxdnoob-api-data）；可另购云盘挂载到 Docker 数据目录（进阶）。
+# 对象存储备份（阿里云 OSS）见 .github/workflows/aliyun-oss-backup.yml 与 scripts/aliyun-oss-backup.sh。
+# 在仓库 Settings → Secrets and variables → Actions 中配置（均为 Repository secrets）：
+#   DEPLOY_HOST           — 服务器主机名或 IP（必填才会跑 deploy job）
+#   DEPLOY_USER           — SSH 登录用户
+#   DEPLOY_SSH_KEY        — 对应私钥（整段 PEM，含 BEGIN/END）
+#   DEPLOY_GHCR_TOKEN     — 可选；读 ghcr 镜像用 PAT（classic: read:packages），
+#                           公开包可不配（服务器需能匿名 pull 或已 docker login）
+#   DEPLOY_GHCR_USER      — 可选；与 DEPLOY_GHCR_TOKEN 一起用于 docker login，默认仓库 owner
+#   DEPLOY_SSH_PORT       — 可选；SSH 端口，默认 22
+#   DEPLOY_HOST_PORT      — 可选；宿主机映射端口，默认 4000（容器内仍为 4000）
+#   DEPLOY_CONTAINER_NAME — 可选；容器名，默认 zxdnoob-api
+#   DEPLOY_VOLUME_NAME    — 可选；SQLite 数据卷名，默认 zxdnoob-api-data
+#   DEPLOY_CORS_ORIGIN    — 可选；传给容器的 CORS_ORIGIN（如 https://zxdnoob.github.io）
 # =============================================================================
 name: Publish backend image
 
@@ -28,6 +45,8 @@ jobs:
   docker:
     name: Build and push to GHCR
     runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,3 +73,46 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.image }}:latest
             ${{ steps.meta.outputs.image }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy on server (SSH + Docker)
+    needs: docker
+    runs-on: ubuntu-latest
+    if: ${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_SSH_KEY != '' }}
+    steps:
+      - name: Pull image and restart container
+        uses: appleboy/ssh-action@v1.2.5
+        env:
+          IMAGE: ${{ needs.docker.outputs.image }}
+          GHCR_TOKEN: ${{ secrets.DEPLOY_GHCR_TOKEN }}
+          GHCR_USER: ${{ secrets.DEPLOY_GHCR_USER != '' && secrets.DEPLOY_GHCR_USER || github.repository_owner }}
+          CONTAINER_NAME: ${{ secrets.DEPLOY_CONTAINER_NAME != '' && secrets.DEPLOY_CONTAINER_NAME || 'zxdnoob-api' }}
+          HOST_PORT: ${{ secrets.DEPLOY_HOST_PORT != '' && secrets.DEPLOY_HOST_PORT || '4000' }}
+          VOLUME_NAME: ${{ secrets.DEPLOY_VOLUME_NAME != '' && secrets.DEPLOY_VOLUME_NAME || 'zxdnoob-api-data' }}
+          CORS_ORIGIN: ${{ secrets.DEPLOY_CORS_ORIGIN }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT != '' && secrets.DEPLOY_SSH_PORT || 22 }}
+          envs: IMAGE,GHCR_TOKEN,GHCR_USER,CONTAINER_NAME,HOST_PORT,VOLUME_NAME,CORS_ORIGIN
+          script: |
+            set -eu
+            IMAGE_FULL="${IMAGE}:latest"
+            if [ -n "${GHCR_TOKEN:-}" ]; then
+              echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            fi
+            docker pull "$IMAGE_FULL"
+            docker stop "$CONTAINER_NAME" 2>/dev/null || true
+            docker rm "$CONTAINER_NAME" 2>/dev/null || true
+            if [ -n "${CORS_ORIGIN:-}" ]; then
+              docker run -d --restart unless-stopped --name "$CONTAINER_NAME" \
+                -p "${HOST_PORT}:4000" -v "${VOLUME_NAME}:/app/data" \
+                -e "CORS_ORIGIN=$CORS_ORIGIN" \
+                "$IMAGE_FULL"
+            else
+              docker run -d --restart unless-stopped --name "$CONTAINER_NAME" \
+                -p "${HOST_PORT}:4000" -v "${VOLUME_NAME}:/app/data" \
+                "$IMAGE_FULL"
+            fi
+            docker image prune -f --filter "until=24h" >/dev/null 2>&1 || true

@@ -1,11 +1,13 @@
 # =============================================================================
 # 将 Next.js 静态导出（out/）推送到 gh-pages 分支，由 GitHub Pages 从该分支发布。
 #
-# 适用于：Settings → Pages 为「Deploy from a branch」且分支为 gh-pages 时；
-# 可避免 deploy-pages 与「仅允许 gh-pages」环境策略冲突导致的 400。
+# 数据方案（尽量走数据库）：
+# - 默认：在 Runner 上 build 后端、启动 Nest + SQLite（临时库），Next 构建期通过
+#   API_URL=http://127.0.0.1:4000 从数据库读文章与 changelog，再导出静态页。
+# - 若仓库配置了 Secret「API_URL」或「NEXT_PUBLIC_API_URL」且非空：跳过本地起 API，
+#   构建时使用该地址（适用于把 Nest + DB 长期部署在其它主机的情况）。
 #
-# 仓库 Settings → Pages：Build and deployment → Source「Deploy from a branch」→ Branch「gh-pages」/「/ (root)」。
-# 可选 Secrets：API_URL 或 NEXT_PUBLIC_API_URL — 构建时拉取线上 Nest API。
+# Pages：Settings → Build and deployment → Source「Deploy from a branch」→ gh-pages / (root)
 # =============================================================================
 name: Deploy GitHub Pages
 
@@ -25,6 +27,13 @@ jobs:
   build-and-deploy:
     name: Build and deploy to gh-pages
     runs-on: ubuntu-latest
+    env:
+      STATIC_EXPORT: "1"
+      NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
+      NEXT_TELEMETRY_DISABLED: "1"
+      NODE_OPTIONS: --max-old-space-size=6144
+      # 有远程 API Secret 时用 Secret，否则用本 job 内启动的本地 API
+      API_URL: ${{ secrets.API_URL != '' && secrets.API_URL || secrets.NEXT_PUBLIC_API_URL != '' && secrets.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,25 +43,53 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build (static export)
+      - name: Install backend dependencies
+        if: ${{ secrets.API_URL == '' && secrets.NEXT_PUBLIC_API_URL == '' }}
+        run: npm ci --prefix backend
+
+      - name: Build backend
+        if: ${{ secrets.API_URL == '' && secrets.NEXT_PUBLIC_API_URL == '' }}
+        run: npm run build --prefix backend
+
+      - name: Start API (SQLite + seed) and wait for health
+        if: ${{ secrets.API_URL == '' && secrets.NEXT_PUBLIC_API_URL == '' }}
+        run: |
+          set -e
+          cd backend
+          mkdir -p data
+          nohup env PORT=4000 DATABASE_PATH=./data/ci-github-pages.sqlite npm run start:prod \
+            > "${GITHUB_WORKSPACE}/api.log" 2>&1 &
+          echo $! > "${GITHUB_WORKSPACE}/api.pid"
+          cd "${GITHUB_WORKSPACE}"
+          for i in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:4000/api/health > /dev/null; then
+              echo "API healthy"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API failed to start; last log lines:"
+          tail -80 api.log || true
+          exit 1
+
+      - name: Build (static export from API / DB)
         run: npm run build:static
-        env:
-          STATIC_EXPORT: "1"
-          NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
-          NEXT_TELEMETRY_DISABLED: "1"
-          NODE_OPTIONS: --max-old-space-size=6144
-          API_URL: ${{ secrets.API_URL }}
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+
+      - name: Stop local API
+        if: ${{ always() && secrets.API_URL == '' && secrets.NEXT_PUBLIC_API_URL == '' }}
+        run: |
+          if [ -f api.pid ]; then kill "$(cat api.pid)" 2>/dev/null || true; fi
 
       - name: Push out/ to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./out
-          # 单提交历史，避免 gh-pages 分支无限增大
           force_orphan: true
