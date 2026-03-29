@@ -1,5 +1,5 @@
 # =============================================================================
-# 将 Next.js 静态导出（out/）推送到 gh-pages 分支，由 GitHub Pages 从该分支发布。
+# 将 Next.js 静态导出（out/）通过 GitHub Pages 官方 Actions 部署（见 Deployments）。
 #
 # 数据方案（尽量走数据库）：
 # - 默认：在 Runner 上 build 后端、启动 Nest + SQLite（临时库），Next 构建期通过
@@ -8,7 +8,8 @@
 #   注意：不要用「NEXT_PUBLIC_API_URL」参与此逻辑——该变量常误配或指向浏览器侧地址，
 #   会导致跳过本地 API 而构建期拉取失败，Pages 上出现「暂无文章」。
 #
-# Pages：Settings → Build and deployment → Source「Deploy from a branch」→ gh-pages / (root)
+# Pages：Settings → Build and deployment → Source 选「GitHub Actions」（不要只用「从分支部署」
+# 却依赖本工作流；若选分支，应选 gh-pages 且需其它方式推送到该分支）。
 # =============================================================================
 name: Deploy GitHub Pages
 
@@ -18,22 +19,23 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
-    name: Build and deploy to gh-pages
+  build:
+    name: Build static site
     runs-on: ubuntu-latest
     env:
       STATIC_EXPORT: "1"
       NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
       NEXT_TELEMETRY_DISABLED: "1"
       NODE_OPTIONS: --max-old-space-size=6144
-      # 仅 secrets.API_URL 表示「构建期用远程 API」；勿用 NEXT_PUBLIC_API_URL，避免误跳过本地 API
       API_URL: ${{ secrets.API_URL != '' && secrets.API_URL || 'http://127.0.0.1:4000' }}
     steps:
       - name: Checkout
@@ -98,9 +100,22 @@ jobs:
         run: |
           if [ -f api.pid ]; then kill "$(cat api.pid)" 2>/dev/null || true; fi
 
-      - name: Push out/ to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
-          force_orphan: true
+          path: out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

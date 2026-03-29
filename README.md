@@ -72,14 +72,14 @@ npm run build:api
 
 本仓库名为 **`zxdnoob.github.io`** 时，GitHub 会将站点发布到 **`https://zxdnoob.github.io/`**。
 
-[Deploy GitHub Pages](.github/workflows/deploy-github-pages.yml) 在 **`main`** 上构建 **`out/`**，再用 **`peaceiris/actions-gh-pages`** 将静态文件推送到 **`gh-pages` 分支**（与 `main` 源码分离），**不**使用 `actions/deploy-pages`（避免与仓库里「仅允许从 `gh-pages` 部署」等环境策略冲突时出现 `Invalid deployment branch … Deployments are only allowed from gh-pages`）。
+[Deploy GitHub Pages](.github/workflows/deploy-github-pages.yml) 在 **`main`** 上构建 **`out/`**，再通过官方 **`actions/upload-pages-artifact`** 与 **`actions/deploy-pages`** 发布；仓库 **[Deployments](https://github.com/ZxdNoob/zxdnoob.github.io/deployments)** 中会出现对应部署记录。
 
 1. 打开 **Settings → Pages**，在 **Build and deployment** 中：  
-   - **Source** 选 **Deploy from a branch**（不要选 **GitHub Actions**，否则与当前工作流两套机制并存、易混淆）。  
-   - **Branch** 选 **`gh-pages`**，文件夹 **`/ (root)`**。首次运行工作流后会自动创建 **`gh-pages`** 分支。
-2. 推送 **main** 后，工作流会执行 **`npm run build:static`** 并把 **`out/`** 推到 **`gh-pages`**；几分钟后站点更新。
+   - **Source** 必须选 **GitHub Actions**（不要选 **Deploy from a branch** 指望本工作流去更新站点——仅推 `gh-pages` 分支在「Actions 源」下**不会**替换线上内容）。  
+   - 首次使用若提示选择工作流，选 **Deploy GitHub Pages**。
+2. 推送 **main** 或手动 **Run workflow** 后：先跑 **Build static site**，再跑 **Deploy to GitHub Pages**；成功几分钟后 **`https://zxdnoob.github.io/`** 更新。若 **github-pages** 环境启用了审批，需在 Deployments / Environments 里批准后再上线。
 3. **文章与版本历史**在构建时通过 HTTP 从 Nest API 拉取。默认在 Runner 上启动临时 Nest + SQLite（含种子文章），**无需**配置 Secret。若你希望改为从**已部署的公网 API**拉数据，再在 Actions 中单独配置 Secret **`API_URL`**（根 URL，无尾部斜杠）。**不要**把 **`NEXT_PUBLIC_API_URL`** 当作 Pages 构建用的 Secret：工作流不会用它决定数据源，误配其它 Secret 曾会导致跳过本地 API、构建期拉取失败，站点显示「暂无文章」。
-4. 根目录 **`public/.nojekyll`** 会进入 **`out/`**，避免 Jekyll 忽略 **`_next`**。工作流需 **`contents: write`** 以向 **`gh-pages`** 推送（已在 YAML 中声明）。
+4. 根目录 **`public/.nojekyll`** 会进入 **`out/`**，避免 Jekyll 忽略 **`_next`**。工作流使用 **`pages: write`** 与 **`id-token: write`** 以通过 OIDC 部署 Pages（已在 YAML 中声明）。
 
 ### 前端：推荐用 Vercel 连接 GitHub（零配置 Actions）
 
