@@ -4,8 +4,9 @@
 # 数据方案（尽量走数据库）：
 # - 默认：在 Runner 上 build 后端、启动 Nest + SQLite（临时库），Next 构建期通过
 #   API_URL=http://127.0.0.1:4000 从数据库读文章与 changelog，再导出静态页。
-# - 若仓库配置了 Secret「API_URL」或「NEXT_PUBLIC_API_URL」且非空：跳过本地起 API，
-#   构建时使用该地址（适用于把 Nest + DB 长期部署在其它主机的情况）。
+# - 仅当配置了 Secret「API_URL」且非空：跳过本地起 API，构建时向该地址拉数据（长期部署的 Nest）。
+#   注意：不要用「NEXT_PUBLIC_API_URL」参与此逻辑——该变量常误配或指向浏览器侧地址，
+#   会导致跳过本地 API 而构建期拉取失败，Pages 上出现「暂无文章」。
 #
 # Pages：Settings → Build and deployment → Source「Deploy from a branch」→ gh-pages / (root)
 # =============================================================================
@@ -32,8 +33,8 @@ jobs:
       NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
       NEXT_TELEMETRY_DISABLED: "1"
       NODE_OPTIONS: --max-old-space-size=6144
-      # 有远程 API Secret 时用 Secret，否则用本 job 内启动的本地 API
-      API_URL: ${{ secrets.API_URL != '' && secrets.API_URL || secrets.NEXT_PUBLIC_API_URL != '' && secrets.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4000' }}
+      # 仅 secrets.API_URL 表示「构建期用远程 API」；勿用 NEXT_PUBLIC_API_URL，避免误跳过本地 API
+      API_URL: ${{ secrets.API_URL != '' && secrets.API_URL || 'http://127.0.0.1:4000' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,15 +52,15 @@ jobs:
         run: npm ci
 
       - name: Install backend dependencies
-        if: ${{ secrets.API_URL == '' && secrets.NEXT_PUBLIC_API_URL == '' }}
+        if: ${{ secrets.API_URL == '' }}
         run: npm ci --prefix backend
 
       - name: Build backend
-        if: ${{ secrets.API_URL == '' && secrets.NEXT_PUBLIC_API_URL == '' }}
+        if: ${{ secrets.API_URL == '' }}
         run: npm run build --prefix backend
 
       - name: Start API (SQLite + seed) and wait for health
-        if: ${{ secrets.API_URL == '' && secrets.NEXT_PUBLIC_API_URL == '' }}
+        if: ${{ secrets.API_URL == '' }}
         run: |
           set -e
           cd backend
@@ -82,8 +83,18 @@ jobs:
       - name: Build (static export from API / DB)
         run: npm run build:static
 
+      - name: Verify static export received post data
+        run: |
+          set -e
+          if find out/blog -maxdepth 1 -name '*.html' ! -name '*__static-export-placeholder__*' -print -quit | grep -q .; then
+            echo "Static blog pages OK"
+          else
+            echo "::error::No post HTML under out/blog (only placeholder). Build could not reach API during SSG — check API_URL secret or local API logs."
+            exit 1
+          fi
+
       - name: Stop local API
-        if: ${{ always() && secrets.API_URL == '' && secrets.NEXT_PUBLIC_API_URL == '' }}
+        if: ${{ always() && secrets.API_URL == '' }}
         run: |
           if [ -f api.pid ]; then kill "$(cat api.pid)" 2>/dev/null || true; fi
 

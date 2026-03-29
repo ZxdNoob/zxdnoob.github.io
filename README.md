@@ -78,7 +78,7 @@ npm run build:api
    - **Source** 选 **Deploy from a branch**（不要选 **GitHub Actions**，否则与当前工作流两套机制并存、易混淆）。  
    - **Branch** 选 **`gh-pages`**，文件夹 **`/ (root)`**。首次运行工作流后会自动创建 **`gh-pages`** 分支。
 2. 推送 **main** 后，工作流会执行 **`npm run build:static`** 并把 **`out/`** 推到 **`gh-pages`**；几分钟后站点更新。
-3. **文章与版本历史**在构建时通过 HTTP 从 Nest API 拉取。请在 **Settings → Secrets and variables → Actions** 中配置 **`API_URL`** 或 **`NEXT_PUBLIC_API_URL`**（公网 API 根 URL，无尾部斜杠）。未配置时列表可能为空，并可能出现占位页。
+3. **文章与版本历史**在构建时通过 HTTP 从 Nest API 拉取。默认在 Runner 上启动临时 Nest + SQLite（含种子文章），**无需**配置 Secret。若你希望改为从**已部署的公网 API**拉数据，再在 Actions 中单独配置 Secret **`API_URL`**（根 URL，无尾部斜杠）。**不要**把 **`NEXT_PUBLIC_API_URL`** 当作 Pages 构建用的 Secret：工作流不会用它决定数据源，误配其它 Secret 曾会导致跳过本地 API、构建期拉取失败，站点显示「暂无文章」。
 4. 根目录 **`public/.nojekyll`** 会进入 **`out/`**，避免 Jekyll 忽略 **`_next`**。工作流需 **`contents: write`** 以向 **`gh-pages`** 推送（已在 YAML 中声明）。
 
 ### 前端：推荐用 Vercel 连接 GitHub（零配置 Actions）
