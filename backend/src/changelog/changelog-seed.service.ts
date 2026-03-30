@@ -74,7 +74,7 @@ const SEED_RELEASE_001: Partial<ChangelogReleaseEntity> = {
 };
 
 const SEED_RELEASE_002: Partial<ChangelogReleaseEntity> = {
-  date: '2026-03-30T22:30:00',
+  date: '2026-03-30T22:23:52',
   title: '系列分组与内容基建（0.0.2）',
   webVersion: '0.0.2',
   apiVersion: '0.0.2',
