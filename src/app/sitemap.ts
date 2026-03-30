@@ -1,19 +1,19 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 import {
   STATIC_EXPORT_PLACEHOLDER_SLUG,
   fetchAllPostSummaries,
-} from "@/lib/posts";
-import { site } from "@/lib/site";
+} from '@/lib/posts';
+import { site } from '@/lib/site';
 
 /** 与 `output: 'export'` 兼容：构建期根据 API 列表生成 `sitemap.xml` */
-export const dynamic = "force-static";
+export const dynamic = 'force-static';
 
 /**
  * 站点地图：文章 URL 由后端列表接口动态生成。
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await fetchAllPostSummaries();
-  const base = site.url.replace(/\/$/, "");
+  const base = site.url.replace(/\/$/, '');
 
   return [
     { url: `${base}/`, lastModified: new Date() },

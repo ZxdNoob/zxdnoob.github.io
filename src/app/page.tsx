@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { PostCard } from "@/components/post-card";
+import Link from 'next/link';
+import { PostCard } from '@/components/post-card';
 import {
   fetchAllPostSummaries,
   formatPostPublishedAt,
   postPublishedAtIso,
-} from "@/lib/posts";
-import { site } from "@/lib/site";
+} from '@/lib/posts';
+import { site } from '@/lib/site';
 
 function CompactPostRow({
   post,
@@ -14,15 +14,15 @@ function CompactPostRow({
   post: Awaited<ReturnType<typeof fetchAllPostSummaries>>[number];
   index: number;
 }) {
-  const dateLabel = formatPostPublishedAt(post.date, "short");
+  const dateLabel = formatPostPublishedAt(post.date, 'short');
   return (
     <Link
       href={`/blog/${post.slug}`}
       className={[
-        "group relative block rounded-2xl border border-[var(--border)] bg-[var(--surface)]/40 p-5",
-        "transition-all duration-200 hover:bg-[var(--surface)]/80 hover:shadow-sm",
-        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)]",
-      ].join(" ")}
+        'group relative block rounded-2xl border border-[var(--border)] bg-[var(--surface)]/40 p-5',
+        'transition-all duration-200 hover:bg-[var(--surface)]/80 hover:shadow-sm',
+        'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)]',
+      ].join(' ')}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -87,19 +87,19 @@ export default async function HomePage() {
           </p>
           <h1
             className="animate-in mt-6 max-w-3xl font-serif text-5xl font-bold leading-[1.1] tracking-tight text-stone-900 sm:text-6xl lg:text-7xl dark:text-stone-50"
-            style={{ animationDelay: "80ms" }}
+            style={{ animationDelay: '80ms' }}
           >
             {site.name}
           </h1>
           <p
             className="animate-in mt-6 max-w-2xl text-lg leading-relaxed text-stone-600 sm:text-xl dark:text-stone-400"
-            style={{ animationDelay: "160ms" }}
+            style={{ animationDelay: '160ms' }}
           >
             {site.description}
           </p>
           <div
             className="animate-in mt-10 flex flex-wrap gap-4"
-            style={{ animationDelay: "240ms" }}
+            style={{ animationDelay: '240ms' }}
           >
             <Link
               href="/blog"
@@ -124,7 +124,11 @@ export default async function HomePage() {
               rel="noopener noreferrer"
               target="_blank"
             >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                className="mr-2 h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
               查看源码
@@ -152,11 +156,11 @@ export default async function HomePage() {
         {posts.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-dashed border-[var(--border)] p-10 text-center">
             <p className="text-sm text-stone-500 dark:text-stone-500">
-              暂无文章或无法连接后端。请先启动 API（默认{" "}
+              暂无文章或无法连接后端。请先启动 API（默认{' '}
               <code className="rounded bg-stone-100 px-1.5 py-0.5 text-xs dark:bg-stone-800">
                 npm run dev:api
               </code>
-              ）并配置{" "}
+              ）并配置{' '}
               <code className="rounded bg-stone-100 px-1.5 py-0.5 text-xs dark:bg-stone-800">
                 API_URL
               </code>
@@ -165,17 +169,15 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="mt-8 grid gap-4 lg:grid-cols-[1.25fr,0.75fr] lg:items-start">
-            <div
-              className="animate-in"
-              style={{ animationDelay: "80ms" }}
-            >
+            <div className="animate-in" style={{ animationDelay: '80ms' }}>
               {featured ? <PostCard post={featured} /> : null}
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <Link href="/blog" className="btn btn-secondary">
                   浏览全部文章
                 </Link>
                 <p className="text-sm text-stone-500 dark:text-stone-500">
-                  首页仅展示 <span className="font-semibold">3</span> 篇最新内容。
+                  首页仅展示 <span className="font-semibold">3</span>{' '}
+                  篇最新内容。
                 </p>
               </div>
             </div>

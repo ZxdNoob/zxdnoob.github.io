@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { site } from "@/lib/site";
+import Link from 'next/link';
+import { site } from '@/lib/site';
 
 export function SiteFooter() {
   const year = new Date().getFullYear();

@@ -24,12 +24,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Prettier (check)
+        run: npm run format:check
 
       - name: ESLint
         run: npm run lint
@@ -44,7 +47,7 @@ jobs:
       - name: Build (GitHub Pages static export)
         run: npm run build:static
         env:
-          STATIC_EXPORT: "1"
+          STATIC_EXPORT: '1'
           NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
           NEXT_PUBLIC_API_URL: https://api.example.com
           API_URL: https://api.example.com
@@ -62,12 +65,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Prettier (check)
+        run: npm run format:check
 
       - name: ESLint
         run: npm run lint

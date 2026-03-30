@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { BackToTop } from "@/components/back-to-top";
-import { PostBody } from "@/components/post-body";
-import { ScrollProgress } from "@/components/scroll-progress";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { BackToTop } from '@/components/back-to-top';
+import { PostBody } from '@/components/post-body';
+import { ScrollProgress } from '@/components/scroll-progress';
 import {
   STATIC_EXPORT_PLACEHOLDER_SLUG,
   fetchAllPostSummaries,
@@ -11,8 +11,8 @@ import {
   formatPostPublishedAt,
   postPublishedAtIso,
   readingMinutesFromMarkdown,
-} from "@/lib/posts";
-import { site } from "@/lib/site";
+} from '@/lib/posts';
+import { site } from '@/lib/site';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -21,7 +21,7 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
   if (posts.length > 0) {
     return posts.map((p) => ({ slug: p.slug }));
   }
-  if (process.env.STATIC_EXPORT === "1") {
+  if (process.env.STATIC_EXPORT === '1') {
     return [{ slug: STATIC_EXPORT_PLACEHOLDER_SLUG }];
   }
   return [];
@@ -30,18 +30,18 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { slug } = await props.params;
   if (slug === STATIC_EXPORT_PLACEHOLDER_SLUG) {
-    return { title: "文章列表为空", robots: { index: false, follow: true } };
+    return { title: '文章列表为空', robots: { index: false, follow: true } };
   }
   const post = await fetchPostBySlug(slug);
   if (!post || post.draft) {
-    return { title: "未找到" };
+    return { title: '未找到' };
   }
   const url = `${site.url}/blog/${post.slug}`;
   return {
     title: post.title,
     description: post.description,
     openGraph: {
-      type: "article",
+      type: 'article',
       url,
       title: post.title,
       description: post.description,
@@ -62,11 +62,11 @@ export default async function BlogPostPage(props: Props) {
             暂无文章
           </h1>
           <p className="mt-3 text-stone-600 dark:text-stone-400">
-            构建时未能从 API 获取文章。请在 GitHub Actions 中配置可用的{" "}
+            构建时未能从 API 获取文章。请在 GitHub Actions 中配置可用的{' '}
             <code className="rounded bg-stone-100 px-1 dark:bg-stone-800">
               API_URL
-            </code>{" "}
-            后重新部署；本地请启动后端并重新执行{" "}
+            </code>{' '}
+            后重新部署；本地请启动后端并重新执行{' '}
             <code className="rounded bg-stone-100 px-1 dark:bg-stone-800">
               npm run build:static
             </code>
@@ -82,7 +82,7 @@ export default async function BlogPostPage(props: Props) {
 
   const minutes =
     post.readingMinutes ?? readingMinutesFromMarkdown(post.content);
-  const dateLabel = formatPostPublishedAt(post.date, "long");
+  const dateLabel = formatPostPublishedAt(post.date, 'long');
 
   return (
     <>

@@ -48,4 +48,3 @@ export class MarkdownFixupService implements OnModuleInit {
     );
   }
 }
-

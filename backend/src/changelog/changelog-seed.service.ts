@@ -17,13 +17,18 @@ export class ChangelogSeedService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    const rows = await this.repo.find({ select: { id: true, webVersion: true, apiVersion: true } });
-    const byKey = new Map(rows.map((r) => [`${r.webVersion ?? ''}|${r.apiVersion ?? ''}`, r.id]));
+    const rows = await this.repo.find({
+      select: { id: true, webVersion: true, apiVersion: true },
+    });
+    const byKey = new Map(
+      rows.map((r) => [`${r.webVersion ?? ''}|${r.apiVersion ?? ''}`, r.id]),
+    );
 
     const seeds: Partial<ChangelogReleaseEntity>[] = [
       SEED_RELEASE_001,
       SEED_RELEASE_002,
       SEED_RELEASE_003,
+      SEED_RELEASE_004,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -41,7 +46,9 @@ export class ChangelogSeedService implements OnModuleInit {
     if (toInsert.length === 0 && toUpdate.length === 0) return;
     if (toInsert.length > 0) await this.repo.save(toInsert);
     if (toUpdate.length > 0) await this.repo.save(toUpdate);
-    this.logger.log(`已同步版本历史：新增 ${toInsert.length} 条，更新 ${toUpdate.length} 条`);
+    this.logger.log(
+      `已同步版本历史：新增 ${toInsert.length} 条，更新 ${toUpdate.length} 条`,
+    );
   }
 }
 
@@ -168,6 +175,35 @@ const SEED_RELEASE_003: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: '前后端版本号统一升级至 0.0.3，并同步更新版本历史。',
+    },
+  ],
+};
+
+const SEED_RELEASE_004: Partial<ChangelogReleaseEntity> = {
+  date: '2026-03-31T00:00:12',
+  title: '工程化与格式化规范（0.0.4）',
+  webVersion: '0.0.4',
+  sortOrder: 3,
+  items: [
+    {
+      kind: 'docs',
+      surface: 'web',
+      text: '前端版本号升级至 0.0.4；后端版本保持 0.0.3（本次无 API 行为变更）。',
+    },
+    {
+      kind: 'docs',
+      surface: 'web',
+      text: '新增根目录 Prettier 配置与忽略规则，并提供 VSCode 保存时格式化/ESLint 修复建议，统一代码风格（single-quote、trailing-comma）。',
+    },
+    {
+      kind: 'docs',
+      surface: 'web',
+      text: 'ESLint 与 Prettier 协作：引入 `eslint-config-prettier`（flat），新增 `lint:fix` / `format` / `format:check` 脚本，减少格式相关的 lint 噪音。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'CI 与 GitHub Pages 部署流程增加 Prettier 校验，并做了一次全仓格式化整理，降低 PR diff 噪音、让流水线更稳定可复现。',
     },
   ],
 };

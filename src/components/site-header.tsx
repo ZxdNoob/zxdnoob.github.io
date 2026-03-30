@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { SiteLogo } from "@/components/site-logo";
-import { SiteNavLinks } from "@/components/site-nav-links";
-import { site } from "@/lib/site";
+import Link from 'next/link';
+import { SiteLogo } from '@/components/site-logo';
+import { SiteNavLinks } from '@/components/site-nav-links';
+import { site } from '@/lib/site';
 
 export function SiteHeader() {
   return (

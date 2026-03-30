@@ -1,16 +1,12 @@
-"use client";
+'use client';
 
 import {
   useEffect,
   useState,
   useSyncExternalStore,
   type ReactNode,
-} from "react";
-import {
-  toastState,
-  type ToastRecord,
-  type ToastVariant,
-} from "@/lib/toast";
+} from 'react';
+import { toastState, type ToastRecord, type ToastVariant } from '@/lib/toast';
 
 function variantMeta(v: ToastVariant): {
   icon: ReactNode;
@@ -18,10 +14,10 @@ function variantMeta(v: ToastVariant): {
   iconWrap: string;
 } {
   switch (v) {
-    case "success":
+    case 'success':
       return {
-        bar: "bg-emerald-500",
-        iconWrap: "text-emerald-600 dark:text-emerald-400",
+        bar: 'bg-emerald-500',
+        iconWrap: 'text-emerald-600 dark:text-emerald-400',
         icon: (
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path
@@ -34,10 +30,10 @@ function variantMeta(v: ToastVariant): {
           </svg>
         ),
       };
-    case "error":
+    case 'error':
       return {
-        bar: "bg-rose-500",
-        iconWrap: "text-rose-600 dark:text-rose-400",
+        bar: 'bg-rose-500',
+        iconWrap: 'text-rose-600 dark:text-rose-400',
         icon: (
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path
@@ -50,10 +46,10 @@ function variantMeta(v: ToastVariant): {
           </svg>
         ),
       };
-    case "info":
+    case 'info':
       return {
-        bar: "bg-sky-500",
-        iconWrap: "text-sky-600 dark:text-sky-400",
+        bar: 'bg-sky-500',
+        iconWrap: 'text-sky-600 dark:text-sky-400',
         icon: (
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path
@@ -66,10 +62,10 @@ function variantMeta(v: ToastVariant): {
           </svg>
         ),
       };
-    case "warning":
+    case 'warning':
       return {
-        bar: "bg-amber-500",
-        iconWrap: "text-amber-600 dark:text-amber-400",
+        bar: 'bg-amber-500',
+        iconWrap: 'text-amber-600 dark:text-amber-400',
         icon: (
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path
@@ -84,8 +80,8 @@ function variantMeta(v: ToastVariant): {
       };
     default:
       return {
-        bar: "bg-stone-400 dark:bg-stone-500",
-        iconWrap: "text-stone-600 dark:text-stone-400",
+        bar: 'bg-stone-400 dark:bg-stone-500',
+        iconWrap: 'text-stone-600 dark:text-stone-400',
         icon: (
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path
@@ -115,10 +111,10 @@ function ToastRow({ record }: { record: ToastRecord }) {
     <div
       role="status"
       className={[
-        "pointer-events-auto flex w-full max-w-[min(356px,calc(100vw-2rem))] items-start gap-3 overflow-hidden rounded-lg border border-stone-200/90 bg-white py-3 pl-3 pr-4 shadow-lg ring-1 ring-stone-950/5 transition duration-200 ease-out dark:border-stone-700/90 dark:bg-stone-900 dark:ring-white/10",
-        hidden ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100",
-        record.leaving ? "scale-[0.98]" : "",
-      ].join(" ")}
+        'pointer-events-auto flex w-full max-w-[min(356px,calc(100vw-2rem))] items-start gap-3 overflow-hidden rounded-lg border border-stone-200/90 bg-white py-3 pl-3 pr-4 shadow-lg ring-1 ring-stone-950/5 transition duration-200 ease-out dark:border-stone-700/90 dark:bg-stone-900 dark:ring-white/10',
+        hidden ? 'translate-y-2 opacity-0' : 'translate-y-0 opacity-100',
+        record.leaving ? 'scale-[0.98]' : '',
+      ].join(' ')}
     >
       <span
         className={`mt-0.5 w-1 shrink-0 self-stretch rounded-full ${meta.bar}`}

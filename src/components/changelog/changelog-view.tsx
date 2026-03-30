@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useMemo, useState, type ReactElement, type ReactNode } from "react";
-import { toast } from "@/lib/toast";
+import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
+import { toast } from '@/lib/toast';
 import {
   changelogEntryKey,
   formatChangelogReleaseAt,
@@ -11,17 +11,17 @@ import {
   type ChangelogEntry,
   type ChangelogItem,
   type ChangelogKind,
-} from "@/lib/changelog";
+} from '@/lib/changelog';
 
-type KindFilter = "all" | ChangelogKind;
-type ScopeFilter = "all" | "web" | "api";
+type KindFilter = 'all' | ChangelogKind;
+type ScopeFilter = 'all' | 'web' | 'api';
 
 const KIND_ORDER: ChangelogKind[] = [
-  "feature",
-  "fix",
-  "breaking",
-  "perf",
-  "docs",
+  'feature',
+  'fix',
+  'breaking',
+  'perf',
+  'docs',
 ];
 
 const KIND_META: Record<
@@ -29,28 +29,28 @@ const KIND_META: Record<
   { label: string; pill: string; Icon: () => ReactElement }
 > = {
   feature: {
-    label: "新功能",
-    pill: "border-amber-200/80 bg-amber-50 text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-100",
+    label: '新功能',
+    pill: 'border-amber-200/80 bg-amber-50 text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-100',
     Icon: IconSpark,
   },
   fix: {
-    label: "修复",
-    pill: "border-sky-200/80 bg-sky-50 text-sky-950 dark:border-sky-500/25 dark:bg-sky-500/10 dark:text-sky-100",
+    label: '修复',
+    pill: 'border-sky-200/80 bg-sky-50 text-sky-950 dark:border-sky-500/25 dark:bg-sky-500/10 dark:text-sky-100',
     Icon: IconWrench,
   },
   breaking: {
-    label: "破坏性变更",
-    pill: "border-rose-200/80 bg-rose-50 text-rose-950 dark:border-rose-500/25 dark:bg-rose-500/10 dark:text-rose-100",
+    label: '破坏性变更',
+    pill: 'border-rose-200/80 bg-rose-50 text-rose-950 dark:border-rose-500/25 dark:bg-rose-500/10 dark:text-rose-100',
     Icon: IconAlert,
   },
   perf: {
-    label: "性能",
-    pill: "border-emerald-200/80 bg-emerald-50 text-emerald-950 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-100",
+    label: '性能',
+    pill: 'border-emerald-200/80 bg-emerald-50 text-emerald-950 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-100',
     Icon: IconBolt,
   },
   docs: {
-    label: "文档",
-    pill: "border-stone-200/80 bg-stone-100 text-stone-900 dark:border-stone-600/60 dark:bg-stone-800/80 dark:text-stone-100",
+    label: '文档',
+    pill: 'border-stone-200/80 bg-stone-100 text-stone-900 dark:border-stone-600/60 dark:bg-stone-800/80 dark:text-stone-100',
     Icon: IconBook,
   },
 };
@@ -150,26 +150,29 @@ function IconBook() {
   );
 }
 
-function itemSurfaceLabel(item: ChangelogItem): { text: string; className: string } {
-  const s = item.surface ?? "both";
-  if (s === "web") {
+function itemSurfaceLabel(item: ChangelogItem): {
+  text: string;
+  className: string;
+} {
+  const s = item.surface ?? 'both';
+  if (s === 'web') {
     return {
-      text: "前端",
+      text: '前端',
       className:
-        "border-amber-200/90 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100",
+        'border-amber-200/90 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100',
     };
   }
-  if (s === "api") {
+  if (s === 'api') {
     return {
-      text: "后端",
+      text: '后端',
       className:
-        "border-violet-200/90 bg-violet-50 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100",
+        'border-violet-200/90 bg-violet-50 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100',
     };
   }
   return {
-    text: "共通",
+    text: '共通',
     className:
-      "border-stone-200/90 bg-stone-100 text-stone-600 dark:border-stone-600 dark:bg-stone-800/90 dark:text-stone-400",
+      'border-stone-200/90 bg-stone-100 text-stone-600 dark:border-stone-600 dark:bg-stone-800/90 dark:text-stone-400',
   };
 }
 
@@ -177,15 +180,15 @@ function filterByScope(
   entries: ChangelogEntry[],
   scope: ScopeFilter,
 ): ChangelogEntry[] {
-  if (scope === "all") return entries;
+  if (scope === 'all') return entries;
   return entries
     .map((e) => {
-      if (scope === "web" && !e.webVersion) return null;
-      if (scope === "api" && !e.apiVersion) return null;
+      if (scope === 'web' && !e.webVersion) return null;
+      if (scope === 'api' && !e.apiVersion) return null;
       const items = e.items.filter((i) => {
-        const s = i.surface ?? "both";
-        if (s === "both") return true;
-        return scope === "web" ? s === "web" : s === "api";
+        const s = i.surface ?? 'both';
+        if (s === 'both') return true;
+        return scope === 'web' ? s === 'web' : s === 'api';
       });
       return { ...e, items };
     })
@@ -196,7 +199,7 @@ function filterByKind(
   entries: ChangelogEntry[],
   filter: KindFilter,
 ): ChangelogEntry[] {
-  if (filter === "all") return entries;
+  if (filter === 'all') return entries;
   return entries
     .map((e) => ({
       ...e,
@@ -209,15 +212,15 @@ function VersionBadge({
   role,
   version,
 }: {
-  role: "web" | "api";
+  role: 'web' | 'api';
   version: string;
 }) {
   const [done, setDone] = useState(false);
   const surface =
-    role === "web"
-      ? "border-amber-300/90 bg-amber-50 text-amber-950 ring-amber-500/15 dark:border-amber-500/35 dark:bg-amber-500/10 dark:text-amber-50 dark:ring-amber-400/20"
-      : "border-violet-300/90 bg-violet-50 text-violet-950 ring-violet-500/15 dark:border-violet-500/35 dark:bg-violet-500/10 dark:text-violet-50 dark:ring-violet-400/20";
-  const label = role === "web" ? "前端 Next.js" : "后端 API";
+    role === 'web'
+      ? 'border-amber-300/90 bg-amber-50 text-amber-950 ring-amber-500/15 dark:border-amber-500/35 dark:bg-amber-500/10 dark:text-amber-50 dark:ring-amber-400/20'
+      : 'border-violet-300/90 bg-violet-50 text-violet-950 ring-violet-500/15 dark:border-violet-500/35 dark:bg-violet-500/10 dark:text-violet-50 dark:ring-violet-400/20';
+  const label = role === 'web' ? '前端 Next.js' : '后端 API';
 
   return (
     <button
@@ -225,7 +228,7 @@ function VersionBadge({
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(version);
-          toast.success("版本号已复制");
+          toast.success('版本号已复制');
           setDone(true);
           window.setTimeout(() => setDone(false), 1600);
         } catch {
@@ -233,11 +236,13 @@ function VersionBadge({
         }
       }}
       className={`group/copy inline-flex max-w-full items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left text-xs font-medium outline-none ring-offset-2 ring-offset-[var(--background)] transition hover:brightness-[0.98] focus-visible:ring-2 dark:ring-offset-[var(--background)] dark:hover:brightness-110 ${surface} ${
-        role === "web"
-          ? "focus-visible:ring-amber-500/60"
-          : "focus-visible:ring-violet-500/60"
+        role === 'web'
+          ? 'focus-visible:ring-amber-500/60'
+          : 'focus-visible:ring-violet-500/60'
       }`}
-      aria-label={done ? `${label} 版本号已复制` : `复制${label} 版本号 ${version}`}
+      aria-label={
+        done ? `${label} 版本号已复制` : `复制${label} 版本号 ${version}`
+      }
     >
       <span className="min-w-0 shrink truncate text-[11px] font-semibold uppercase tracking-wide opacity-80">
         {label}
@@ -263,18 +268,15 @@ function VersionBadge({
 }
 
 export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
-  const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all");
-  const [kindFilter, setKindFilter] = useState<KindFilter>("all");
+  const [scopeFilter, setScopeFilter] = useState<ScopeFilter>('all');
+  const [kindFilter, setKindFilter] = useState<KindFilter>('all');
 
   const filtered = useMemo(() => {
     const scoped = filterByScope(entries, scopeFilter);
     return filterByKind(scoped, kindFilter);
   }, [entries, scopeFilter, kindFilter]);
 
-  const yearGroups = useMemo(
-    () => groupChangelogByYear(filtered),
-    [filtered],
-  );
+  const yearGroups = useMemo(() => groupChangelogByYear(filtered), [filtered]);
 
   const totalReleases = entries.length;
   const latestWeb = latestWebVersionFromEntries(entries);
@@ -299,22 +301,23 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
             版本历史
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-stone-600 dark:text-stone-400">
-            列表数据持久化在 SQLite 表{" "}
+            列表数据持久化在 SQLite 表{' '}
             <code className="rounded bg-stone-100 px-1 text-[0.9em] dark:bg-stone-800">
               changelog_releases
             </code>
-            ，经 Nest 接口{" "}
+            ，经 Nest 接口{' '}
             <code className="rounded bg-stone-100 px-1 text-[0.9em] dark:bg-stone-800">
               GET /api/changelog
             </code>
-            提供。可按前端/后端范围与变更类型筛选；点击版本块即可复制对应 semver。
+            提供。可按前端/后端范围与变更类型筛选；点击版本块即可复制对应
+            semver。
           </p>
           {totalReleases === 0 ? (
             <p
               className="mt-6 max-w-2xl rounded-xl border border-stone-200/90 bg-stone-50/80 px-4 py-3 text-sm leading-relaxed text-stone-700 dark:border-stone-700 dark:bg-stone-900/50 dark:text-stone-300"
               role="status"
             >
-              暂无版本记录或无法连接后端。请先启动 API（默认{" "}
+              暂无版本记录或无法连接后端。请先启动 API（默认{' '}
               <code className="rounded bg-stone-200/80 px-1 dark:bg-stone-800">
                 npm run dev:api
               </code>
@@ -335,7 +338,7 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
                 当前前端版本
               </dt>
               <dd className="mt-2 font-mono text-2xl font-semibold tabular-nums text-amber-950 dark:text-amber-50">
-                {latestWeb != null ? `v${latestWeb}` : "—"}
+                {latestWeb != null ? `v${latestWeb}` : '—'}
               </dd>
               <dd className="mt-1 text-[11px] leading-snug text-amber-900/70 dark:text-amber-200/70">
                 取自最新一条发布的前端 semver
@@ -346,7 +349,7 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
                 当前后端版本
               </dt>
               <dd className="mt-2 font-mono text-2xl font-semibold tabular-nums text-violet-950 dark:text-violet-50">
-                {latestApi != null ? `v${latestApi}` : "—"}
+                {latestApi != null ? `v${latestApi}` : '—'}
               </dd>
               <dd className="mt-1 text-[11px] leading-snug text-violet-900/70 dark:text-violet-200/70">
                 取自最新一条发布的 API semver
@@ -375,21 +378,21 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
               范围
             </span>
             <ScopeChip
-              active={scopeFilter === "all"}
-              onClick={() => setScopeFilter("all")}
+              active={scopeFilter === 'all'}
+              onClick={() => setScopeFilter('all')}
             >
               全部
             </ScopeChip>
             <ScopeChip
-              active={scopeFilter === "web"}
-              onClick={() => setScopeFilter("web")}
+              active={scopeFilter === 'web'}
+              onClick={() => setScopeFilter('web')}
               variant="web"
             >
               仅前端
             </ScopeChip>
             <ScopeChip
-              active={scopeFilter === "api"}
-              onClick={() => setScopeFilter("api")}
+              active={scopeFilter === 'api'}
+              onClick={() => setScopeFilter('api')}
               variant="api"
             >
               仅后端
@@ -404,8 +407,8 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
               类型
             </span>
             <FilterChip
-              active={kindFilter === "all"}
-              onClick={() => setKindFilter("all")}
+              active={kindFilter === 'all'}
+              onClick={() => setKindFilter('all')}
             >
               全部
             </FilterChip>
@@ -490,10 +493,10 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
                             <span
                               className={`absolute left-0 top-7 h-3.5 w-3.5 rounded-full border-2 border-[var(--background)] shadow-[0_0_0_4px] ${
                                 entry.webVersion && entry.apiVersion
-                                  ? "bg-gradient-to-br from-amber-400 to-violet-500 shadow-amber-500/15 dark:from-amber-300 dark:to-violet-500 dark:shadow-violet-500/15"
+                                  ? 'bg-gradient-to-br from-amber-400 to-violet-500 shadow-amber-500/15 dark:from-amber-300 dark:to-violet-500 dark:shadow-violet-500/15'
                                   : entry.webVersion
-                                    ? "bg-gradient-to-br from-amber-400 to-amber-600 shadow-amber-500/15 dark:from-amber-300 dark:to-amber-600"
-                                    : "bg-gradient-to-br from-violet-400 to-violet-600 shadow-violet-500/15 dark:from-violet-300 dark:to-violet-600"
+                                    ? 'bg-gradient-to-br from-amber-400 to-amber-600 shadow-amber-500/15 dark:from-amber-300 dark:to-amber-600'
+                                    : 'bg-gradient-to-br from-violet-400 to-violet-600 shadow-violet-500/15 dark:from-violet-300 dark:to-violet-600'
                               }`}
                               aria-hidden
                             />
@@ -535,14 +538,16 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
                                       id={`release-${changelogEntryKey(entry)}-title`}
                                       className="sr-only"
                                     >
-                                      发布{" "}
+                                      发布{' '}
                                       {entry.webVersion
                                         ? `前端 ${entry.webVersion}`
-                                        : ""}
-                                      {entry.webVersion && entry.apiVersion ? "，" : ""}
+                                        : ''}
+                                      {entry.webVersion && entry.apiVersion
+                                        ? '，'
+                                        : ''}
                                       {entry.apiVersion
                                         ? `后端 ${entry.apiVersion}`
-                                        : ""}
+                                        : ''}
                                     </h2>
                                   )}
                                 </div>
@@ -602,27 +607,27 @@ function ScopeChip({
   children: ReactNode;
   active: boolean;
   onClick: () => void;
-  variant?: "web" | "api";
+  variant?: 'web' | 'api';
 }) {
   const activeWeb =
-    "border-amber-400/90 bg-amber-50 text-amber-950 shadow-sm dark:border-amber-500/50 dark:bg-amber-500/15 dark:text-amber-50";
+    'border-amber-400/90 bg-amber-50 text-amber-950 shadow-sm dark:border-amber-500/50 dark:bg-amber-500/15 dark:text-amber-50';
   const activeApi =
-    "border-violet-400/90 bg-violet-50 text-violet-950 shadow-sm dark:border-violet-500/50 dark:bg-violet-500/15 dark:text-violet-50";
+    'border-violet-400/90 bg-violet-50 text-violet-950 shadow-sm dark:border-violet-500/50 dark:bg-violet-500/15 dark:text-violet-50';
 
   return (
     <button
       type="button"
       onClick={onClick}
       className={[
-        "rounded-full border px-3.5 py-1.5 text-sm font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] dark:focus-visible:ring-offset-[var(--background)]",
+        'rounded-full border px-3.5 py-1.5 text-sm font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] dark:focus-visible:ring-offset-[var(--background)]',
         active
-          ? variant === "web"
+          ? variant === 'web'
             ? `${activeWeb} focus-visible:ring-amber-500/50`
-            : variant === "api"
+            : variant === 'api'
               ? `${activeApi} focus-visible:ring-violet-500/50`
-              : "border-stone-900 bg-stone-900 text-white shadow-sm focus-visible:ring-stone-500/50 dark:border-amber-400 dark:bg-amber-400 dark:text-stone-950 dark:focus-visible:ring-amber-400/60"
-          : "border-stone-200/90 bg-white/70 text-stone-600 hover:border-stone-300 hover:bg-stone-50 focus-visible:ring-amber-500/40 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-400 dark:hover:border-stone-600 dark:hover:bg-stone-800/80",
-      ].join(" ")}
+              : 'border-stone-900 bg-stone-900 text-white shadow-sm focus-visible:ring-stone-500/50 dark:border-amber-400 dark:bg-amber-400 dark:text-stone-950 dark:focus-visible:ring-amber-400/60'
+          : 'border-stone-200/90 bg-white/70 text-stone-600 hover:border-stone-300 hover:bg-stone-50 focus-visible:ring-amber-500/40 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-400 dark:hover:border-stone-600 dark:hover:bg-stone-800/80',
+      ].join(' ')}
     >
       {children}
     </button>
@@ -645,13 +650,13 @@ function FilterChip({
       type="button"
       onClick={onClick}
       className={[
-        "rounded-full border px-3.5 py-1.5 text-sm font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] dark:focus-visible:ring-offset-[var(--background)]",
+        'rounded-full border px-3.5 py-1.5 text-sm font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] dark:focus-visible:ring-offset-[var(--background)]',
         active
           ? accent
             ? `${accent} border-transparent shadow-sm`
-            : "border-stone-900 bg-stone-900 text-white shadow-sm dark:border-amber-400 dark:bg-amber-400 dark:text-stone-950"
-          : "border-stone-200/90 bg-white/70 text-stone-600 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-400 dark:hover:border-stone-600 dark:hover:bg-stone-800/80",
-      ].join(" ")}
+            : 'border-stone-900 bg-stone-900 text-white shadow-sm dark:border-amber-400 dark:bg-amber-400 dark:text-stone-950'
+          : 'border-stone-200/90 bg-white/70 text-stone-600 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-400 dark:hover:border-stone-600 dark:hover:bg-stone-800/80',
+      ].join(' ')}
     >
       {children}
     </button>

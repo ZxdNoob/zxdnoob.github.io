@@ -29,7 +29,7 @@ name: Aliyun OSS backup (SQLite)
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 2 * * 0"
+    - cron: '0 2 * * 0'
   workflow_run:
     workflows:
       - publish-backend-image.yml

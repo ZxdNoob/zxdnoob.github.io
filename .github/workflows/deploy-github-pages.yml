@@ -33,9 +33,9 @@ jobs:
     env:
       # 供 if: 使用（禁止在 if 里写 secrets.*）；1 = 在 Runner 上起 Nest + SQLite
       USE_LOCAL_NEST: ${{ secrets.PAGES_REMOTE_API_URL == '' && '1' || '0' }}
-      STATIC_EXPORT: "1"
+      STATIC_EXPORT: '1'
       NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
-      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_TELEMETRY_DISABLED: '1'
       NODE_OPTIONS: --max-old-space-size=6144
       API_URL: ${{ secrets.PAGES_REMOTE_API_URL != '' && secrets.PAGES_REMOTE_API_URL || 'http://127.0.0.1:4000' }}
     steps:
@@ -45,7 +45,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           cache: npm
           cache-dependency-path: |
             package-lock.json
@@ -54,9 +54,19 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Prettier (check)
+        run: npm run format:check
+
+      - name: ESLint
+        run: npm run lint
+
       - name: Install backend dependencies
         if: ${{ env.USE_LOCAL_NEST == '1' }}
         run: npm ci --prefix backend
+
+      - name: Prettier (check) - backend
+        if: ${{ env.USE_LOCAL_NEST == '1' }}
+        run: npm run format:check --prefix backend
 
       - name: Build backend
         if: ${{ env.USE_LOCAL_NEST == '1' }}

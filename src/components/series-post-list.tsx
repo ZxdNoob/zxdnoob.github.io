@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useId, useState } from "react";
+import Link from 'next/link';
+import { useId, useState } from 'react';
 import {
   formatPostPublishedAt,
   postPublishedAtIso,
   type PostSummary,
-} from "@/lib/posts";
+} from '@/lib/posts';
 
 export type SeriesGroup = {
   series: string;
@@ -43,9 +43,9 @@ function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
       className={[
-        "h-5 w-5 flex-none text-stone-400 transition-transform duration-200 motion-reduce:transition-none dark:text-stone-500",
-        open ? "rotate-180" : "",
-      ].join(" ")}
+        'h-5 w-5 flex-none text-stone-400 transition-transform duration-200 motion-reduce:transition-none dark:text-stone-500',
+        open ? 'rotate-180' : '',
+      ].join(' ')}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -68,16 +68,16 @@ function MetaPill({ children }: { children: React.ReactNode }) {
 }
 
 function PostRow({ post }: { post: PostSummary }) {
-  const dateLabel = formatPostPublishedAt(post.date, "short");
+  const dateLabel = formatPostPublishedAt(post.date, 'short');
   return (
     <li>
       <Link
         href={`/blog/${post.slug}`}
         className={[
-          "group block rounded-2xl border border-transparent px-4 py-3 transition-all duration-200",
-          "hover:border-[var(--border)] hover:bg-[var(--surface)]/80 hover:shadow-sm",
-          "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)]",
-        ].join(" ")}
+          'group block rounded-2xl border border-transparent px-4 py-3 transition-all duration-200',
+          'hover:border-[var(--border)] hover:bg-[var(--surface)]/80 hover:shadow-sm',
+          'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)]',
+        ].join(' ')}
       >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500 dark:text-stone-500">
           <time dateTime={postPublishedAtIso(post.date)}>{dateLabel}</time>
@@ -104,7 +104,7 @@ function PostRow({ post }: { post: PostSummary }) {
 }
 
 export function SeriesPostList({ groups, ungrouped }: Props) {
-  const storageKey = "blog:series-open:v1";
+  const storageKey = 'blog:series-open:v1';
   const listId = useId();
 
   const [openSeries, setOpenSeries] = useState<Set<string>>(() => {
@@ -113,7 +113,7 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
       if (!raw) return new Set<string>();
       const parsed = JSON.parse(raw) as unknown;
       if (!Array.isArray(parsed)) return new Set<string>();
-      return new Set(parsed.filter((x) => typeof x === "string"));
+      return new Set(parsed.filter((x) => typeof x === 'string'));
     } catch {
       return new Set<string>();
     }
@@ -125,7 +125,10 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
       if (next.has(series)) next.delete(series);
       else next.add(series);
       try {
-        window.localStorage.setItem(storageKey, JSON.stringify(Array.from(next)));
+        window.localStorage.setItem(
+          storageKey,
+          JSON.stringify(Array.from(next)),
+        );
       } catch {
         // ignore
       }
@@ -146,9 +149,9 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
           <section
             key={group.series}
             className={[
-              "overflow-hidden rounded-3xl border border-[var(--border)]",
-              "bg-[var(--surface)]/40 shadow-sm shadow-black/5",
-            ].join(" ")}
+              'overflow-hidden rounded-3xl border border-[var(--border)]',
+              'bg-[var(--surface)]/40 shadow-sm shadow-black/5',
+            ].join(' ')}
           >
             <div className="relative">
               <div
@@ -161,10 +164,10 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
                 aria-expanded={open}
                 aria-controls={`${listId}-${group.series}`}
                 className={[
-                  "relative w-full px-5 py-5 text-left sm:px-6",
-                  "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)]",
-                  "transition-colors hover:bg-[var(--surface)]/60",
-                ].join(" ")}
+                  'relative w-full px-5 py-5 text-left sm:px-6',
+                  'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)]',
+                  'transition-colors hover:bg-[var(--surface)]/60',
+                ].join(' ')}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
@@ -178,7 +181,7 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
                       <MetaPill>{group.posts.length} 篇</MetaPill>
                       {latest ? (
                         <MetaPill>
-                          最近更新 {formatPostPublishedAt(latest, "short")}
+                          最近更新 {formatPostPublishedAt(latest, 'short')}
                         </MetaPill>
                       ) : null}
                     </div>
@@ -194,13 +197,16 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
             <div
               id={`${listId}-${group.series}`}
               className={[
-                "grid transition-[grid-template-rows] duration-300 motion-reduce:transition-none",
-                open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-              ].join(" ")}
+                'grid transition-[grid-template-rows] duration-300 motion-reduce:transition-none',
+                open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+              ].join(' ')}
             >
               <div className="min-h-0 overflow-hidden">
                 <div className="px-2 pb-3 sm:px-3 sm:pb-4">
-                  <ol className="space-y-2" aria-label={`${group.series} 系列文章`}>
+                  <ol
+                    className="space-y-2"
+                    aria-label={`${group.series} 系列文章`}
+                  >
                     {group.posts.map((post) => (
                       <PostRow key={post.slug} post={post} />
                     ))}
@@ -237,4 +243,3 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
     </div>
   );
 }
-

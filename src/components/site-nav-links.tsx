@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const nav = [
-  { href: "/", label: "首页" },
-  { href: "/blog", label: "文章" },
-  { href: "/changelog", label: "版本历史" },
+  { href: '/', label: '首页' },
+  { href: '/blog', label: '文章' },
+  { href: '/changelog', label: '版本历史' },
 ] as const;
 
 function isActive(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
+  if (href === '/') return pathname === '/';
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function SiteNavLinks() {
-  const pathname = usePathname() ?? "";
+  const pathname = usePathname() ?? '';
   // Store the pathname at the moment we opened the menu.
   // If the route changes, the menu will be considered closed automatically.
   const [mobileOpenPathname, setMobileOpenPathname] = useState<string | null>(
@@ -26,9 +26,9 @@ export function SiteNavLinks() {
   const mobileOpen = mobileOpenPathname === pathname;
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     };
   }, [mobileOpen]);
 
@@ -42,11 +42,11 @@ export function SiteNavLinks() {
             <Link
               key={item.href}
               href={item.href}
-              aria-current={active ? "page" : undefined}
+              aria-current={active ? 'page' : undefined}
               className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 active
-                  ? "text-stone-900 dark:text-stone-50"
-                  : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50"
+                  ? 'text-stone-900 dark:text-stone-50'
+                  : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50'
               }`}
             >
               {active && (
@@ -64,10 +64,8 @@ export function SiteNavLinks() {
         <button
           type="button"
           className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 md:hidden dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
-          onClick={() =>
-            setMobileOpenPathname(mobileOpen ? null : pathname)
-          }
-          aria-label={mobileOpen ? "关闭菜单" : "打开菜单"}
+          onClick={() => setMobileOpenPathname(mobileOpen ? null : pathname)}
+          aria-label={mobileOpen ? '关闭菜单' : '打开菜单'}
           aria-expanded={mobileOpen}
         >
           <svg
@@ -111,8 +109,8 @@ export function SiteNavLinks() {
                   onClick={() => setMobileOpenPathname(null)}
                   className={`flex items-center rounded-xl px-4 py-3 text-base font-medium transition-colors ${
                     active
-                      ? "bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-50"
-                      : "text-stone-600 hover:bg-stone-50 dark:text-stone-400 dark:hover:bg-stone-800/50"
+                      ? 'bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-50'
+                      : 'text-stone-600 hover:bg-stone-50 dark:text-stone-400 dark:hover:bg-stone-800/50'
                   }`}
                 >
                   {item.label}

@@ -1,15 +1,15 @@
-import Link from "next/link";
+import Link from 'next/link';
 import {
   formatPostPublishedAt,
   postPublishedAtIso,
   type PostSummary,
-} from "@/lib/posts";
+} from '@/lib/posts';
 
 type Props = { post: PostSummary };
 
 export function PostCard({ post }: Props) {
   const minutes = post.readingMinutes;
-  const dateLabel = formatPostPublishedAt(post.date, "short");
+  const dateLabel = formatPostPublishedAt(post.date, 'short');
 
   return (
     <article>

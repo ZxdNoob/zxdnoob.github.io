@@ -1,0 +1,15 @@
+.next
+out
+build
+node_modules
+coverage
+
+# backend has its own config & scripts
+backend/**
+backend/dist
+backend/coverage
+backend/node_modules
+
+# sqlite & generated data
+backend/data
+

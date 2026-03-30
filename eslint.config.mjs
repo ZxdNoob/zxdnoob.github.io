@@ -1,6 +1,7 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
 
 /**
  * ESLint 扁平配置（ESLint 9+ `eslint.config.js` 风格）。
@@ -11,13 +12,15 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Turn off rules that conflict with Prettier formatting.
+  eslintConfigPrettier,
   globalIgnores([
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
     /** Nest 后端使用独立 ESLint 配置（backend/eslint.config.mjs） */
-    "backend/**",
+    'backend/**',
   ]),
 ]);
 

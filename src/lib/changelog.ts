@@ -2,11 +2,11 @@
  * 版本历史：类型与纯函数；列表数据由 `fetchChangelogEntries()` 从 Nest API 拉取。
  */
 
-import { getBackendBaseUrl } from "./api";
+import { getBackendBaseUrl } from './api';
 
-export type ChangelogKind = "feature" | "fix" | "breaking" | "docs" | "perf";
+export type ChangelogKind = 'feature' | 'fix' | 'breaking' | 'docs' | 'perf';
 
-export type ChangelogItemSurface = "web" | "api" | "both";
+export type ChangelogItemSurface = 'web' | 'api' | 'both';
 
 export type ChangelogItem = {
   kind: ChangelogKind;
@@ -47,9 +47,9 @@ export async function fetchChangelogEntries(): Promise<ChangelogEntry[]> {
   const base = getBackendBaseUrl();
   try {
     const init: RequestInit =
-      process.env.STATIC_EXPORT === "1"
-        ? { cache: "force-cache" }
-        : { cache: "no-store" };
+      process.env.STATIC_EXPORT === '1'
+        ? { cache: 'force-cache' }
+        : { cache: 'no-store' };
     const res = await fetch(`${base}/api/changelog`, init);
     if (!res.ok) return [];
     const data = (await res.json()) as ChangelogApiRow[];
@@ -80,21 +80,21 @@ export function parseChangelogDate(dateStr: string): Date {
 
 /** 版本发布时间展示：本地时区年月日 + 24 小时制时分秒（与文章发布时间风格一致）。 */
 export function formatChangelogReleaseAt(dateStr: string): string {
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
     hour12: false,
   }).format(parseChangelogDate(dateStr));
 }
 
 /** Semver 比较：a > b 返回正数（仅支持数字段，与当前 package 一致） */
 export function semverCompare(a: string, b: string): number {
-  const pa = a.split(".").map((x) => parseInt(x, 10) || 0);
-  const pb = b.split(".").map((x) => parseInt(x, 10) || 0);
+  const pa = a.split('.').map((x) => parseInt(x, 10) || 0);
+  const pb = b.split('.').map((x) => parseInt(x, 10) || 0);
   const n = Math.max(pa.length, pb.length);
   for (let i = 0; i < n; i++) {
     const da = pa[i] ?? 0;
@@ -139,26 +139,23 @@ export function sortChangelogEntries(
 ): ChangelogEntry[] {
   return [...entries].sort((a, b) => {
     const byDate =
-      parseChangelogDate(b.date).getTime() - parseChangelogDate(a.date).getTime();
+      parseChangelogDate(b.date).getTime() -
+      parseChangelogDate(a.date).getTime();
     if (byDate !== 0) return byDate;
-    const w = semverCompare(
-      b.webVersion ?? "0.0.0",
-      a.webVersion ?? "0.0.0",
-    );
+    const w = semverCompare(b.webVersion ?? '0.0.0', a.webVersion ?? '0.0.0');
     if (w !== 0) return w;
-    return semverCompare(
-      b.apiVersion ?? "0.0.0",
-      a.apiVersion ?? "0.0.0",
-    );
+    return semverCompare(b.apiVersion ?? '0.0.0', a.apiVersion ?? '0.0.0');
   });
 }
 
 export function changelogEntryKey(e: ChangelogEntry): string {
-  return e.id ?? `${e.date}-${e.webVersion ?? ""}-${e.apiVersion ?? ""}`;
+  return e.id ?? `${e.date}-${e.webVersion ?? ''}-${e.apiVersion ?? ''}`;
 }
 
 /** 按年份分组（年内按排序函数结果） */
-export function groupChangelogByYear(entries: ChangelogEntry[]): ChangelogYearGroup[] {
+export function groupChangelogByYear(
+  entries: ChangelogEntry[],
+): ChangelogYearGroup[] {
   const map = new Map<number, ChangelogEntry[]>();
   for (const e of entries) {
     const y = parseChangelogDate(e.date).getFullYear();
@@ -169,17 +166,12 @@ export function groupChangelogByYear(entries: ChangelogEntry[]): ChangelogYearGr
   for (const list of map.values()) {
     list.sort((a, b) => {
       const byDate =
-        parseChangelogDate(b.date).getTime() - parseChangelogDate(a.date).getTime();
+        parseChangelogDate(b.date).getTime() -
+        parseChangelogDate(a.date).getTime();
       if (byDate !== 0) return byDate;
-      const w = semverCompare(
-        b.webVersion ?? "0.0.0",
-        a.webVersion ?? "0.0.0",
-      );
+      const w = semverCompare(b.webVersion ?? '0.0.0', a.webVersion ?? '0.0.0');
       if (w !== 0) return w;
-      return semverCompare(
-        b.apiVersion ?? "0.0.0",
-        a.apiVersion ?? "0.0.0",
-      );
+      return semverCompare(b.apiVersion ?? '0.0.0', a.apiVersion ?? '0.0.0');
     });
   }
   return [...map.entries()]

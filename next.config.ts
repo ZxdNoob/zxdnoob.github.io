@@ -1,5 +1,5 @@
-import path from "node:path";
-import type { NextConfig } from "next";
+import path from 'node:path';
+import type { NextConfig } from 'next';
 
 /**
  * Next.js 主配置文件（TypeScript）。
@@ -10,12 +10,12 @@ import type { NextConfig } from "next";
  *
  * 文档：https://nextjs.org/docs/app/api-reference/config/next-config-js
  */
-const isStaticExport = process.env.STATIC_EXPORT === "1";
+const isStaticExport = process.env.STATIC_EXPORT === '1';
 
 const nextConfig: NextConfig = {
   ...(isStaticExport
     ? {
-        output: "export" as const,
+        output: 'export' as const,
         images: { unoptimized: true },
       }
     : {}),

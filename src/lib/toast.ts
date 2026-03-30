@@ -3,7 +3,7 @@
  * 与 `<ToastViewport />` 配合使用；仅在客户端事件内调用即可。
  */
 
-export type ToastVariant = "default" | "success" | "error" | "info" | "warning";
+export type ToastVariant = 'default' | 'success' | 'error' | 'info' | 'warning';
 
 export type ToastRecord = {
   id: string;
@@ -78,14 +78,14 @@ export const toastState = {
 export const toast = {
   /** 默认中性样式 */
   message: (message: string, opts?: { duration?: number }) =>
-    push(message, "default", opts?.duration),
+    push(message, 'default', opts?.duration),
   success: (message: string, opts?: { duration?: number }) =>
-    push(message, "success", opts?.duration),
+    push(message, 'success', opts?.duration),
   error: (message: string, opts?: { duration?: number }) =>
-    push(message, "error", opts?.duration),
+    push(message, 'error', opts?.duration),
   info: (message: string, opts?: { duration?: number }) =>
-    push(message, "info", opts?.duration),
+    push(message, 'info', opts?.duration),
   warning: (message: string, opts?: { duration?: number }) =>
-    push(message, "warning", opts?.duration),
+    push(message, 'warning', opts?.duration),
   dismiss,
 };

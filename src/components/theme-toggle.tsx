@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
-type ThemeMode = "system" | "light" | "dark";
+type ThemeMode = 'system' | 'light' | 'dark';
 
 const BUTTON_LABELS: Record<ThemeMode, string> = {
-  system: "主题：跟随系统",
-  light: "主题：浅色",
-  dark: "主题：深色",
+  system: '主题：跟随系统',
+  light: '主题：浅色',
+  dark: '主题：深色',
 };
 
 const OPTIONS: Array<{
@@ -17,55 +17,55 @@ const OPTIONS: Array<{
   Icon: () => React.JSX.Element;
 }> = [
   {
-    mode: "system",
-    label: "跟随系统",
-    description: "自动匹配系统浅色/深色",
+    mode: 'system',
+    label: '跟随系统',
+    description: '自动匹配系统浅色/深色',
     Icon: SystemIcon,
   },
   {
-    mode: "light",
-    label: "浅色",
-    description: "始终使用浅色主题",
+    mode: 'light',
+    label: '浅色',
+    description: '始终使用浅色主题',
     Icon: SunIcon,
   },
   {
-    mode: "dark",
-    label: "深色",
-    description: "始终使用深色主题",
+    mode: 'dark',
+    label: '深色',
+    description: '始终使用深色主题',
     Icon: MoonIcon,
   },
 ];
 
 function resolveIsDark(mode: ThemeMode): boolean {
-  if (mode === "dark") return true;
-  if (mode === "light") return false;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  if (mode === 'dark') return true;
+  if (mode === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 function applyClass(isDark: boolean) {
-  document.documentElement.classList.toggle("dark", isDark);
+  document.documentElement.classList.toggle('dark', isDark);
 }
 
 function withThemeChangeFreeze(fn: () => void) {
   const root = document.documentElement;
-  root.classList.add("theme-changing");
+  root.classList.add('theme-changing');
   fn();
   window.setTimeout(() => {
-    root.classList.remove("theme-changing");
+    root.classList.remove('theme-changing');
   }, 120);
 }
 
 export function ThemeToggle() {
-  const [mode, setMode] = useState<ThemeMode>("system");
+  const [mode, setMode] = useState<ThemeMode>('system');
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const popoverId = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("theme") as ThemeMode | null;
+    const stored = localStorage.getItem('theme') as ThemeMode | null;
     const initial: ThemeMode =
-      stored === "light" || stored === "dark" ? stored : "system";
+      stored === 'light' || stored === 'dark' ? stored : 'system';
     const id = window.setTimeout(() => {
       setMode(initial);
       setMounted(true);
@@ -74,7 +74,7 @@ export function ThemeToggle() {
   }, []);
 
   const syncSystem = useCallback(() => {
-    withThemeChangeFreeze(() => applyClass(resolveIsDark("system")));
+    withThemeChangeFreeze(() => applyClass(resolveIsDark('system')));
   }, []);
 
   useEffect(() => {
@@ -82,21 +82,21 @@ export function ThemeToggle() {
 
     withThemeChangeFreeze(() => applyClass(resolveIsDark(mode)));
 
-    if (mode === "system") {
-      localStorage.removeItem("theme");
-      const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      mq.addEventListener("change", syncSystem);
-      return () => mq.removeEventListener("change", syncSystem);
+    if (mode === 'system') {
+      localStorage.removeItem('theme');
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      mq.addEventListener('change', syncSystem);
+      return () => mq.removeEventListener('change', syncSystem);
     }
 
-    localStorage.setItem("theme", mode);
+    localStorage.setItem('theme', mode);
   }, [mode, mounted, syncSystem]);
 
   useEffect(() => {
     if (!open) return;
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === 'Escape') setOpen(false);
     }
 
     function onPointerDown(e: PointerEvent) {
@@ -106,11 +106,11 @@ export function ThemeToggle() {
       if (target && !root.contains(target)) setOpen(false);
     }
 
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('pointerdown', onPointerDown);
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('pointerdown', onPointerDown);
     };
   }, [open]);
 
@@ -129,9 +129,9 @@ export function ThemeToggle() {
         aria-expanded={open}
         aria-controls={popoverId}
       >
-        {mode === "system" ? (
+        {mode === 'system' ? (
           <SystemIcon />
-        ) : mode === "light" ? (
+        ) : mode === 'light' ? (
           <SunIcon />
         ) : (
           <MoonIcon />
@@ -162,11 +162,11 @@ export function ThemeToggle() {
                     setOpen(false);
                   }}
                   className={[
-                    "flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
+                    'flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
                     active
-                      ? "bg-stone-100 text-stone-900 dark:bg-stone-800/80 dark:text-stone-50"
-                      : "text-stone-700 hover:bg-stone-50 dark:text-stone-200 dark:hover:bg-stone-800/40",
-                  ].join(" ")}
+                      ? 'bg-stone-100 text-stone-900 dark:bg-stone-800/80 dark:text-stone-50'
+                      : 'text-stone-700 hover:bg-stone-50 dark:text-stone-200 dark:hover:bg-stone-800/40',
+                  ].join(' ')}
                 >
                   <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-stone-600 dark:text-stone-300">
                     <opt.Icon />

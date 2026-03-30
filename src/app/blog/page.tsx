@@ -1,10 +1,13 @@
-import type { Metadata } from "next";
-import { SeriesPostList, type SeriesGroup } from "@/components/series-post-list";
-import { fetchAllPostSummaries, type PostSummary } from "@/lib/posts";
-import { site } from "@/lib/site";
+import type { Metadata } from 'next';
+import {
+  SeriesPostList,
+  type SeriesGroup,
+} from '@/components/series-post-list';
+import { fetchAllPostSummaries, type PostSummary } from '@/lib/posts';
+import { site } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: "文章",
+  title: '文章',
   description: `「${site.name}」全部文章列表。`,
 };
 
@@ -16,7 +19,7 @@ function toSeriesGroups(posts: PostSummary[]): {
   const ungrouped: PostSummary[] = [];
 
   for (const post of posts) {
-    const series = (post.series ?? "").trim();
+    const series = (post.series ?? '').trim();
     if (!series) {
       ungrouped.push(post);
       continue;
@@ -31,7 +34,10 @@ function toSeriesGroups(posts: PostSummary[]): {
     return { series, posts: p, latestMs };
   });
 
-  groups.sort((a, b) => b.latestMs - a.latestMs || a.series.localeCompare(b.series, "zh-CN"));
+  groups.sort(
+    (a, b) =>
+      b.latestMs - a.latestMs || a.series.localeCompare(b.series, 'zh-CN'),
+  );
   return { groups, ungrouped };
 }
 

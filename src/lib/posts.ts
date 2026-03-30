@@ -3,7 +3,7 @@
  *
  * 服务端组件中请使用下列 async 方法；`cache: 'no-store'` 避免把旧数据静态缓存进 HTML。
  */
-import { getBackendBaseUrl } from "./api";
+import { getBackendBaseUrl } from './api';
 
 /** 列表项：无正文，含后端计算的 `readingMinutes` */
 export type PostSummary = {
@@ -32,9 +32,9 @@ async function fetchJson<T>(path: string): Promise<T | null> {
   try {
     /** 静态导出（GitHub Pages）构建需可缓存的 fetch；本地/Vercel 仍用 no-store */
     const init: RequestInit =
-      process.env.STATIC_EXPORT === "1"
-        ? { cache: "force-cache" }
-        : { cache: "no-store" };
+      process.env.STATIC_EXPORT === '1'
+        ? { cache: 'force-cache' }
+        : { cache: 'no-store' };
     const res = await fetch(`${base}${path}`, init);
     if (res.status === 404) return null;
     if (!res.ok) return null;
@@ -46,7 +46,7 @@ async function fetchJson<T>(path: string): Promise<T | null> {
 
 /** 已发布文章摘要列表（用于首页、文章索引、sitemap） */
 export async function fetchAllPostSummaries(): Promise<PostSummary[]> {
-  const data = await fetchJson<PostSummary[]>("/api/posts");
+  const data = await fetchJson<PostSummary[]>('/api/posts');
   return data ?? [];
 }
 
@@ -60,10 +60,10 @@ export async function fetchPostBySlug(slug: string): Promise<Post | null> {
  */
 export function readingMinutesFromMarkdown(content: string): number {
   const text = content
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
-  const words = text.split(" ").filter(Boolean).length;
+  const words = text.split(' ').filter(Boolean).length;
   return Math.max(1, Math.round(words / 280));
 }
 
@@ -76,7 +76,8 @@ export function postPublishedAtIso(dateStr: string): string {
  * 静态导出（GitHub Pages）且构建时拉不到任何文章时，Next 仍要求 `[slug]` 至少有一条预渲染路径。
  * 该 slug 仅用于占位，详情页会渲染提示文案而非真实文章。
  */
-export const STATIC_EXPORT_PLACEHOLDER_SLUG = "__static-export-placeholder__" as const;
+export const STATIC_EXPORT_PLACEHOLDER_SLUG =
+  '__static-export-placeholder__' as const;
 
 /**
  * 发布时间展示：本地时区下的年月日 + 24 小时制时分秒。
@@ -84,15 +85,15 @@ export const STATIC_EXPORT_PLACEHOLDER_SLUG = "__static-export-placeholder__" as
  */
 export function formatPostPublishedAt(
   dateStr: string,
-  monthStyle: "short" | "long" = "short",
+  monthStyle: 'short' | 'long' = 'short',
 ): string {
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
     month: monthStyle,
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
     hour12: false,
   }).format(new Date(dateStr));
 }

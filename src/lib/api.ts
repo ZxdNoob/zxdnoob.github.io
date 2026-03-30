@@ -7,14 +7,14 @@
 export function getBackendBaseUrl(): string {
   const a = process.env.API_URL?.trim();
   const b = process.env.NEXT_PUBLIC_API_URL?.trim();
-  const raw = (a || b || "http://127.0.0.1:4000").replace(/\/$/, "");
+  const raw = (a || b || 'http://127.0.0.1:4000').replace(/\/$/, '');
   return raw;
 }
 
 /** 浏览器端可用的公共变量（未设置时返回 `undefined`） */
 export function getPublicApiBaseUrl(): string | undefined {
   const url = process.env.NEXT_PUBLIC_API_URL;
-  return url?.replace(/\/$/, "");
+  return url?.replace(/\/$/, '');
 }
 
 export function apiHealthUrl(): string | undefined {

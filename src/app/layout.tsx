@@ -1,23 +1,23 @@
-import type { Metadata, Viewport } from "next";
-import { Noto_Sans_SC, Noto_Serif_SC } from "next/font/google";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
-import { ToastViewport } from "@/components/toast-viewport";
-import { site } from "@/lib/site";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next';
+import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
+import { SiteFooter } from '@/components/site-footer';
+import { SiteHeader } from '@/components/site-header';
+import { ToastViewport } from '@/components/toast-viewport';
+import { site } from '@/lib/site';
+import './globals.css';
 
 const sans = Noto_Sans_SC({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-body",
-  display: "swap",
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-body',
+  display: 'swap',
 });
 
 const serif = Noto_Serif_SC({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display",
-  display: "swap",
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-display',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -28,14 +28,14 @@ export const metadata: Metadata = {
   },
   description: site.description,
   openGraph: {
-    type: "website",
+    type: 'website',
     locale: site.locale,
     siteName: site.name,
     title: site.title,
     description: site.description,
   },
   twitter: {
-    card: "summary_large_image",
+    card: 'summary_large_image',
     title: site.title,
     description: site.description,
   },
@@ -43,8 +43,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
+    { media: '(prefers-color-scheme: light)', color: '#faf9f7' },
+    { media: '(prefers-color-scheme: dark)', color: '#0c0a09' },
   ],
 };
 
