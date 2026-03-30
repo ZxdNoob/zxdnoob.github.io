@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostEntity } from '../database/post.entity';
+import { MarkdownFixupService } from '../database/markdown-fixup.service';
 import { SeedService } from '../database/seed.service';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
@@ -11,7 +12,7 @@ import { PostsService } from './posts.service';
 @Module({
   imports: [TypeOrmModule.forFeature([PostEntity])],
   controllers: [PostsController],
-  providers: [PostsService, SeedService],
+  providers: [PostsService, SeedService, MarkdownFixupService],
   exports: [PostsService],
 })
 export class PostsModule {}

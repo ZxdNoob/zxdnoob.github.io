@@ -160,7 +160,7 @@ const SEED_POSTS: Partial<PostEntity>[] = [
 
 ## 05 一个可复用的页面骨架（直接抄）
 
-\\\`\\\`\\\`tsx
+\`\`\`tsx
 export default function Page() {
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16 lg:px-8">
@@ -179,7 +179,7 @@ export default function Page() {
     </main>
   );
 }
-\\\`\\\`\\\`
+\`\`\`
 
 关键点：全站页面风格统一，你不会每个页面都重新“设计一次”。
 
@@ -206,9 +206,9 @@ export default function Page() {
 
 你可能见过这样的代码：
 
-\\\`\\\`\\\`html
+\`\`\`html
 <div class="px-4 sm:px-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
-\\\`\\\`\\\`
+\`\`\`
 
 看起来很“认真”，但团队里没人愿意改它。
 
@@ -233,7 +233,7 @@ export default function Page() {
 - 间距：移动端紧凑，桌面端舒展
 - 列表项：卡片化，hover 轻反馈
 
-\\\`\\\`\\\`tsx
+\`\`\`tsx
 <main className="mx-auto max-w-5xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16 lg:px-8">
   <header className="border-b border-[var(--border)]/60 pb-10">
     <h1 className="font-serif text-4xl font-bold tracking-tight">文章</h1>
@@ -244,7 +244,7 @@ export default function Page() {
     {/* rows */}
   </div>
 </main>
-\\\`\\\`\\\`
+\`\`\`
 
 ### B. 详情页（文章详情/帮助文档/说明页）
 
@@ -252,12 +252,12 @@ export default function Page() {
 - 标题与元信息：上方留足呼吸感
 - 内容区：排版一致
 
-\\\`\\\`\\\`tsx
+\`\`\`tsx
 <article className="mx-auto max-w-3xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16">
   <header className="pb-10">{/* meta + title */}</header>
   <div className="pt-2">{/* body */}</div>
 </article>
-\\\`\\\`\\\`
+\`\`\`
 
 ### C. 双栏页（设置页/控制台/编辑器）
 
@@ -265,14 +265,14 @@ export default function Page() {
 - md 开始双栏
 - 侧栏桌面端 sticky（更“产品化”）
 
-\\\`\\\`\\\`tsx
+\`\`\`tsx
 <main className="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
   <div className="grid gap-6 md:grid-cols-[260px,1fr]">
     <aside className="md:sticky md:top-6">{/* nav */}</aside>
     <section className="min-w-0">{/* content */}</section>
   </div>
 </main>
-\\\`\\\`\\\`
+\`\`\`
 
 ## 03 间距是“节奏”，不要随手写
 
@@ -324,7 +324,7 @@ export default function Page() {
 
 思路示例（不强制照抄，重点是结构）：
 
-\\\`\\\`\\\`ts
+\`\`\`ts
 const base =
   "inline-flex items-center justify-center rounded-full font-semibold transition-all active:scale-[0.98]";
 
@@ -336,7 +336,7 @@ const variants = {
   ghost:
     "text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100",
 };
-\\\`\\\`\\\`
+\`\`\`
 
 关键点：变体是字符串，不是魔法。先让团队能读懂。
 

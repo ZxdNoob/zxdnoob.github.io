@@ -18,13 +18,12 @@ function isActive(pathname: string, href: string): boolean {
 
 export function SiteNavLinks() {
   const pathname = usePathname() ?? "";
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const id = window.setTimeout(() => setMobileOpen(false), 0);
-    return () => window.clearTimeout(id);
-  }, [pathname, mobileOpen]);
+  // Store the pathname at the moment we opened the menu.
+  // If the route changes, the menu will be considered closed automatically.
+  const [mobileOpenPathname, setMobileOpenPathname] = useState<string | null>(
+    null,
+  );
+  const mobileOpen = mobileOpenPathname === pathname;
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -65,7 +64,9 @@ export function SiteNavLinks() {
         <button
           type="button"
           className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 md:hidden dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
-          onClick={() => setMobileOpen(!mobileOpen)}
+          onClick={() =>
+            setMobileOpenPathname(mobileOpen ? null : pathname)
+          }
           aria-label={mobileOpen ? "关闭菜单" : "打开菜单"}
           aria-expanded={mobileOpen}
         >
@@ -97,7 +98,7 @@ export function SiteNavLinks() {
         <div className="fixed inset-0 top-16 z-50 md:hidden">
           <div
             className="absolute inset-0 bg-black/20 backdrop-blur-sm dark:bg-black/40"
-            onClick={() => setMobileOpen(false)}
+            onClick={() => setMobileOpenPathname(null)}
             aria-hidden
           />
           <nav className="relative mx-4 mt-2 space-y-1 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3 shadow-xl">
@@ -107,7 +108,7 @@ export function SiteNavLinks() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => setMobileOpenPathname(null)}
                   className={`flex items-center rounded-xl px-4 py-3 text-base font-medium transition-colors ${
                     active
                       ? "bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-50"

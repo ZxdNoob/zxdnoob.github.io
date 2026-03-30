@@ -20,7 +20,11 @@ export class ChangelogSeedService implements OnModuleInit {
     const rows = await this.repo.find({ select: { id: true, webVersion: true, apiVersion: true } });
     const byKey = new Map(rows.map((r) => [`${r.webVersion ?? ''}|${r.apiVersion ?? ''}`, r.id]));
 
-    const seeds: Partial<ChangelogReleaseEntity>[] = [SEED_RELEASE_001, SEED_RELEASE_002];
+    const seeds: Partial<ChangelogReleaseEntity>[] = [
+      SEED_RELEASE_001,
+      SEED_RELEASE_002,
+      SEED_RELEASE_003,
+    ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
 
@@ -129,6 +133,41 @@ const SEED_RELEASE_002: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: '新增 TailwindCSS 实战系列种子文章（三篇）用于演示系列目录与阅读体验。',
+    },
+  ],
+};
+
+const SEED_RELEASE_003: Partial<ChangelogReleaseEntity> = {
+  date: '2026-03-30T23:35:00',
+  title: '阅读体验增强与稳定性修复（0.0.3）',
+  webVersion: '0.0.3',
+  apiVersion: '0.0.3',
+  sortOrder: 2,
+  items: [
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '修复文章页 Markdown 渲染导致的 hydration 失败：消除 `<p>` 内嵌块级元素（如 `<pre>/<div>`）的非法结构。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '代码块体验升级：新增一键复制与自动换行开关，长代码在小屏下更易阅读。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '修复移动端头部菜单导航项“闪烁/一闪而过”：菜单开合状态与路由切换正确联动，交互更稳定。',
+    },
+    {
+      kind: 'fix',
+      surface: 'api',
+      text: '新增历史文章 Markdown 围栏修复：自动纠正被转义的 fenced code（`\\`\\`\\`\\`` → ```），启动时幂等修复存量数据。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: '前后端版本号统一升级至 0.0.3，并同步更新版本历史。',
     },
   ],
 };
