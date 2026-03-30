@@ -57,9 +57,14 @@ const KIND_META: Record<
 
 function IconSpark() {
   return (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg
+      className="block h-3.5 w-3.5 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
       <path
-        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
+        d="M12 3l1.2 4.2a4 4 0 002.8 2.8L20.2 12l-4.2 1.2a4 4 0 00-2.8 2.8L12 20.2 10.8 16a4 4 0 00-2.8-2.8L3.8 12l4.2-1.2a4 4 0 002.8-2.8L12 3z"
         stroke="currentColor"
         strokeWidth="1.75"
         strokeLinecap="round"
@@ -71,7 +76,12 @@ function IconSpark() {
 
 function IconWrench() {
   return (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg
+      className="block h-3.5 w-3.5 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
       <path
         d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.35 6.35a1 1 0 01-3-3l6.35-6.35a6 6 0 017.94-7.94l-3.76 3.76z"
         stroke="currentColor"
@@ -85,7 +95,12 @@ function IconWrench() {
 
 function IconAlert() {
   return (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg
+      className="block h-3.5 w-3.5 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
       <path
         d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
         stroke="currentColor"
@@ -99,7 +114,12 @@ function IconAlert() {
 
 function IconBolt() {
   return (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg
+      className="block h-3.5 w-3.5 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
       <path
         d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"
         stroke="currentColor"
@@ -113,7 +133,12 @@ function IconBolt() {
 
 function IconBook() {
   return (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg
+      className="block h-3.5 w-3.5 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
       <path
         d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 016.5 22H20v-18H6.5A2.5 2.5 0 004 4.5v15zM6.5 2H20v18H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"
         stroke="currentColor"
@@ -339,7 +364,7 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
         </div>
       </section>
 
-      <div className="sticky top-14 z-40 border-b border-stone-200/80 bg-[var(--background)]/85 backdrop-blur-md dark:border-stone-800/80">
+      <div className="sticky top-16 z-40 border-b border-stone-200/80 bg-[var(--background)]/85 backdrop-blur-md dark:border-stone-800/80">
         <div className="mx-auto max-w-4xl space-y-3 px-4 py-3 sm:px-6">
           <div
             className="flex flex-wrap items-center gap-2"
@@ -436,7 +461,7 @@ export function ChangelogView({ entries }: { entries: ChangelogEntry[] }) {
               <section
                 key={group.year}
                 id={`year-${group.year}`}
-                className="scroll-mt-36"
+                className="scroll-mt-40"
               >
                 <div className="flex flex-col gap-10 lg:flex-row lg:gap-14">
                   <div className="lg:w-28 lg:shrink-0">

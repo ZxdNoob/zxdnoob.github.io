@@ -43,6 +43,7 @@ export class PostsService {
       title: row.title,
       date: row.date,
       description: row.description,
+      series: row.series ?? undefined,
       tags: row.tags ?? undefined,
       draft: row.draft,
       readingMinutes: readingMinutesFromMarkdown(row.content),

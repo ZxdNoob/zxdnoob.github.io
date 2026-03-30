@@ -17,11 +17,27 @@ export class ChangelogSeedService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    const count = await this.repo.count();
-    if (count > 0) return;
+    const rows = await this.repo.find({ select: { id: true, webVersion: true, apiVersion: true } });
+    const byKey = new Map(rows.map((r) => [`${r.webVersion ?? ''}|${r.apiVersion ?? ''}`, r.id]));
 
-    await this.repo.save(SEED_RELEASE);
-    this.logger.log('已写入初始版本历史 1 条');
+    const seeds: Partial<ChangelogReleaseEntity>[] = [SEED_RELEASE_001, SEED_RELEASE_002];
+    const toInsert: Partial<ChangelogReleaseEntity>[] = [];
+    const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
+
+    for (const seed of seeds) {
+      const key = `${seed.webVersion ?? ''}|${seed.apiVersion ?? ''}`;
+      const id = byKey.get(key);
+      if (!id) {
+        toInsert.push(seed);
+        continue;
+      }
+      toUpdate.push({ id, ...seed });
+    }
+
+    if (toInsert.length === 0 && toUpdate.length === 0) return;
+    if (toInsert.length > 0) await this.repo.save(toInsert);
+    if (toUpdate.length > 0) await this.repo.save(toUpdate);
+    this.logger.log(`已同步版本历史：新增 ${toInsert.length} 条，更新 ${toUpdate.length} 条`);
   }
 }
 
@@ -48,11 +64,71 @@ const SEED_ITEMS: ChangelogItemPayload[] = [
   },
 ];
 
-const SEED_RELEASE: Partial<ChangelogReleaseEntity> = {
+const SEED_RELEASE_001: Partial<ChangelogReleaseEntity> = {
   date: '2026-03-28T12:00:00',
   title: '初始里程碑（0.0.1）',
   webVersion: '0.0.1',
   apiVersion: '0.0.1',
   items: SEED_ITEMS,
   sortOrder: 0,
+};
+
+const SEED_RELEASE_002: Partial<ChangelogReleaseEntity> = {
+  date: '2026-03-30T22:30:00',
+  title: '系列分组与内容基建（0.0.2）',
+  webVersion: '0.0.2',
+  apiVersion: '0.0.2',
+  sortOrder: 1,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '首页重新设计：更强的 Hero 区域、主推文章卡片 + 紧凑文章目录（固定 3 篇），引导更清晰、信息密度更克制。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '全站视觉 Token 升级：新增 `--surface`/`--border`/按钮与 focus-ring 变量，暗色模式对比度与一致性更好。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '导航与交互升级：顶栏加宽与玻璃化背景，新增主题切换（system/light/dark）与移动端菜单。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章列表升级为“系列目录”：系列卡片折叠展开、目录式条目、展开状态记忆与更完善的可访问性/动效。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章阅读体验增强：详情页新增阅读进度条、回到顶部按钮，排版（Typography）与代码/引用块样式统一升级。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '版本历史页视觉细节优化：变更类型图标在容器内水平/垂直居中对齐，边框与间距更稳定。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章卡片与页脚重做：列表卡片更产品化（hover/阴影/“阅读全文”引导），页脚新增导航、GitHub 与 sitemap 入口。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '文章新增 `series` 字段，并随 `/api/posts` 与 `/api/posts/:slug` 返回，支持前端按系列分组。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '种子文章机制升级：按 slug 补齐缺失文章，并同步元信息（如发布时间）避免重启后看不到新内容。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: '新增 TailwindCSS 实战系列种子文章（三篇）用于演示系列目录与阅读体验。',
+    },
+  ],
 };

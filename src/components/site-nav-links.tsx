@@ -2,41 +2,125 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
-/** 与 `app/` 路由保持一致 */
 const nav = [
   { href: "/", label: "首页" },
   { href: "/blog", label: "文章" },
   { href: "/changelog", label: "版本历史" },
 ] as const;
 
-function navItemActive(pathname: string, href: string): boolean {
+function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function SiteNavLinks() {
   const pathname = usePathname() ?? "";
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const id = window.setTimeout(() => setMobileOpen(false), 0);
+    return () => window.clearTimeout(id);
+  }, [pathname, mobileOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   return (
-    <nav className="flex items-center gap-6 text-sm font-medium">
-      {nav.map((item) => {
-        const active = navItemActive(pathname, item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={
-              active
-                ? "font-semibold text-amber-800 transition-colors dark:text-amber-200"
-                : "text-stone-600 transition-colors hover:text-amber-800 dark:text-stone-400 dark:hover:text-amber-200"
-            }
+    <>
+      {/* Desktop */}
+      <nav className="hidden items-center gap-1 md:flex">
+        {nav.map((item) => {
+          const active = isActive(pathname, item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                active
+                  ? "text-stone-900 dark:text-stone-50"
+                  : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50"
+              }`}
+            >
+              {active && (
+                <span className="absolute inset-0 rounded-full bg-stone-100 dark:bg-stone-800/80" />
+              )}
+              <span className="relative">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Controls */}
+      <div className="flex items-center gap-1">
+        <ThemeToggle />
+        <button
+          type="button"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 md:hidden dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "关闭菜单" : "打开菜单"}
+          aria-expanded={mobileOpen}
+        >
+          <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
           >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
+            {mobileOpen ? (
+              <>
+                <path d="M18 6L6 18" />
+                <path d="M6 6l12 12" />
+              </>
+            ) : (
+              <>
+                <path d="M4 8h16" />
+                <path d="M4 16h16" />
+              </>
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 top-16 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm dark:bg-black/40"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden
+          />
+          <nav className="relative mx-4 mt-2 space-y-1 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3 shadow-xl">
+            {nav.map((item) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center rounded-xl px-4 py-3 text-base font-medium transition-colors ${
+                    active
+                      ? "bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-50"
+                      : "text-stone-600 hover:bg-stone-50 dark:text-stone-400 dark:hover:bg-stone-800/50"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+    </>
   );
 }

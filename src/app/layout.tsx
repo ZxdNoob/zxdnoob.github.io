@@ -6,12 +6,6 @@ import { ToastViewport } from "@/components/toast-viewport";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-/**
- * 根布局：全站字体、SEO metadata、页头页脚外壳。
- *
- * `next/font`：构建时优化字体子集，避免布局抖动（`display: swap`）。
- * CSS 变量 `--font-body` / `--font-display` 在 `globals.css` 的 `@theme` 中映射到 Tailwind。
- */
 const sans = Noto_Sans_SC({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -26,7 +20,6 @@ const serif = Noto_Serif_SC({
   display: "swap",
 });
 
-/** 默认与模板：供子页面 `generateMetadata` 继承 */
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
@@ -48,20 +41,20 @@ export const metadata: Metadata = {
   },
 };
 
-/** 浏览器 UI 主题色（Safari 等标签栏/地址栏） */
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf8f5" },
+    { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
     { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
   ],
 };
+
+const THEME_SCRIPT = `!function(){try{var d=document.documentElement,t=localStorage.getItem("theme"),s=matchMedia("(prefers-color-scheme:dark)").matches;(t==="dark"||(t!=="light"&&s))?d.classList.add("dark"):d.classList.remove("dark")}catch(e){}}()`;
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // `suppressHydrationWarning`：缓解浏览器扩展向 `<html>` 注入属性时的 hydration 提示
   return (
     <html
       lang="zh-CN"
@@ -69,6 +62,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col bg-[var(--background)] font-sans text-[var(--foreground)]">
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <SiteHeader />
         <div className="flex-1">{children}</div>
         <SiteFooter />

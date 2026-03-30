@@ -6,6 +6,11 @@ export type PostMeta = {
   /** ISO 8601 发布时间（含时分秒） */
   date: string;
   description: string;
+  /**
+   * 系列名：用于前端按系列分组展示。
+   * 为空/缺省表示不属于任何系列。
+   */
+  series?: string;
   tags?: string[];
   draft?: boolean;
 };

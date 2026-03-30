@@ -1,41 +1,154 @@
-/* =============================================================================
-   全局样式入口（由 PostCSS + Tailwind 处理）
-   - `@import "tailwindcss"`：Tailwind v4 主入口
-   - `@plugin "@tailwindcss/typography"`：启用 `prose` 系列工具类（文章正文）
-   ============================================================================= */
-
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* 浅色主题：暖纸色背景 + 石色文字，减少刺眼纯白 */
+@variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #faf8f5;
+  --background: #faf9f7;
   --foreground: #1c1917;
   --muted: #78716c;
-  --accent: #b45309;
+  --accent: #d97706;
+  --surface: #ffffff;
+  --border: #e8e5e0;
+
+  /* Button tokens */
+  --btn-primary-bg: #1c1917;
+  --btn-primary-fg: #ffffff;
+  --btn-primary-bg-hover: #292524;
+  --btn-primary-border: rgba(28, 25, 23, 0.85);
+  --btn-primary-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+  --btn-primary-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-fg: #44403c;
+  --btn-secondary-bg-hover: #fcfcfb;
+  --btn-secondary-border: rgba(232, 229, 224, 1);
+  --btn-secondary-border-hover: rgba(214, 211, 209, 1);
+  --btn-secondary-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --btn-secondary-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+
+  --focus-ring: rgba(217, 119, 6, 0.35);
 }
 
-/* 深色主题：跟随系统 `prefers-color-scheme` */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0c0a09;
-    --foreground: #e7e5e4;
-    --muted: #a8a29e;
-    --accent: #fbbf24;
-  }
+.dark {
+  --background: #0c0a09;
+  --foreground: #e7e5e4;
+  --muted: #a8a29e;
+  --accent: #f59e0b;
+  --surface: #171615;
+  --border: #292524;
+
+  /* Button tokens */
+  --btn-primary-bg: #fafaf9;
+  --btn-primary-fg: #0c0a09;
+  --btn-primary-bg-hover: #e7e5e4;
+  --btn-primary-border: rgba(250, 250, 249, 0.75);
+  --btn-primary-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --btn-primary-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  --btn-secondary-bg: #171615;
+  --btn-secondary-fg: #e7e5e4;
+  --btn-secondary-bg-hover: #1c1a19;
+  --btn-secondary-border: rgba(41, 37, 36, 1);
+  --btn-secondary-border-hover: rgba(68, 64, 60, 1);
+  --btn-secondary-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  --btn-secondary-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  --focus-ring: rgba(245, 158, 11, 0.28);
 }
 
-/*
- * `@theme inline`：把自定义 CSS 变量注册进 Tailwind 主题，
- * 以便使用 `bg-background`、`text-foreground`、`font-serif` 等工具类。
- */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-display), ui-serif, Georgia, "Noto Serif SC", serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
+}
+
+/* Freeze transitions during theme switch to avoid "phantom clicks". */
+html.theme-changing *,
+html.theme-changing *::before,
+html.theme-changing *::after {
+  transition: none !important;
+}
+
+/* Buttons: stable across theme changes (no transform/shadow animation). */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-primary-shadow), var(--btn-primary-highlight);
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-bg-hover);
+}
+
+.btn-secondary {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--btn-secondary-border);
+  box-shadow: var(--btn-secondary-shadow), var(--btn-secondary-highlight);
+}
+
+.btn-secondary:hover {
+  background: var(--btn-secondary-bg-hover);
+  border-color: var(--btn-secondary-border-hover);
+}
+
+::selection {
+  background-color: #fde68a;
+  color: #1c1917;
+}
+
+.dark ::selection {
+  background-color: #92400e;
+  color: #fef3c7;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@utility animate-in {
+  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

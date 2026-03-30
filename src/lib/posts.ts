@@ -12,6 +12,11 @@ export type PostSummary = {
   /** ISO 8601 日期时间（可含时区），用于展示与 `<time datetime>` */
   date: string;
   description: string;
+  /**
+   * 系列名：用于前端按系列分组展示。
+   * 为空/缺省表示不属于任何系列。
+   */
+  series?: string;
   tags?: string[];
   draft?: boolean;
   readingMinutes: number;

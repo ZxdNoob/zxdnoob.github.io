@@ -22,6 +22,13 @@ export class PostEntity {
   @Column({ type: 'text' })
   description!: string;
 
+  /**
+   * 系列名：用于前端按系列分组展示。
+   * 为空表示该文章不属于任何系列。
+   */
+  @Column({ type: 'varchar', length: 191, nullable: true })
+  series!: string | null;
+
   @Column({ type: 'text' })
   content!: string;
 

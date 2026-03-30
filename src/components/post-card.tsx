@@ -7,9 +7,6 @@ import {
 
 type Props = { post: PostSummary };
 
-/**
- * 文章卡片：列表数据来自后端摘要接口（含 `readingMinutes`）。
- */
 export function PostCard({ post }: Props) {
   const minutes = post.readingMinutes;
   const dateLabel = formatPostPublishedAt(post.date, "short");
@@ -18,21 +15,24 @@ export function PostCard({ post }: Props) {
     <article>
       <Link
         href={`/blog/${post.slug}`}
-        className="group block rounded-xl border border-transparent px-3 py-4 transition-colors hover:border-stone-200 hover:bg-stone-50/80 dark:hover:border-stone-800 dark:hover:bg-stone-900/40"
+        className="group relative block rounded-2xl border border-transparent p-5 transition-all duration-200 hover:border-[var(--border)] hover:bg-[var(--surface)]/80 hover:shadow-sm sm:p-6"
       >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500 dark:text-stone-500">
           <time dateTime={postPublishedAtIso(post.date)}>{dateLabel}</time>
-          <span aria-hidden>·</span>
+          <span
+            className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
+            aria-hidden
+          />
           <span>{minutes} 分钟阅读</span>
         </div>
-        <h2 className="mt-2 font-serif text-xl font-semibold tracking-tight text-stone-900 transition-colors group-hover:text-amber-900 dark:text-stone-100 dark:group-hover:text-amber-100">
+        <h2 className="mt-3 font-serif text-xl font-semibold tracking-tight text-stone-900 transition-colors group-hover:text-[var(--accent)] dark:text-stone-100">
           {post.title}
         </h2>
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
           {post.description}
         </p>
         {post.tags && post.tags.length > 0 ? (
-          <ul className="mt-3 flex flex-wrap gap-2">
+          <ul className="mt-4 flex flex-wrap gap-2">
             {post.tags.map((tag) => (
               <li
                 key={tag}
@@ -43,6 +43,20 @@ export function PostCard({ post }: Props) {
             ))}
           </ul>
         ) : null}
+        <span className="mt-4 inline-flex items-center text-sm font-medium text-[var(--accent)] opacity-0 transition-opacity group-hover:opacity-100">
+          阅读全文
+          <svg
+            className="ml-1 h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </span>
       </Link>
     </article>
   );

@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ZxdNoob NestJS 后端：TypeORM + SQLite，提供 /api/health 与 /api/posts*。",
   "author": "",
   "private": true,
