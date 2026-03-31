@@ -11,7 +11,9 @@ import {
 type Props = { posts: PostSummary[] };
 
 function uniqSorted(values: string[]) {
-  return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b, 'zh-CN'));
+  return Array.from(new Set(values)).sort((a, b) =>
+    a.localeCompare(b, 'zh-CN'),
+  );
 }
 
 function SeriesSelect({
@@ -91,7 +93,9 @@ function SeriesSelect({
           'flex items-center justify-between gap-3',
         ].join(' ')}
       >
-        <span className="min-w-0 truncate text-left font-medium">{selected?.label ?? ''}</span>
+        <span className="min-w-0 truncate text-left font-medium">
+          {selected?.label ?? ''}
+        </span>
         <span
           className={[
             'inline-flex h-6 w-6 items-center justify-center rounded-full',
@@ -125,7 +129,9 @@ function SeriesSelect({
           onKeyDown={(e) => {
             if (e.key === 'ArrowDown') {
               e.preventDefault();
-              setActiveIndex((i) => Math.min(options.length - 1, (i < 0 ? 0 : i) + 1));
+              setActiveIndex((i) =>
+                Math.min(options.length - 1, (i < 0 ? 0 : i) + 1),
+              );
             } else if (e.key === 'ArrowUp') {
               e.preventDefault();
               setActiveIndex((i) => Math.max(0, (i < 0 ? 0 : i) - 1));
@@ -295,16 +301,16 @@ export function BlogIndex({ posts }: Props) {
   const allTags = useMemo(
     () =>
       uniqSorted(
-        posts.flatMap((p) => (Array.isArray(p.tags) ? p.tags : [])).filter(Boolean),
+        posts
+          .flatMap((p) => (Array.isArray(p.tags) ? p.tags : []))
+          .filter(Boolean),
       ),
     [posts],
   );
   const allSeries = useMemo(
     () =>
       uniqSorted(
-        posts
-          .map((p) => (p.series ?? '').trim())
-          .filter((s) => s.length > 0),
+        posts.map((p) => (p.series ?? '').trim()).filter((s) => s.length > 0),
       ),
     [posts],
   );
@@ -323,13 +329,17 @@ export function BlogIndex({ posts }: Props) {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = posts.slice();
-    if (series !== '__all__') list = list.filter((p) => (p.series ?? '') === series);
+    if (series !== '__all__')
+      list = list.filter((p) => (p.series ?? '') === series);
     if (selectedTags.size > 0) {
-      list = list.filter((p) => (p.tags ?? []).some((t) => selectedTags.has(t)));
+      list = list.filter((p) =>
+        (p.tags ?? []).some((t) => selectedTags.has(t)),
+      );
     }
     if (q) {
       list = list.filter((p) => {
-        const hay = `${p.title}\n${p.description}\n${(p.tags ?? []).join(' ')}\n${p.series ?? ''}`.toLowerCase();
+        const hay =
+          `${p.title}\n${p.description}\n${(p.tags ?? []).join(' ')}\n${p.series ?? ''}`.toLowerCase();
         return hay.includes(q);
       });
     }
@@ -357,7 +367,10 @@ export function BlogIndex({ posts }: Props) {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(storageKeyShowFilters, showFilters ? '1' : '0');
+      window.localStorage.setItem(
+        storageKeyShowFilters,
+        showFilters ? '1' : '0',
+      );
     } catch {
       // ignore
     }
@@ -596,4 +609,3 @@ export function BlogIndex({ posts }: Props) {
     </div>
   );
 }
-

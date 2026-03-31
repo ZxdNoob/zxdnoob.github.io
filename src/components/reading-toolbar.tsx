@@ -7,13 +7,12 @@ type Props = {
   topAnchorId?: string;
 };
 
-function Icon({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function Icon({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex h-10 w-10 items-center justify-center" aria-hidden>
+    <span
+      className="inline-flex h-10 w-10 items-center justify-center"
+      aria-hidden
+    >
       {children}
     </span>
   );
@@ -233,4 +232,3 @@ export function ReadingToolbar({ topAnchorId = 'post-article' }: Props) {
     </div>
   );
 }
-

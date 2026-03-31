@@ -64,13 +64,14 @@ export function readingMinutesFromMarkdown(content: string): number {
 
   const fencedBlocks = content.match(/```[\s\S]*?```/g) ?? [];
   const codeLines = fencedBlocks
-    .map((b) =>
-      b
-        // 去掉围栏行，避免把 ```ts 算成代码行
-        .replace(/^```.*$/gm, '')
-        .split('\n')
-        .map((x) => x.trim())
-        .filter(Boolean).length,
+    .map(
+      (b) =>
+        b
+          // 去掉围栏行，避免把 ```ts 算成代码行
+          .replace(/^```.*$/gm, '')
+          .split('\n')
+          .map((x) => x.trim())
+          .filter(Boolean).length,
     )
     .reduce((a, b) => a + b, 0);
 
@@ -85,7 +86,8 @@ export function readingMinutesFromMarkdown(content: string): number {
   const cjkChars =
     prose.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu)
       ?.length ?? 0;
-  const latinWords = prose.match(/[A-Za-z0-9]+(?:'[A-Za-z0-9]+)?/g)?.length ?? 0;
+  const latinWords =
+    prose.match(/[A-Za-z0-9]+(?:'[A-Za-z0-9]+)?/g)?.length ?? 0;
 
   // 经验速度（偏保守）：
   // - 中文：约 500 字/分钟（含少量停顿）
@@ -95,12 +97,10 @@ export function readingMinutesFromMarkdown(content: string): number {
   const codeMinutes = codeLines / 45;
 
   // 难度因子：代码占比越高、符号密度越高，理解成本越高。
-  const symbolHits =
-    prose.match(/[{}[\]()<>=/*\\|&^%$#@~:+-]/g)?.length ?? 0;
+  const symbolHits = prose.match(/[{}[\]()<>=/*\\|&^%$#@~:+-]/g)?.length ?? 0;
   const proseLen = Math.max(1, prose.length);
   const symbolDensity = symbolHits / proseLen;
-  const codeShare =
-    codeMinutes / Math.max(0.0001, proseMinutes + codeMinutes);
+  const codeShare = codeMinutes / Math.max(0.0001, proseMinutes + codeMinutes);
 
   const multiplier =
     1 +
