@@ -38,15 +38,6 @@ function SeriesSelect({
 
   useEffect(() => {
     if (!open) return;
-    const idx = Math.max(
-      0,
-      options.findIndex((o) => o.value === value),
-    );
-    setActiveIndex(idx);
-  }, [open, options, value]);
-
-  useEffect(() => {
-    if (!open) return;
     function onPointerDown(e: PointerEvent) {
       const el = rootRef.current;
       if (!el) return;
@@ -78,11 +69,27 @@ function SeriesSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) {
+            const idx = Math.max(
+              0,
+              options.findIndex((o) => o.value === value),
+            );
+            setActiveIndex(idx);
+          }
+          setOpen((v) => !v);
+        }}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
             e.preventDefault();
-            setOpen(true);
+            if (!open) {
+              const idx = Math.max(
+                0,
+                options.findIndex((o) => o.value === value),
+              );
+              setActiveIndex(idx);
+              setOpen(true);
+            }
           }
         }}
         className={[
@@ -321,7 +328,17 @@ export function BlogIndex({ posts }: Props) {
   const [sort, setSort] = useState<'new' | 'old'>('new');
   const [visible, setVisible] = useState(40);
   const [showAllTags, setShowAllTags] = useState(false);
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      const raw = window.localStorage.getItem(storageKeyShowFilters);
+      if (raw === '0') return false;
+      if (raw === '1') return true;
+    } catch {
+      // ignore
+    }
+    return true;
+  });
 
   const hasActiveFilter =
     query.trim().length > 0 || series !== '__all__' || selectedTags.size > 0;
@@ -357,16 +374,6 @@ export function BlogIndex({ posts }: Props) {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(storageKeyShowFilters);
-      if (raw === '0') setShowFilters(false);
-      if (raw === '1') setShowFilters(true);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
       window.localStorage.setItem(
         storageKeyShowFilters,
         showFilters ? '1' : '0',
@@ -375,11 +382,6 @@ export function BlogIndex({ posts }: Props) {
       // ignore
     }
   }, [showFilters]);
-
-  useEffect(() => {
-    // Keep the filter panel compact by default after filter changes.
-    if (selectedTags.size === 0) setShowAllTags(false);
-  }, [selectedTags]);
 
   const shown = filtered.slice(0, visible);
   const canLoadMore = visible < filtered.length;
@@ -497,7 +499,10 @@ export function BlogIndex({ posts }: Props) {
                       <button
                         type="button"
                         className="text-xs font-semibold text-stone-500 underline-offset-4 hover:underline dark:text-stone-400"
-                        onClick={() => setSelectedTags(new Set())}
+                        onClick={() => {
+                          setSelectedTags(new Set());
+                          setShowAllTags(false);
+                        }}
                       >
                         清空
                       </button>
@@ -509,14 +514,17 @@ export function BlogIndex({ posts }: Props) {
                     <PillButton
                       key={t}
                       active={selectedTags.has(t)}
-                      onClick={() =>
+                      onClick={() => {
+                        const willClear =
+                          selectedTags.size === 1 && selectedTags.has(t);
                         setSelectedTags((prev) => {
                           const next = new Set(prev);
                           if (next.has(t)) next.delete(t);
                           else next.add(t);
                           return next;
-                        })
-                      }
+                        });
+                        if (willClear) setShowAllTags(false);
+                      }}
                       ariaLabel={`筛选标签 ${t}`}
                     >
                       {t}
