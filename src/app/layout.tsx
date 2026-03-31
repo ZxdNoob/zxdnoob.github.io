@@ -62,7 +62,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script id="theme-init" dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <script
+          id="theme-init"
+          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+        />
       </head>
       <body className="flex min-h-full flex-col bg-[var(--background)] font-sans text-[var(--foreground)]">
         <SiteHeader />
