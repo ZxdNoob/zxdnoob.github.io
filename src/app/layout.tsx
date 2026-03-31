@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
-import Script from 'next/script';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { ToastViewport } from '@/components/toast-viewport';
@@ -49,7 +48,7 @@ export const viewport: Viewport = {
   ],
 };
 
-const THEME_SCRIPT = `!function(){try{var d=document.documentElement,t=localStorage.getItem("theme"),s=matchMedia("(prefers-color-scheme:dark)").matches;(t==="dark"||(t!=="light"&&s))?d.classList.add("dark"):d.classList.remove("dark")}catch(e){}}()`;
+const THEME_SCRIPT = `!function(){try{var d=document.documentElement,t=localStorage.getItem("theme"),s=matchMedia("(prefers-color-scheme:dark)").matches,i=(t==="dark"||(t!=="light"&&s));d.classList.toggle("dark",i);d.style.colorScheme=i?"dark":"light"}catch(e){}}()`;
 
 export default function RootLayout({
   children,
@@ -62,12 +61,10 @@ export default function RootLayout({
       className={`${sans.variable} ${serif.variable} h-full scroll-smooth antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script id="theme-init" dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col bg-[var(--background)] font-sans text-[var(--foreground)]">
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
-        />
         <SiteHeader />
         <div className="flex-1">{children}</div>
         <SiteFooter />

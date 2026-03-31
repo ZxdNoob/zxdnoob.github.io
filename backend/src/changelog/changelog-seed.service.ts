@@ -210,7 +210,7 @@ const SEED_RELEASE_004: Partial<ChangelogReleaseEntity> = {
 };
 
 const SEED_RELEASE_005: Partial<ChangelogReleaseEntity> = {
-  date: '2026-03-31T00:00:30',
+  date: '2026-03-31T19:42:32',
   title: '文章索引与阅读体验（0.0.5 / API 0.0.4）',
   webVersion: '0.0.5',
   apiVersion: '0.0.4',
@@ -245,6 +245,11 @@ const SEED_RELEASE_005: Partial<ChangelogReleaseEntity> = {
       kind: 'feature',
       surface: 'web',
       text: '正文标题锚点体验升级：为 h2/h3/h4 提供可复制/可跳转的 # 锚点链接，并统一 scroll margin，配合目录跳转更稳定。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '修复刷新后“闪屏/闪白”：主题初始化在首屏绘制前完成（避免先浅后深），并同步 `color-scheme` 与页面底色以减少主题切换闪烁。',
     },
     {
       kind: 'fix',
