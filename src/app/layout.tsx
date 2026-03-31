@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
+import Script from 'next/script';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { ToastViewport } from '@/components/toast-viewport';
@@ -62,7 +63,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col bg-[var(--background)] font-sans text-[var(--foreground)]">
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+        />
         <SiteHeader />
         <div className="flex-1">{children}</div>
         <SiteFooter />

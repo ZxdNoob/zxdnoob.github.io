@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
-import {
-  SeriesPostList,
-  type SeriesGroup,
-} from '@/components/series-post-list';
-import { fetchAllPostSummaries, type PostSummary } from '@/lib/posts';
+import { BlogIndex } from '@/components/blog-index';
+import { fetchAllPostSummaries } from '@/lib/posts';
 import { site } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -11,39 +8,8 @@ export const metadata: Metadata = {
   description: `「${site.name}」全部文章列表。`,
 };
 
-function toSeriesGroups(posts: PostSummary[]): {
-  groups: SeriesGroup[];
-  ungrouped: PostSummary[];
-} {
-  const map = new Map<string, PostSummary[]>();
-  const ungrouped: PostSummary[] = [];
-
-  for (const post of posts) {
-    const series = (post.series ?? '').trim();
-    if (!series) {
-      ungrouped.push(post);
-      continue;
-    }
-    const bucket = map.get(series);
-    if (bucket) bucket.push(post);
-    else map.set(series, [post]);
-  }
-
-  const groups: SeriesGroup[] = Array.from(map.entries()).map(([series, p]) => {
-    const latestMs = Math.max(...p.map((x) => new Date(x.date).getTime()));
-    return { series, posts: p, latestMs };
-  });
-
-  groups.sort(
-    (a, b) =>
-      b.latestMs - a.latestMs || a.series.localeCompare(b.series, 'zh-CN'),
-  );
-  return { groups, ungrouped };
-}
-
 export default async function BlogIndexPage() {
   const posts = await fetchAllPostSummaries();
-  const { groups, ungrouped } = toSeriesGroups(posts);
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16 lg:px-8">
@@ -52,7 +18,7 @@ export default async function BlogIndexPage() {
           文章
         </h1>
         <p className="mt-4 text-lg text-stone-600 dark:text-stone-400">
-          共 {posts.length} 篇，按发布时间从新到旧排列。
+          默认按发布时间从新到旧排列，可在筛选区切换排序与筛选条件。
         </p>
       </header>
       {posts.length === 0 ? (
@@ -77,7 +43,7 @@ export default async function BlogIndexPage() {
           </p>
         </div>
       ) : (
-        <SeriesPostList groups={groups} ungrouped={ungrouped} />
+        <BlogIndex posts={posts} />
       )}
     </main>
   );

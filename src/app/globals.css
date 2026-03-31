@@ -73,6 +73,16 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Immersive reading mode (toggle via <html class="reading-immersive">). */
+html.reading-immersive [data-site-header],
+html.reading-immersive [data-site-footer] {
+  display: none;
+}
+
+html.reading-immersive body {
+  background: var(--background);
+}
+
 /* Freeze transitions during theme switch to avoid "phantom clicks". */
 html.theme-changing *,
 html.theme-changing *::before,

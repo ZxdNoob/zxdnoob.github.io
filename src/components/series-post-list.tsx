@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import {
   formatPostPublishedAt,
   postPublishedAtIso,
@@ -67,6 +67,13 @@ function MetaPill({ children }: { children: React.ReactNode }) {
   );
 }
 
+function hashToDomId(input: string): string {
+  // Deterministic and SSR-safe: avoids hydration mismatch and invalid ids for non-ascii series names.
+  let h = 5381;
+  for (let i = 0; i < input.length; i++) h = (h * 33) ^ input.charCodeAt(i);
+  return `series-${(h >>> 0).toString(36)}`;
+}
+
 function PostRow({ post }: { post: PostSummary }) {
   const dateLabel = formatPostPublishedAt(post.date, 'short');
   return (
@@ -107,17 +114,22 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
   const storageKey = 'blog:series-open:v1';
   const listId = useId();
 
-  const [openSeries, setOpenSeries] = useState<Set<string>>(() => {
+  // Keep the first render consistent between SSR and client, then hydrate from localStorage.
+  const [openSeries, setOpenSeries] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
     try {
       const raw = window.localStorage.getItem(storageKey);
-      if (!raw) return new Set<string>();
+      if (!raw) return;
       const parsed = JSON.parse(raw) as unknown;
-      if (!Array.isArray(parsed)) return new Set<string>();
-      return new Set(parsed.filter((x) => typeof x === 'string'));
+      if (!Array.isArray(parsed)) return;
+      const next = new Set(parsed.filter((x) => typeof x === 'string'));
+      // Defer state update to avoid synchronous setState-in-effect lint.
+      window.setTimeout(() => setOpenSeries(next), 0);
     } catch {
-      return new Set<string>();
+      // ignore
     }
-  });
+  }, []);
 
   function toggle(series: string) {
     setOpenSeries((prev) => {
@@ -145,6 +157,7 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
       {groups.map((group) => {
         const open = openSeries.has(group.series);
         const latest = group.posts[0]?.date;
+        const seriesDomId = `${listId}-${hashToDomId(group.series)}`;
         return (
           <section
             key={group.series}
@@ -162,7 +175,7 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
                 type="button"
                 onClick={() => toggle(group.series)}
                 aria-expanded={open}
-                aria-controls={`${listId}-${group.series}`}
+                aria-controls={seriesDomId}
                 className={[
                   'relative w-full px-5 py-5 text-left sm:px-6',
                   'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)]',
@@ -195,7 +208,7 @@ export function SeriesPostList({ groups, ungrouped }: Props) {
             </div>
 
             <div
-              id={`${listId}-${group.series}`}
+              id={seriesDomId}
               className={[
                 'grid transition-[grid-template-rows] duration-300 motion-reduce:transition-none',
                 open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',

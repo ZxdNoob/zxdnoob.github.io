@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BackToTop } from '@/components/back-to-top';
 import { PostBody } from '@/components/post-body';
+import { ReadingToolbar } from '@/components/reading-toolbar';
 import { ScrollProgress } from '@/components/scroll-progress';
+import { TableOfContents } from '@/components/table-of-contents';
 import {
   STATIC_EXPORT_PLACEHOLDER_SLUG,
   fetchAllPostSummaries,
@@ -13,6 +14,7 @@ import {
   readingMinutesFromMarkdown,
 } from '@/lib/posts';
 import { site } from '@/lib/site';
+import { extractToc } from '@/lib/toc';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -83,83 +85,99 @@ export default async function BlogPostPage(props: Props) {
   const minutes =
     post.readingMinutes ?? readingMinutesFromMarkdown(post.content);
   const dateLabel = formatPostPublishedAt(post.date, 'long');
+  const toc = extractToc(post.content);
 
   return (
     <>
-      <ScrollProgress />
-      <article className="mx-auto max-w-3xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16">
-        <header className="pb-10">
-          <Link
-            href="/blog"
-            className="group mb-8 inline-flex items-center text-sm font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
-          >
-            <svg
-              className="mr-1.5 h-4 w-4 transition-transform group-hover:-translate-x-0.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            返回文章列表
-          </Link>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500 dark:text-stone-500">
-            <time dateTime={postPublishedAtIso(post.date)}>{dateLabel}</time>
-            <span
-              className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
-              aria-hidden
-            />
-            <span>{minutes} 分钟阅读</span>
-          </div>
-          <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-stone-900 sm:text-4xl lg:text-[2.75rem] dark:text-stone-50">
-            {post.title}
-          </h1>
-          {post.description && (
-            <p className="mt-4 text-lg leading-relaxed text-stone-600 dark:text-stone-400">
-              {post.description}
-            </p>
-          )}
-          {post.tags && post.tags.length > 0 ? (
-            <ul className="mt-6 flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <li
-                  key={tag}
-                  className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+      <ScrollProgress
+        startSelector="#post-article"
+        endSelector="#post-content"
+      />
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:px-6 sm:pt-14 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr),18rem]">
+          <article id="post-article" className="min-w-0">
+            <header className="pb-10">
+              <Link
+                href="/blog"
+                className="group mb-8 inline-flex items-center text-sm font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
+              >
+                <svg
+                  className="mr-1.5 h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  {tag}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          <div className="mt-8 h-px bg-gradient-to-r from-[var(--border)] via-[var(--border)]/60 to-transparent" />
-        </header>
-        <div className="pt-2">
-          <PostBody content={post.content} />
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                返回文章列表
+              </Link>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500 dark:text-stone-500">
+                <time dateTime={postPublishedAtIso(post.date)}>
+                  {dateLabel}
+                </time>
+                <span
+                  className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
+                  aria-hidden
+                />
+                <span>{minutes} 分钟阅读</span>
+              </div>
+              <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-stone-900 sm:text-4xl lg:text-[2.75rem] dark:text-stone-50">
+                {post.title}
+              </h1>
+              {post.description && (
+                <p className="mt-4 text-lg leading-relaxed text-stone-600 dark:text-stone-400">
+                  {post.description}
+                </p>
+              )}
+              {post.tags && post.tags.length > 0 ? (
+                <ul className="mt-6 flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="mt-8 h-px bg-gradient-to-r from-[var(--border)] via-[var(--border)]/60 to-transparent" />
+            </header>
+            <div className="pt-2">
+              <PostBody content={post.content} />
+            </div>
+            <footer className="mt-16 border-t border-[var(--border)]/60 pt-8">
+              <Link
+                href="/blog"
+                className="group inline-flex items-center text-sm font-medium text-stone-500 transition-colors hover:text-[var(--accent)] dark:text-stone-400"
+              >
+                <svg
+                  className="mr-1.5 h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                返回文章列表
+              </Link>
+            </footer>
+          </article>
+
+          <aside className="hidden lg:block">
+            <div className="sticky top-24 rounded-3xl border border-[var(--border)] bg-[var(--surface)]/30 p-5">
+              <TableOfContents items={toc} />
+            </div>
+          </aside>
         </div>
-        <footer className="mt-16 border-t border-[var(--border)]/60 pt-8">
-          <Link
-            href="/blog"
-            className="group inline-flex items-center text-sm font-medium text-stone-500 transition-colors hover:text-[var(--accent)] dark:text-stone-400"
-          >
-            <svg
-              className="mr-1.5 h-4 w-4 transition-transform group-hover:-translate-x-0.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            返回文章列表
-          </Link>
-        </footer>
-      </article>
-      <BackToTop />
+      </main>
+      <ReadingToolbar />
     </>
   );
 }

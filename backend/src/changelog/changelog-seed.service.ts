@@ -29,6 +29,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_002,
       SEED_RELEASE_003,
       SEED_RELEASE_004,
+      SEED_RELEASE_005,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -204,6 +205,56 @@ const SEED_RELEASE_004: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'CI 与 GitHub Pages 部署流程增加 Prettier 校验，并做了一次全仓格式化整理，降低 PR diff 噪音、让流水线更稳定可复现。',
+    },
+  ],
+};
+
+const SEED_RELEASE_005: Partial<ChangelogReleaseEntity> = {
+  date: '2026-03-31T00:00:30',
+  title: '文章索引与阅读体验（0.0.5 / API 0.0.4）',
+  webVersion: '0.0.5',
+  apiVersion: '0.0.4',
+  sortOrder: 4,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章索引页重做为“可筛选列表”：支持按系列筛选、按标签筛选（含“更多/收起”）、关键词搜索（标题/描述/标签/系列）、最新/最早排序，并记忆“是否显示筛选区”的偏好。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章索引支持渐进加载：首屏展示 40 篇，滚动接近底部自动加载更多，同时保留“加载更多”按钮作为显式兜底；筛选条件变化会自动重置可见数量。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章详情页新增右侧目录（h2/h3/h4）：自动提取 Markdown 标题并高亮当前阅读小节，便于长文定位与快速跳转。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章详情页阅读工具条：提供沉浸式阅读模式（隐藏站点头/尾并可尝试进入全屏）、以及“回到顶部”按钮（滚动超过阈值后出现）；沉浸式开关会记忆。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '阅读进度条计算更精确：可配置以文章容器为起点、以正文末尾为 100%（视口底部到达正文底部），并保留整页滚动的回退逻辑。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '正文标题锚点体验升级：为 h2/h3/h4 提供可复制/可跳转的 # 锚点链接，并统一 scroll margin，配合目录跳转更稳定。',
+    },
+    {
+      kind: 'fix',
+      surface: 'api',
+      text: '阅读时长预估算法更新（后端）：综合中文字符/英文词、代码块行数、以及符号密度与代码占比的难度系数，调整 `/api/posts` 返回的 `readingMinutes` 使其更贴近技术类长文的实际阅读成本。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: '版本号升级：前端 0.0.5；后端 0.0.4，并在版本历史中同步记录本次改动。',
     },
   ],
 };

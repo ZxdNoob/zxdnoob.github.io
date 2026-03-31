@@ -3,7 +3,9 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { isValidElement, useMemo, useState } from 'react';
+import type { Pluggable } from 'unified';
 import { toast } from '@/lib/toast';
+import { normalizeHeadingText } from '@/lib/toc';
 
 type Props = { content: string };
 
@@ -102,8 +104,93 @@ function CodeBlock({
 
 export function PostBody({ content }: Props) {
   const normalizedContent = content.replaceAll('\\`\\`\\`', '```');
+  // Avoid type conflicts from duplicated `vfile` versions in remark plugin types.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const remarkSlugMod = require('remark-slug') as unknown as
+    | Pluggable
+    | { default: Pluggable };
+  const remarkSlug =
+    typeof remarkSlugMod === 'function'
+      ? remarkSlugMod
+      : (remarkSlugMod as { default: Pluggable }).default;
+
+  function textFromNode(node: React.ReactNode): string {
+    if (typeof node === 'string' || typeof node === 'number')
+      return String(node);
+    if (Array.isArray(node)) return node.map(textFromNode).join('');
+    if (isValidElement<{ children?: React.ReactNode }>(node))
+      return textFromNode(node.props.children);
+    return '';
+  }
+
+  function renderHeading(
+    level: 2 | 3 | 4,
+    id: string | undefined,
+    children?: React.ReactNode,
+  ) {
+    const Tag = `h${level}` as const;
+    const text = normalizeHeadingText(textFromNode(children));
+    void text;
+    return (
+      <Tag id={id} className="group scroll-mt-24">
+        <span className="mr-2">{children}</span>
+        <a
+          href={id ? `#${id}` : '#'}
+          className="no-underline opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+          aria-label="跳转到该小节"
+          onClick={(e) => {
+            // Keep default jump behavior; also update URL hash reliably.
+            e.preventDefault();
+            const currentId =
+              id ?? (e.currentTarget.parentElement as HTMLElement | null)?.id;
+            if (!currentId) return;
+            try {
+              history.replaceState(null, '', `#${currentId}`);
+            } catch {
+              // ignore
+            }
+            document
+              .getElementById(currentId)
+              ?.scrollIntoView({ block: 'start' });
+          }}
+        >
+          #
+        </a>
+      </Tag>
+    );
+  }
+
+  function Heading2({
+    id,
+    children,
+  }: {
+    id?: string;
+    children?: React.ReactNode;
+  }) {
+    return renderHeading(2, id, children);
+  }
+  function Heading3({
+    id,
+    children,
+  }: {
+    id?: string;
+    children?: React.ReactNode;
+  }) {
+    return renderHeading(3, id, children);
+  }
+  function Heading4({
+    id,
+    children,
+  }: {
+    id?: string;
+    children?: React.ReactNode;
+  }) {
+    return renderHeading(4, id, children);
+  }
+
   return (
     <div
+      id="post-content"
       className={[
         'prose prose-stone max-w-none dark:prose-invert',
         'prose-headings:font-serif prose-headings:tracking-tight prose-h2:mt-12 prose-h2:text-2xl prose-h3:mt-8',
@@ -120,8 +207,11 @@ export function PostBody({ content }: Props) {
       ].join(' ')}
     >
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, remarkSlug]}
         components={{
+          h2: Heading2,
+          h3: Heading3,
+          h4: Heading4,
           pre: ({ children }) => {
             // Render fenced code blocks via <pre><code> as our custom CodeBlock.
             // Keeping <code> itself inline-only avoids invalid <p><div> nesting.

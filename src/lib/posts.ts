@@ -59,12 +59,56 @@ export async function fetchPostBySlug(slug: string): Promise<Post | null> {
  * 与后端 `reading-minutes` 算法一致，供卡片在缺少字段时兜底（一般不需要）。
  */
 export function readingMinutesFromMarkdown(content: string): number {
-  const text = content
-    .replace(/```[\s\S]*?```/g, ' ')
+  // 与后端 `backend/src/posts/reading-minutes.ts` 保持一致。
+  // 目标：适配中文（无空格）、英文（按词）、以及代码块较多的技术文章。
+
+  const fencedBlocks = content.match(/```[\s\S]*?```/g) ?? [];
+  const codeLines = fencedBlocks
+    .map((b) =>
+      b
+        // 去掉围栏行，避免把 ```ts 算成代码行
+        .replace(/^```.*$/gm, '')
+        .split('\n')
+        .map((x) => x.trim())
+        .filter(Boolean).length,
+    )
+    .reduce((a, b) => a + b, 0);
+
+  const prose = content
+    .replace(/```[\s\S]*?```/g, '\n')
+    // 去掉行内 code，避免符号密集时把“可读字数”夸大
+    .replace(/`[^`\n]+`/g, ' ')
+    // 只保留文本结构，避免 URL/标点造成噪声
     .replace(/\s+/g, ' ')
     .trim();
-  const words = text.split(' ').filter(Boolean).length;
-  return Math.max(1, Math.round(words / 280));
+
+  const cjkChars =
+    prose.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu)
+      ?.length ?? 0;
+  const latinWords = prose.match(/[A-Za-z0-9]+(?:'[A-Za-z0-9]+)?/g)?.length ?? 0;
+
+  // 经验速度（偏保守）：
+  // - 中文：约 500 字/分钟（含少量停顿）
+  // - 英文：约 220 词/分钟
+  // - 代码：约 45 行/分钟（“扫读 + 理解”）
+  const proseMinutes = cjkChars / 500 + latinWords / 220;
+  const codeMinutes = codeLines / 45;
+
+  // 难度因子：代码占比越高、符号密度越高，理解成本越高。
+  const symbolHits =
+    prose.match(/[{}[\]()<>=/*\\|&^%$#@~:+-]/g)?.length ?? 0;
+  const proseLen = Math.max(1, prose.length);
+  const symbolDensity = symbolHits / proseLen;
+  const codeShare =
+    codeMinutes / Math.max(0.0001, proseMinutes + codeMinutes);
+
+  const multiplier =
+    1 +
+    (codeShare >= 0.55 ? 0.35 : codeShare >= 0.3 ? 0.18 : 0) +
+    (symbolDensity >= 0.085 ? 0.12 : symbolDensity >= 0.045 ? 0.06 : 0);
+
+  const total = (proseMinutes + codeMinutes) * multiplier;
+  return Math.max(1, Math.round(total));
 }
 
 /** 供 `<time datetime>` 使用的规范 ISO 字符串（UTC） */

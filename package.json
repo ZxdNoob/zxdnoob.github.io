@@ -1,6 +1,6 @@
 {
   "name": "zxdnoob",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "description": "ZxdNoob 个人博客：Next.js 前端通过 REST 调用 NestJS；文章数据存 SQLite（TypeORM）。",
   "scripts": {
@@ -17,11 +17,13 @@
     "start:api": "npm run start:prod --prefix backend"
   },
   "dependencies": {
+    "github-slugger": "^2.0.0",
     "next": "^16.2.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "remark-slug": "^7.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
