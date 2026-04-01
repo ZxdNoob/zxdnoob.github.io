@@ -45,12 +45,18 @@ export class ChangelogSeedService implements OnModuleInit {
       this.logger.warn(`已清理重复版本历史记录 ${dupIds.length} 条`);
     }
 
-    const freshRows = dupIds.length > 0 ? await this.repo.find({
-      select: { id: true, webVersion: true, apiVersion: true },
-    }) : rows;
+    const freshRows =
+      dupIds.length > 0
+        ? await this.repo.find({
+            select: { id: true, webVersion: true, apiVersion: true },
+          })
+        : rows;
 
     const byKey = new Map(
-      freshRows.map((r) => [`${r.webVersion ?? ''}|${r.apiVersion ?? ''}`, r.id]),
+      freshRows.map((r) => [
+        `${r.webVersion ?? ''}|${r.apiVersion ?? ''}`,
+        r.id,
+      ]),
     );
 
     const seeds: Partial<ChangelogReleaseEntity>[] = [
