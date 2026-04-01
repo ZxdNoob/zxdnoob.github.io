@@ -18,10 +18,39 @@ export class ChangelogSeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     const rows = await this.repo.find({
-      select: { id: true, webVersion: true, apiVersion: true },
+      select: { id: true, webVersion: true, apiVersion: true, date: true },
     });
+
+    // Defensive cleanup: remove duplicates that share the same (webVersion, apiVersion).
+    // This can happen if older data was inserted before we enforced "upsert by key".
+    const byKeyRows = new Map<string, typeof rows>();
+    for (const r of rows) {
+      const key = `${r.webVersion ?? ''}|${r.apiVersion ?? ''}`;
+      const list = byKeyRows.get(key) ?? [];
+      list.push(r);
+      byKeyRows.set(key, list);
+    }
+    const dupIds: string[] = [];
+    for (const list of byKeyRows.values()) {
+      if (list.length <= 1) continue;
+      list.sort((a, b) => {
+        const da = new Date(a.date).getTime();
+        const db = new Date(b.date).getTime();
+        return db - da;
+      });
+      dupIds.push(...list.slice(1).map((r) => r.id));
+    }
+    if (dupIds.length > 0) {
+      await this.repo.delete(dupIds);
+      this.logger.warn(`已清理重复版本历史记录 ${dupIds.length} 条`);
+    }
+
+    const freshRows = dupIds.length > 0 ? await this.repo.find({
+      select: { id: true, webVersion: true, apiVersion: true },
+    }) : rows;
+
     const byKey = new Map(
-      rows.map((r) => [`${r.webVersion ?? ''}|${r.apiVersion ?? ''}`, r.id]),
+      freshRows.map((r) => [`${r.webVersion ?? ''}|${r.apiVersion ?? ''}`, r.id]),
     );
 
     const seeds: Partial<ChangelogReleaseEntity>[] = [
@@ -32,6 +61,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_005,
       SEED_RELEASE_006,
       SEED_RELEASE_007,
+      SEED_RELEASE_008,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -312,7 +342,7 @@ const SEED_RELEASE_006: Partial<ChangelogReleaseEntity> = {
 };
 
 const SEED_RELEASE_007: Partial<ChangelogReleaseEntity> = {
-  date: '2026-04-01T20:10:00',
+  date: '2026-04-01T19:13:09',
   title: '部署稳定性与提交前格式化兜底（0.0.7）',
   webVersion: '0.0.7',
   sortOrder: 6,
@@ -326,6 +356,25 @@ const SEED_RELEASE_007: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: '新增提交前自动格式化：引入 `husky` + `lint-staged`，对暂存区文件按各自 Prettier 配置执行 `--write`，从源头规避格式类部署失败。',
+    },
+  ],
+};
+
+const SEED_RELEASE_008: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-01T19:46:20',
+  title: '移动端菜单兼容性修复（0.0.8）',
+  webVersion: '0.0.8',
+  sortOrder: 7,
+  items: [
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '修复移动端在部分浏览器中点击右上角菜单/下拉入口无反应：对不支持 Pointer Events 的环境降级使用 `touchstart`/`mousedown` 监听，保证可点击与点外部关闭逻辑可用。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '兼容旧版 Safari 主题跟随系统：`matchMedia` 监听在缺失 `addEventListener` 时回退到 `addListener/removeListener`，避免报错影响页面交互。',
     },
   ],
 };

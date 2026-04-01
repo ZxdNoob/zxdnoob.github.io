@@ -38,7 +38,7 @@ function SeriesSelect({
 
   useEffect(() => {
     if (!open) return;
-    function onPointerDown(e: PointerEvent) {
+    function onPointerDown(e: Event) {
       const el = rootRef.current;
       if (!el) return;
       if (e.target instanceof Node && !el.contains(e.target)) setOpen(false);
@@ -46,10 +46,16 @@ function SeriesSelect({
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false);
     }
-    window.addEventListener('pointerdown', onPointerDown);
+    const supportsPointer =
+      typeof window !== 'undefined' && 'PointerEvent' in window;
+    const downEvent = supportsPointer ? 'pointerdown' : 'touchstart';
+    window.addEventListener(downEvent, onPointerDown, { passive: true });
+    if (!supportsPointer) window.addEventListener('mousedown', onPointerDown);
     window.addEventListener('keydown', onKeyDown);
     return () => {
-      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener(downEvent, onPointerDown);
+      if (!supportsPointer)
+        window.removeEventListener('mousedown', onPointerDown);
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [open]);

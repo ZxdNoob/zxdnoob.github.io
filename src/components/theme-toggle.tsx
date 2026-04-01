@@ -85,8 +85,18 @@ export function ThemeToggle() {
     if (mode === 'system') {
       localStorage.removeItem('theme');
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      mq.addEventListener('change', syncSystem);
-      return () => mq.removeEventListener('change', syncSystem);
+      // Safari < 14 uses addListener/removeListener (deprecated but still needed).
+      const mqLegacy = mq as MediaQueryList & {
+        addListener?: (listener: (e: MediaQueryListEvent) => void) => void;
+        removeListener?: (listener: (e: MediaQueryListEvent) => void) => void;
+      };
+
+      if (typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', syncSystem);
+        return () => mq.removeEventListener('change', syncSystem);
+      }
+      mqLegacy.addListener?.(syncSystem);
+      return () => mqLegacy.removeListener?.(syncSystem);
     }
 
     localStorage.setItem('theme', mode);
@@ -99,7 +109,7 @@ export function ThemeToggle() {
       if (e.key === 'Escape') setOpen(false);
     }
 
-    function onPointerDown(e: PointerEvent) {
+    function onPointerDown(e: Event) {
       const root = rootRef.current;
       if (!root) return;
       const target = e.target as Node | null;
@@ -107,10 +117,16 @@ export function ThemeToggle() {
     }
 
     window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('pointerdown', onPointerDown);
+    const supportsPointer =
+      typeof window !== 'undefined' && 'PointerEvent' in window;
+    const downEvent = supportsPointer ? 'pointerdown' : 'touchstart';
+    window.addEventListener(downEvent, onPointerDown, { passive: true });
+    if (!supportsPointer) window.addEventListener('mousedown', onPointerDown);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener(downEvent, onPointerDown);
+      if (!supportsPointer)
+        window.removeEventListener('mousedown', onPointerDown);
     };
   }, [open]);
 
