@@ -188,13 +188,7 @@ export const DEFAULT_RESUME_PAYLOAD: ResumePayload = {
       period: '2024.08 — 2024.12',
       summary:
         '企业级安全保密核心系统的统一入口，覆盖密签、排名、投诉举报等能力，支持 PC 与移动双端访问，要求稳定性、合规性与可视化呈现。',
-      stack: [
-        'React',
-        'TypeScript',
-        'Ant Design',
-        '内部组件库',
-        'ECharts',
-      ],
+      stack: ['React', 'TypeScript', 'Ant Design', '内部组件库', 'ECharts'],
       myRole: '移动端 1.0 负责人 / PC 端协作开发',
       responsibilities: [
         '主导移动端 1.0 核心开发，负责密签、漏洞反馈等关键模块的页面与交互落地。',

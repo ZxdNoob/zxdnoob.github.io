@@ -5,7 +5,11 @@ import type { ResumeExperience } from '@/lib/resume-types';
 
 function isCurrentPeriod(period: string): boolean {
   const p = period.trim();
-  return /至今|present|current/i.test(p) || p.endsWith('— 至今') || p.endsWith('—至今');
+  return (
+    /至今|present|current/i.test(p) ||
+    p.endsWith('— 至今') ||
+    p.endsWith('—至今')
+  );
 }
 
 export function ExperienceSection({
@@ -35,7 +39,10 @@ export function ExperienceSection({
           const isLast = idx === visible.length - 1;
           const isCurrent = isCurrentPeriod(job.period);
           return (
-            <li key={`${job.company}-${job.period}`} className="relative flex gap-2 sm:gap-2.5">
+            <li
+              key={`${job.company}-${job.period}`}
+              className="relative flex gap-2 sm:gap-2.5"
+            >
               {/* 时间线：圆点与首行标题垂直居中，与正文留出间距 */}
               <div className="relative flex w-3 shrink-0 flex-col items-center">
                 {idx > 0 ? (
@@ -88,13 +95,19 @@ export function ExperienceSection({
 
                 <p className="mt-1 text-sm font-medium text-stone-600 dark:text-stone-400">
                   {job.role}
-                  <span className="text-stone-400 dark:text-stone-600"> · {job.location}</span>
+                  <span className="text-stone-400 dark:text-stone-600">
+                    {' '}
+                    · {job.location}
+                  </span>
                 </p>
 
                 <ul className="mt-3 space-y-2 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
                   {job.points.map((pt) => (
                     <li key={pt} className="flex gap-2">
-                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" aria-hidden />
+                      <span
+                        className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]"
+                        aria-hidden
+                      />
                       <span>{pt}</span>
                     </li>
                   ))}
@@ -123,4 +136,3 @@ export function ExperienceSection({
     </div>
   );
 }
-

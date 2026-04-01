@@ -118,7 +118,11 @@ export function SiteNavLinks() {
 
               if (active) {
                 return (
-                  <span key={item.href} aria-current="page" className={className}>
+                  <span
+                    key={item.href}
+                    aria-current="page"
+                    className={className}
+                  >
                     {item.label}
                   </span>
                 );

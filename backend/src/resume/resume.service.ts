@@ -16,7 +16,9 @@ export class ResumeService {
   async getDefault(): Promise<ResumePayload> {
     const row = await this.resumeRepo.findOne({ where: { id: DEFAULT_ID } });
     if (!row) {
-      throw new NotFoundException('简历数据不存在，请确认后端已启动并完成种子写入。');
+      throw new NotFoundException(
+        '简历数据不存在，请确认后端已启动并完成种子写入。',
+      );
     }
     return row.payload;
   }

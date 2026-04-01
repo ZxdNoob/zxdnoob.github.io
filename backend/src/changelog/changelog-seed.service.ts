@@ -31,6 +31,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_004,
       SEED_RELEASE_005,
       SEED_RELEASE_006,
+      SEED_RELEASE_007,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -306,6 +307,25 @@ const SEED_RELEASE_006: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'api',
       text: '端到端测试补齐：新增 `GET /api/resume` e2e 覆盖，确保全局前缀配置与线上路径一致（`/api/*`）。',
+    },
+  ],
+};
+
+const SEED_RELEASE_007: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-01T20:10:00',
+  title: '部署稳定性与提交前格式化兜底（0.0.7）',
+  webVersion: '0.0.7',
+  sortOrder: 6,
+  items: [
+    {
+      kind: 'fix',
+      surface: 'both',
+      text: '修复前后端 Prettier 校验失败的格式问题，避免部署/CI 在 `format:check` 阶段中断。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: '新增提交前自动格式化：引入 `husky` + `lint-staged`，对暂存区文件按各自 Prettier 配置执行 `--write`，从源头规避格式类部署失败。',
     },
   ],
 };

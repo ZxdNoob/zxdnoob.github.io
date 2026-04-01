@@ -1,9 +1,10 @@
 {
   "name": "zxdnoob",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": true,
   "description": "ZxdNoob 个人博客：Next.js 前端通过 REST 调用 NestJS；文章数据存 SQLite（TypeORM）。",
   "scripts": {
+    "prepare": "husky",
     "dev": "next dev",
     "build": "next build",
     "build:static": "STATIC_EXPORT=1 next build",
@@ -15,6 +16,14 @@
     "dev:api": "npm run start:dev --prefix backend",
     "build:api": "npm run build --prefix backend",
     "start:api": "npm run start:prod --prefix backend"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx,json,css,md,yml,yaml}": [
+      "prettier --write"
+    ],
+    "backend/**/*.{ts,js,json,md,yml,yaml}": [
+      "prettier --write --config backend/prettier.config.mjs --ignore-path backend/.prettierignore"
+    ]
   },
   "dependencies": {
     "github-slugger": "^2.0.0",
@@ -34,6 +43,8 @@
     "eslint": "^9",
     "eslint-config-next": "^16.2.1",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2"
