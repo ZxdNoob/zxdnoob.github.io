@@ -7,7 +7,9 @@ import { AppController } from './app.controller';
 import { ChangelogModule } from './changelog/changelog.module';
 import { ChangelogReleaseEntity } from './database/changelog-release.entity';
 import { PostEntity } from './database/post.entity';
+import { ResumeEntity } from './database/resume.entity';
 import { PostsModule } from './posts/posts.module';
+import { ResumeModule } from './resume/resume.module';
 
 /**
  * 根模块：配置全局环境变量与 TypeORM（SQLite 文件库）。
@@ -33,13 +35,14 @@ import { PostsModule } from './posts/posts.module';
         return {
           type: 'better-sqlite3' as const,
           database: dbPath,
-          entities: [PostEntity, ChangelogReleaseEntity],
+          entities: [PostEntity, ChangelogReleaseEntity, ResumeEntity],
           synchronize: sync,
         };
       },
     }),
     PostsModule,
     ChangelogModule,
+    ResumeModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -1,7 +1,23 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { site } from '@/lib/site';
 
+const nav = [
+  { href: '/', label: '首页' },
+  { href: '/blog', label: '文章' },
+  { href: '/resume', label: '简历' },
+  { href: '/changelog', label: '版本历史' },
+] as const;
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function SiteFooter() {
+  const pathname = usePathname() ?? '';
   const year = new Date().getFullYear();
   return (
     <footer
@@ -24,30 +40,18 @@ export function SiteFooter() {
                 导航
               </p>
               <ul className="space-y-2.5">
-                <li>
-                  <Link
-                    href="/"
-                    className="text-stone-600 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
-                  >
-                    首页
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/blog"
-                    className="text-stone-600 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
-                  >
-                    文章
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/changelog"
-                    className="text-stone-600 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
-                  >
-                    版本历史
-                  </Link>
-                </li>
+                {nav
+                  .filter((item) => !isActive(pathname, item.href))
+                  .map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className="text-stone-600 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </div>
             <div className="space-y-3">

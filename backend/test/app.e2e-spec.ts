@@ -50,4 +50,15 @@ describe('App (e2e)', () => {
         expect(Array.isArray(res.body)).toBe(true);
       });
   });
+
+  it('GET /api/resume', () => {
+    return request(app.getHttpServer())
+      .get('/api/resume')
+      .expect(200)
+      .expect((res) => {
+        const body = res.body as { name?: string; projects?: unknown[] };
+        expect(typeof body.name).toBe('string');
+        expect(Array.isArray(body.projects)).toBe(true);
+      });
+  });
 });

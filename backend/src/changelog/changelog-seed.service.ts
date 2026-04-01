@@ -30,6 +30,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_003,
       SEED_RELEASE_004,
       SEED_RELEASE_005,
+      SEED_RELEASE_006,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -260,6 +261,51 @@ const SEED_RELEASE_005: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: '版本号升级：前端 0.0.5；后端 0.0.4，并在版本历史中同步记录本次改动。',
+    },
+  ],
+};
+
+const SEED_RELEASE_006: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-01T18:50:36',
+  title: '在线简历与站点导航完善（0.0.6 / API 0.0.5）',
+  webVersion: '0.0.6',
+  apiVersion: '0.0.5',
+  sortOrder: 5,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增在线简历页 `/resume`：服务端渲染拉取后端简历 JSON，并提供独立的 SEO metadata（title/description/openGraph）。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增简历展示组件体系：章节目录（移动/桌面）、技术栈分组卡片、经历时间线（支持展开/收起与“Current/至今”识别）、代表项目卡片（职责与成果双栏可折叠）。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增简历数据访问与类型：`fetchResume()` 对接 `GET /api/resume`；补齐 `ResumePayload` 等类型定义并与后端结构对齐。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '站点导航与 SEO 覆盖完善：顶栏/页脚新增“简历”“版本历史”入口；`sitemap.xml` 新增 `/resume` 与 `/changelog` 静态页链接。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '新增简历模块与数据持久化：SQLite 新增 `resume` 表（`payload` 为完整 JSON），提供 `GET /api/resume` 返回默认简历文档。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '新增简历种子同步机制：启动时将 `default-resume.payload.ts` 同步写入数据库；支持 `RESUME_SKIP_SEED_SYNC=1/true` 跳过覆盖以便手动维护库内数据。',
+    },
+    {
+      kind: 'docs',
+      surface: 'api',
+      text: '端到端测试补齐：新增 `GET /api/resume` e2e 覆盖，确保全局前缀配置与线上路径一致（`/api/*`）。',
     },
   ],
 };

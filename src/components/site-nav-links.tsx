@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 const nav = [
   { href: '/', label: '首页' },
   { href: '/blog', label: '文章' },
+  { href: '/resume', label: '简历' },
   { href: '/changelog', label: '版本历史' },
 ] as const;
 
@@ -38,21 +39,28 @@ export function SiteNavLinks() {
       <nav className="hidden items-center gap-1 md:flex">
         {nav.map((item) => {
           const active = isActive(pathname, item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? 'page' : undefined}
-              className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                active
-                  ? 'text-stone-900 dark:text-stone-50'
-                  : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50'
-              }`}
-            >
+          const className = `relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            active
+              ? 'cursor-default text-stone-900 dark:text-stone-50'
+              : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50'
+          }`;
+
+          const content = (
+            <>
               {active && (
                 <span className="absolute inset-0 rounded-full bg-stone-100 dark:bg-stone-800/80" />
               )}
               <span className="relative">{item.label}</span>
+            </>
+          );
+
+          return active ? (
+            <span key={item.href} aria-current="page" className={className}>
+              {content}
+            </span>
+          ) : (
+            <Link key={item.href} href={item.href} className={className}>
+              {content}
             </Link>
           );
         })}
@@ -102,16 +110,26 @@ export function SiteNavLinks() {
           <nav className="relative mx-4 mt-2 space-y-1 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3 shadow-xl">
             {nav.map((item) => {
               const active = isActive(pathname, item.href);
+              const className = `flex items-center rounded-xl px-4 py-3 text-base font-medium transition-colors ${
+                active
+                  ? 'cursor-default bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-50'
+                  : 'text-stone-600 hover:bg-stone-50 dark:text-stone-400 dark:hover:bg-stone-800/50'
+              }`;
+
+              if (active) {
+                return (
+                  <span key={item.href} aria-current="page" className={className}>
+                    {item.label}
+                  </span>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpenPathname(null)}
-                  className={`flex items-center rounded-xl px-4 py-3 text-base font-medium transition-colors ${
-                    active
-                      ? 'bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-50'
-                      : 'text-stone-600 hover:bg-stone-50 dark:text-stone-400 dark:hover:bg-stone-800/50'
-                  }`}
+                  className={className}
                 >
                   {item.label}
                 </Link>

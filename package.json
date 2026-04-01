@@ -1,6 +1,6 @@
 {
   "name": "zxdnoob",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "description": "ZxdNoob 个人博客：Next.js 前端通过 REST 调用 NestJS；文章数据存 SQLite（TypeORM）。",
   "scripts": {

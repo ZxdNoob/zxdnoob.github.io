@@ -18,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: `${base}/`, lastModified: new Date() },
     { url: `${base}/blog`, lastModified: new Date() },
+    { url: `${base}/resume`, lastModified: new Date() },
     { url: `${base}/changelog`, lastModified: new Date() },
     ...posts
       .filter((p) => p.slug !== STATIC_EXPORT_PLACEHOLDER_SLUG)
