@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ * 文章页顶部阅读进度条：在 `startSelector`～`endSelector` 之间映射滚动比例为宽度。
+ */
 import { useEffect, useState } from 'react';
 
 type Props = {
@@ -15,6 +18,7 @@ type Props = {
   endSelector?: string;
 };
 
+/** 将进度限制在 [0,1]，避免 NaN 或越界。 */
 function clamp01(v: number) {
   if (Number.isNaN(v)) return 0;
   if (v <= 0) return 0;

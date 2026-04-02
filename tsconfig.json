@@ -6,24 +6,39 @@
    * - `paths`：`@/*` → `src/*`，与目录别名一致
    */
   "compilerOptions": {
+    /** 语法目标：与 Next 默认一致，兼顾浏览器与构建工具 */
     "target": "ES2017",
+    /** 含 DOM 与最新 ES API 类型，供浏览器端组件使用 */
     "lib": ["dom", "dom.iterable", "esnext"],
+    /** 允许混用少量 .js，便于渐进迁移 */
     "allowJs": true,
+    /** 跳过 node_modules 内 .d.ts 的严格校验，加快编辑体验 */
     "skipLibCheck": true,
+    /** 开启 strict 全家桶（含 strictNullChecks 等） */
     "strict": true,
+    /** Next 由自身编译器输出产物，tsc 仅作类型检查 */
     "noEmit": true,
+    /** CommonJS/ESM 默认导出互操作 */
     "esModuleInterop": true,
+    /** 模块语法：由打包器解析 */
     "module": "esnext",
+    /** 与 SWC/Turbopack 解析策略一致 */
     "moduleResolution": "bundler",
+    /** 允许 `import x from './x.json'` */
     "resolveJsonModule": true,
+    /** 每个文件视为独立模块（对 Babel/SWC 友好） */
     "isolatedModules": true,
+    /** 新 JSX 运行时，无需 `import React` */
     "jsx": "react-jsx",
+    /** 增量编译信息，加快二次 `tsc` */
     "incremental": true,
+    /** Next.js 插件：增强路由类型等 */
     "plugins": [
       {
         "name": "next"
       }
     ],
+    /** 与 `src` 下 `@/components/...` 别名一致 */
     "paths": {
       "@/*": ["./src/*"]
     }
@@ -32,6 +47,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    /** Next 生成的类型（构建后出现） */
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"

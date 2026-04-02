@@ -1,3 +1,7 @@
+/**
+ * 首页：Hero、主推文章卡片与侧边紧凑列表（共展示最新 3 篇摘要）。
+ * 数据来自 `fetchAllPostSummaries()`，无数据时提示启动后端 API。
+ */
 import Link from 'next/link';
 import { PostCard } from '@/components/post-card';
 import {
@@ -7,6 +11,7 @@ import {
 } from '@/lib/posts';
 import { site } from '@/lib/site';
 
+/** 侧边次要文章：单行元信息 + 标题/描述，右侧显示序号与「阅读」提示 */
 function CompactPostRow({
   post,
   index,

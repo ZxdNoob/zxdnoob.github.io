@@ -1,3 +1,6 @@
+/**
+ * 站点顶栏：sticky + 背景模糊；左侧 Logo/站名链到首页，右侧导航见 `SiteNavLinks`。
+ */
 import Link from 'next/link';
 import { SiteLogo } from '@/components/site-logo';
 import { SiteNavLinks } from '@/components/site-nav-links';

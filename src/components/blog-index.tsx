@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * 文章索引客户端：系列/标签/关键词筛选、排序、渐进加载与自定义下拉（无障碍属性）。
+ * 接收服务端传入的 `PostSummary[]`，不在此文件内发起列表 API 请求。
+ */
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -10,12 +14,14 @@ import {
 
 type Props = { posts: PostSummary[] };
 
+/** 去重后按中文排序，用于系列/标签筛选选项 */
 function uniqSorted(values: string[]) {
   return Array.from(new Set(values)).sort((a, b) =>
     a.localeCompare(b, 'zh-CN'),
   );
 }
 
+/** 自定义「下拉」：button + listbox 模式，键盘方向键/Home/End 与点外部关闭 */
 function SeriesSelect({
   labelId,
   value,
@@ -214,6 +220,7 @@ function SeriesSelect({
   );
 }
 
+/** 无限滚动哨兵：进入视口（带 rootMargin）时触发回调加载更多 */
 function useIntersection(onHit: () => void) {
   const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -231,6 +238,7 @@ function useIntersection(onHit: () => void) {
   return ref;
 }
 
+/** 筛选区圆角切换按钮：激活态高亮 */
 function PillButton({
   active,
   children,
@@ -261,6 +269,7 @@ function PillButton({
   );
 }
 
+/** 索引页文章卡片（非首页 `PostCard` 组件）：紧凑元信息 + 标题/描述 */
 function PostCard({ post }: { post: PostSummary }) {
   const dateLabel = formatPostPublishedAt(post.date, 'short');
   return (
@@ -309,6 +318,7 @@ function PostCard({ post }: { post: PostSummary }) {
   );
 }
 
+/** 文章索引主组件：派生筛选选项、维护可见数量与本地存储偏好 */
 export function BlogIndex({ posts }: Props) {
   const storageKeyShowFilters = 'blog:index:show-filters:v1';
   const allTags = useMemo(

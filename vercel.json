@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "$comment": "Vercel 项目设置（标准 JSON）：framework 指定 Next；installCommand/buildCommand 与本地 CI 一致，便于可复现构建。",
   "framework": "nextjs",
   "installCommand": "npm ci",
   "buildCommand": "npm run build"

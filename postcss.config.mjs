@@ -6,6 +6,7 @@
  */
 const config = {
   plugins: {
+    /** Tailwind CSS v4 官方 PostCSS 插件；与 `globals.css` 中 @import/@plugin 配合 */
     '@tailwindcss/postcss': {},
   },
 };

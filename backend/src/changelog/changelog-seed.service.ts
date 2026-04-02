@@ -21,8 +21,9 @@ export class ChangelogSeedService implements OnModuleInit {
       select: { id: true, webVersion: true, apiVersion: true, date: true },
     });
 
-    // Defensive cleanup: remove duplicates that share the same (webVersion, apiVersion).
-    // This can happen if older data was inserted before we enforced "upsert by key".
+    // 防御性清理：删除 (webVersion, apiVersion) 完全相同的重复行。
+    // 旧数据在引入「按版本键 upsert」之前可能已插入多份，此处保留最新 date 的一条。
+    // 按「web|api」版本键分组，找出同一键下的多条记录
     const byKeyRows = new Map<string, typeof rows>();
     for (const r of rows) {
       const key = `${r.webVersion ?? ''}|${r.apiVersion ?? ''}`;
@@ -33,6 +34,7 @@ export class ChangelogSeedService implements OnModuleInit {
     const dupIds: string[] = [];
     for (const list of byKeyRows.values()) {
       if (list.length <= 1) continue;
+      // 同键保留 date 最新的一条，其余 id 待删除
       list.sort((a, b) => {
         const da = new Date(a.date).getTime();
         const db = new Date(b.date).getTime();
@@ -52,6 +54,7 @@ export class ChangelogSeedService implements OnModuleInit {
           })
         : rows;
 
+    // 去重后的当前库内「版本键 → 行 id」，用于后续 upsert
     const byKey = new Map(
       freshRows.map((r) => [
         `${r.webVersion ?? ''}|${r.apiVersion ?? ''}`,
@@ -59,6 +62,7 @@ export class ChangelogSeedService implements OnModuleInit {
       ]),
     );
 
+    // 内置种子列表：与站点发版说明同步；新增键插入，已有关键字更新整行
     const seeds: Partial<ChangelogReleaseEntity>[] = [
       SEED_RELEASE_001,
       SEED_RELEASE_002,

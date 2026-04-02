@@ -1,3 +1,6 @@
+/**
+ * 在线简历路由：构建期 `fetchResume()` 拉取 `GET /api/resume`，失败时由 `ResumePage` 展示空态。
+ */
 import type { Metadata } from 'next';
 import { ResumePage } from '@/components/resume/resume-page';
 import { fetchResume } from '@/lib/resume';

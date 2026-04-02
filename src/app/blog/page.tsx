@@ -1,3 +1,6 @@
+/**
+ * 文章索引路由：服务端拉取全部摘要后交给客户端组件 `BlogIndex`（筛选、排序、无限加载）。
+ */
 import type { Metadata } from 'next';
 import { BlogIndex } from '@/components/blog-index';
 import { fetchAllPostSummaries } from '@/lib/posts';

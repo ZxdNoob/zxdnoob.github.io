@@ -1,3 +1,6 @@
+/**
+ * 简历技能分组卡片：标题 + 横向滚动标签列表，背景渐变装饰与 `group.accent` 配色。
+ */
 import type { ResumeSkillGroup } from '@/lib/resume-types';
 
 export function SkillGroupCard({ group }: { group: ResumeSkillGroup }) {

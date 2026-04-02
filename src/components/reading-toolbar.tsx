@@ -1,9 +1,12 @@
 'use client';
 
+/**
+ * 阅读页右下角工具条：沉浸式阅读（可选全屏）、回到顶部；部分状态持久化到 localStorage。
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 type Props = {
-  /** Optional element id to scroll back to top. */
+  /** 点击「回顶」时优先滚动到该 id 的元素（默认页面顶部） */
   topAnchorId?: string;
 };
 
@@ -39,7 +42,7 @@ function Tooltip({ text }: { text: string }) {
       setPlace(r.top < margin ? 'bottom' : 'top');
     }
 
-    // Next tick: allow layout after visibility change.
+    // 下一帧再测位，避免显示/隐藏后布局未稳定
     const t = window.setTimeout(compute, 0);
     window.addEventListener('resize', compute, { passive: true });
     return () => {

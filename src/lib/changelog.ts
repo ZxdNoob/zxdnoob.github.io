@@ -104,6 +104,7 @@ export function semverCompare(a: string, b: string): number {
   return 0;
 }
 
+/** 在两条可选版本号中取 semver 较大者（用于推导站点「当前最新版本」展示）。 */
 function maxSemver(
   current: string | undefined,
   next: string | undefined,

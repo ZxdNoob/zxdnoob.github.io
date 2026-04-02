@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * 文章正文：基于 `react-markdown` + `remark-gfm` + `remark-slug` 渲染 Markdown。
+ * - 自定义 h2/h3/h4：锚点链接、`scroll-mt` 与目录对齐
+ * - 自定义 fenced `pre`：拆成 `CodeBlock`（复制、换行），避免 `<p>` 包裹块级元素导致 hydration 报错
+ */
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { isValidElement, useMemo, useState } from 'react';
@@ -9,6 +14,9 @@ import { normalizeHeadingText } from '@/lib/toc';
 
 type Props = { content: string };
 
+/**
+ * 代码展示：短且单行的 token 渲染为行内 `code`；多行围栏块带复制与「自动换行」开关。
+ */
 function CodeBlock({
   className,
   children,
@@ -104,7 +112,7 @@ function CodeBlock({
 
 export function PostBody({ content }: Props) {
   const normalizedContent = content.replaceAll('\\`\\`\\`', '```');
-  // Avoid type conflicts from duplicated `vfile` versions in remark plugin types.
+  // 使用 require 规避不同依赖树中重复 `vfile` 类型导致的 TS 插件类型冲突
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const remarkSlugMod = require('remark-slug') as unknown as
     | Pluggable
@@ -114,6 +122,7 @@ export function PostBody({ content }: Props) {
       ? remarkSlugMod
       : (remarkSlugMod as { default: Pluggable }).default;
 
+  /** 从 React 节点树中拼接纯文本，用于标题锚点辅助（与 TOC 文本规范化一致） */
   function textFromNode(node: React.ReactNode): string {
     if (typeof node === 'string' || typeof node === 'number')
       return String(node);
@@ -123,6 +132,7 @@ export function PostBody({ content }: Props) {
     return '';
   }
 
+  /** 渲染 h2/h3/h4：带 `#` 锚点链接，点击时 `replaceState` 更新 hash 并滚动到目标 */
   function renderHeading(
     level: 2 | 3 | 4,
     id: string | undefined,
@@ -139,7 +149,7 @@ export function PostBody({ content }: Props) {
           className="no-underline opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
           aria-label="跳转到该小节"
           onClick={(e) => {
-            // Keep default jump behavior; also update URL hash reliably.
+            // 使用 replaceState 更新地址栏 hash，并 scrollIntoView，避免默认跳转与客户端路由冲突
             e.preventDefault();
             const currentId =
               id ?? (e.currentTarget.parentElement as HTMLElement | null)?.id;
@@ -213,8 +223,7 @@ export function PostBody({ content }: Props) {
           h3: Heading3,
           h4: Heading4,
           pre: ({ children }) => {
-            // Render fenced code blocks via <pre><code> as our custom CodeBlock.
-            // Keeping <code> itself inline-only avoids invalid <p><div> nesting.
+            // 将 fenced 块交给 CodeBlock；结构为 pre > code，避免 prose 把块包进 <p> 引发非法嵌套
             const child = Array.isArray(children) ? children[0] : children;
             if (
               isValidElement<{

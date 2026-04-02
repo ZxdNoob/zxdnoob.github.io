@@ -27,6 +27,7 @@ export type Post = PostSummary & {
   content: string;
 };
 
+/** 内部通用 GET：404/网络错误返回 null，由上层决定默认空列表或 notFound。 */
 async function fetchJson<T>(path: string): Promise<T | null> {
   const base = getBackendBaseUrl();
   try {

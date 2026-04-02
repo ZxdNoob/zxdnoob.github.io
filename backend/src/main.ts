@@ -8,6 +8,7 @@ import { applyAppGlobals } from './setup-app';
  *
  * - 默认端口 4000，避免与本仓库 Next 开发服务器（3000）冲突
  * - 全局前缀与 CORS 逻辑集中在 `setup-app.ts`，便于测试复用
+ * - 脚手架与构建范围见 `nest-cli.json`（如 `sourceRoot`、`compilerOptions.deleteOutDir`）
  */
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {

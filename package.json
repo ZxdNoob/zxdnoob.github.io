@@ -2,7 +2,7 @@
   "name": "zxdnoob",
   "version": "0.0.8",
   "private": true,
-  "description": "ZxdNoob 个人博客：Next.js 前端通过 REST 调用 NestJS；文章数据存 SQLite（TypeORM）。",
+  "description": "ZxdNoob 个人博客：Next.js App Router + NestJS API + SQLite。脚本说明：dev=前端开发；build=生产构建；build:static=静态导出(out/)供 GitHub Pages；dev:api/build:api/start:api=子目录 backend；lint/format 与 husky+lint-staged 在提交前格式化。",
   "scripts": {
     "prepare": "husky",
     "dev": "next dev",

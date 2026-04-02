@@ -1,3 +1,6 @@
+/**
+ * 简历页容器：移动端/桌面章节目录、各区块拼装；`resume` 为空时展示联调提示。
+ */
 import Link from 'next/link';
 import { ExperienceSection } from '@/components/resume/experience-section';
 import { SkillGroupCard } from '@/components/resume/skill-group-card';
@@ -13,6 +16,7 @@ const toc = [
   { id: 'education', label: '教育' },
 ] as const;
 
+/** 11 位手机号中间加空格，便于阅读；其它格式原样返回。 */
 function formatCnMobileDisplay(phone: string): string {
   const d = phone.replace(/\s/g, '');
   if (d.length === 11) return `${d.slice(0, 3)} ${d.slice(3, 7)} ${d.slice(7)}`;

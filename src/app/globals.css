@@ -1,8 +1,18 @@
+/**
+ * 全局样式入口（由 `src/app/layout.tsx` 引入）。
+ *
+ * - Tailwind v4：`@import 'tailwindcss'` + `@plugin` 启用 Typography（prose）
+ * - `@variant dark`：仅在祖先带 `.dark` 时应用暗色变体（与根节点 class 联动）
+ * - `:root` / `.dark`：设计 Token（背景、强调色、按钮、聚焦环）
+ * - `.btn*`：全站按钮工具类；`.reading-immersive` / `.theme-changing` 由阅读工具条与主题切换脚本挂接
+ */
+
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
 
 @variant dark (&:where(.dark, .dark *));
 
+/* ========== 浅色主题 Token ========== */
 :root {
   --background: #faf9f7;
   --foreground: #1c1917;
@@ -11,7 +21,7 @@
   --surface: #ffffff;
   --border: #e8e5e0;
 
-  /* Button tokens */
+  /* 主/次按钮：背景、描边、阴影与高光（浅色下偏实体按钮质感） */
   --btn-primary-bg: #1c1917;
   --btn-primary-fg: #ffffff;
   --btn-primary-bg-hover: #292524;
@@ -30,6 +40,7 @@
   --focus-ring: rgba(217, 119, 6, 0.35);
 }
 
+/* ========== 深色主题 Token（html.dark） ========== */
 .dark {
   --background: #0c0a09;
   --foreground: #e7e5e4;
@@ -38,7 +49,7 @@
   --surface: #171615;
   --border: #292524;
 
-  /* Button tokens */
+  /* 主/次按钮：背景、描边、阴影与高光（浅色下偏实体按钮质感） */
   --btn-primary-bg: #fafaf9;
   --btn-primary-fg: #0c0a09;
   --btn-primary-bg-hover: #e7e5e4;
@@ -57,6 +68,7 @@
   --focus-ring: rgba(245, 158, 11, 0.28);
 }
 
+/* Tailwind v4：把 CSS 变量注册进主题，使 `bg-background` 等与 Token 同步 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -75,7 +87,7 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Immersive reading mode (toggle via <html class="reading-immersive">). */
+/* 沉浸式阅读：由 ReadingToolbar 给 html 加 class，隐藏顶栏/页脚 */
 html.reading-immersive [data-site-header],
 html.reading-immersive [data-site-footer] {
   display: none;
@@ -85,14 +97,14 @@ html.reading-immersive body {
   background: var(--background);
 }
 
-/* Freeze transitions during theme switch to avoid "phantom clicks". */
+/* 主题切换瞬间禁用过渡，减轻布局抖动与误触感知 */
 html.theme-changing *,
 html.theme-changing *::before,
 html.theme-changing *::after {
   transition: none !important;
 }
 
-/* Buttons: stable across theme changes (no transform/shadow animation). */
+/* 按钮基类：仅过渡颜色类属性，避免 scale/shadow 在换肤时乱跳 */
 .btn {
   display: inline-flex;
   align-items: center;

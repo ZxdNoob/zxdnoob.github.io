@@ -1,12 +1,15 @@
 'use client';
 
+/**
+ * 文章右侧目录：IntersectionObserver 高亮当前可见标题，链接使用 hash 跳转。
+ */
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import type { TocItem } from '@/lib/toc';
 
 type Props = {
   items: TocItem[];
-  /** Which content container to observe for active heading. Defaults to `#post-content`. */
+  /** 用于限定观察范围的内容容器选择器，默认 `#post-content` */
   contentSelector?: string;
 };
 
@@ -33,7 +36,7 @@ export function TableOfContents({
 
     const io = new IntersectionObserver(
       (entries) => {
-        // Pick the closest heading above the fold among intersecting ones.
+        // 在相交的标题中选最靠近视口上方的一个作为「当前小节」
         const visible = entries
           .filter((e) => e.isIntersecting)
           .map((e) => e.target as HTMLElement)

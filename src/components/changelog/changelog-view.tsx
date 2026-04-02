@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ * 版本历史页：按年分组、类型/范围筛选、一键复制单条或整次发布说明；展示最新 web/api 版本摘要。
+ */
 import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { toast } from '@/lib/toast';
 import {

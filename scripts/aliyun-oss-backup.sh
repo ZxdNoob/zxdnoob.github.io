@@ -19,15 +19,18 @@
 # =============================================================================
 set -eu
 
+# ---------- 默认值：与 GitHub Actions 部署脚本中的卷名、前缀保持一致 ----------
 DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-zxdnoob-api-data}"
 ALIYUN_OSS_PREFIX="${ALIYUN_OSS_PREFIX:-blog-api/backups}"
 TMP_SQLITE="${TMPDIR:-/tmp}/blog-backup-$$.sqlite"
 
+# 必填：缺少任一变量则立即失败，避免静默上传错误桶
 : "${ALIYUN_ACCESS_KEY_ID:?}"
 : "${ALIYUN_ACCESS_KEY_SECRET:?}"
 : "${ALIYUN_OSS_BUCKET:?}"
 : "${ALIYUN_OSS_ENDPOINT:?}"
 
+# 优先使用本机已安装的 ossutil；否则下载临时二进制并在退出时清理
 OSSUTIL="${OSSUTIL_BIN:-}"
 if [ -z "$OSSUTIL" ] || [ ! -x "$OSSUTIL" ]; then
   OSSUTIL="/tmp/ossutil64-$$"
@@ -39,12 +42,14 @@ if [ -z "$OSSUTIL" ] || [ ! -x "$OSSUTIL" ]; then
   trap 'rm -f "$OSSUTIL"' EXIT INT TERM
 fi
 
+# 从只读挂载的卷中复制 blog.sqlite 到宿主机临时路径
 docker run --rm \
   -v "${DOCKER_VOLUME_NAME}:/data:ro" \
   -v "$(dirname "$TMP_SQLITE"):/out" \
   alpine:3.20 \
   cp "/data/blog.sqlite" "/out/$(basename "$TMP_SQLITE")"
 
+# 对象键：前缀 + 时间戳，避免覆盖历史备份
 OBJECT_KEY="${ALIYUN_OSS_PREFIX}/blog-$(date +%Y%m%d-%H%M%S).sqlite"
 OBJECT_KEY="$(echo "$OBJECT_KEY" | sed 's#//*#/#g; s#^/##')"
 

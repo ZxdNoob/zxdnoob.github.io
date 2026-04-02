@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# Git pre-commit：在提交前仅对「已暂存」文件运行 lint-staged（见根 package.json）
 . "$(dirname -- "$0")/_/husky.sh"
 
 npx lint-staged

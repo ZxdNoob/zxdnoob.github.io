@@ -1,3 +1,5 @@
+# 后端包 Prettier 忽略：产物、依赖、本地数据库目录
+
 .next
 out
 build

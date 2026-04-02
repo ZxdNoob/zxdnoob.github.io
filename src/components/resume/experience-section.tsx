@@ -1,8 +1,12 @@
 'use client';
 
+/**
+ * 简历「工作经历」时间线：默认折叠仅显示前 N 条，支持「至今」类文案高亮。
+ */
 import { useMemo, useState } from 'react';
 import type { ResumeExperience } from '@/lib/resume-types';
 
+/** 根据 period 文案判断是否展示为「当前在职」类样式。 */
 function isCurrentPeriod(period: string): boolean {
   const p = period.trim();
   return (

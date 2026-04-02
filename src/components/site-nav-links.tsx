@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * 顶栏导航：桌面横排链接 + 移动端抽屉菜单；打开菜单时锁定 `body` 滚动。
+ * `mobileOpenPathname` 在路由变化时自动视为关闭，避免切换页面后菜单仍打开。
+ */
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -19,8 +23,7 @@ function isActive(pathname: string, href: string): boolean {
 
 export function SiteNavLinks() {
   const pathname = usePathname() ?? '';
-  // Store the pathname at the moment we opened the menu.
-  // If the route changes, the menu will be considered closed automatically.
+  // 记录「打开菜单时」的路径；若当前 path 与之不等，说明已导航，视为菜单已关
   const [mobileOpenPathname, setMobileOpenPathname] = useState<string | null>(
     null,
   );

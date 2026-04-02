@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ * 按 `series` 分组的文章目录：可折叠系列卡片 + 无系列文章列表；展开状态可写入 sessionStorage。
+ */
 import Link from 'next/link';
 import { useEffect, useId, useState } from 'react';
 import {

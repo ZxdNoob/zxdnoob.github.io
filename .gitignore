@@ -1,6 +1,7 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Git 忽略规则（根目录）：Next 与 monorepo 后端路径一并列出，避免误提交依赖与构建产物。
+# 说明：https://help.github.com/articles/ignoring-files/
 
-# backend (NestJS)：依赖、构建产物与覆盖率（与 `backend/.gitignore` 一致，便于在仓库根目录统一可见）
+# backend (NestJS)：依赖、构建产物与覆盖率（与 `backend/.gitignore` 互补）
 backend/node_modules/
 backend/dist/
 backend/coverage/
@@ -44,4 +45,5 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+# 由 Next 生成的类型引用文件（若需在仓库中固定版本可改为不忽略）
 next-env.d.ts

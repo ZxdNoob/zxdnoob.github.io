@@ -1,15 +1,20 @@
+# Prettier 忽略项（根目录 `npm run format`）：构建产物、依赖与后端独立格式化范围
+
+# 本文件含 // 注释（JSONC），避免 Prettier 按严格 JSON 解析破坏注释
+.vscode/settings.json
+
 .next
 out
 build
 node_modules
 coverage
 
-# backend has its own config & scripts
+# 后端使用 backend/prettier.config.mjs 单独格式化，此处整目录排除避免重复/冲突
 backend/**
 backend/dist
 backend/coverage
 backend/node_modules
 
-# sqlite & generated data
+# 本地 SQLite 与生成数据，不参与排版
 backend/data
 

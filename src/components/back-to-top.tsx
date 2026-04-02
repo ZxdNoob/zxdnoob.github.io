@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ * 长页「回到顶部」浮动按钮：滚动超过阈值后淡入，平滑滚动至页面顶端。
+ */
 import { useEffect, useState } from 'react';
 
 export function BackToTop() {

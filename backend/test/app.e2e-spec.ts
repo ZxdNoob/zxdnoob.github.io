@@ -1,3 +1,10 @@
+/**
+ * Nest 端到端测试：拉起完整 `AppModule`，通过 supertest 请求真实 HTTP 管道。
+ * 必须调用 `applyAppGlobals`，否则路由前缀与生产环境不一致。
+ *
+ * Jest 配置见同目录 `jest-e2e.config.cjs`（testRegex、ts-jest、Node 环境）；
+ * 与 `package.json` 中 `test:e2e` 脚本引用路径一致。
+ */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';

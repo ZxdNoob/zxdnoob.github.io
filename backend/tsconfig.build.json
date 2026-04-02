@@ -1,8 +1,9 @@
 {
   /**
-   * 生产构建专用 tsconfig：`nest build` 会优先读取本文件。
+   * 生产构建专用 tsconfig：`nest build` / `nest-cli.json` 默认引用本文件。
    * 在基础 `tsconfig.json` 上排除测试与 `dist`，减小编译范围、加快构建。
    */
   "extends": "./tsconfig.json",
+  /** 不含 e2e、单测与产物目录，避免打进生产 bundle */
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }

@@ -1,7 +1,11 @@
 import type { ResumePayload } from './resume.types';
 
-/** 首次启动写入数据库的默认简历。 */
+/**
+ * 首次启动由 `ResumeSeedService` 同步写入 SQLite `resume` 表的默认 JSON。
+ * 结构须与 `resume.types.ts` / 前端 `ResumePayload` 一致；`skillGroups[].accent` 供 Tailwind 渐变类名使用。
+ */
 export const DEFAULT_RESUME_PAYLOAD: ResumePayload = {
+  /* ========== 基本信息 ========== */
   name: '左信道',
   englishName: 'Zuo Xindao',
   title: '前端工程师',
@@ -11,18 +15,21 @@ export const DEFAULT_RESUME_PAYLOAD: ResumePayload = {
   phone: '13607009273',
   email: 'zuoxindao12345@yeah.net',
   yearsExperience: 8,
+  /* ========== 概览数字/标签（简历页 Hero 区） ========== */
   highlights: [
     { value: '8+', label: '年一线前端' },
     { value: 'React', label: 'TypeScript 主栈' },
     { value: '跨端', label: '小程序 / 支付宝原生' },
     { value: '1 年+', label: 'AI 辅助编程实践' },
   ],
+  /* ========== 个人简介段落 ========== */
   summary: [
     '左信道，8 年一线前端开发经验，从业务页面到复杂中后台与跨端方案均有完整交付经历。',
     '技术栈以 React、TypeScript 为核心，熟悉 Vue 2.0 与 Taro 跨端；样式与工程化方面熟练使用 Less、Sass、Webpack 与 Vite。',
     '具备微信小程序、支付宝原生小程序开发与上线经验，能在多端约束下平衡体验与交付节奏。',
     '近一年将 AI 编程深度融入日常开发流程，用于原型验证、重构与文档沉淀，显著提升迭代效率。',
   ],
+  /* ========== 技能分组（卡片背景 accent 为 Tailwind from-/to- 片段） ========== */
   skillGroups: [
     {
       name: '核心栈',
@@ -52,6 +59,7 @@ export const DEFAULT_RESUME_PAYLOAD: ResumePayload = {
       items: ['Webpack', 'Vite', 'ESLint / Prettier', 'CI 与部署流水线'],
     },
   ],
+  /* ========== 工作经历（时间线；badges 为短标签） ========== */
   experience: [
     {
       company: '维致芯创科技（武汉）有限公司（原纬创软件）',
@@ -132,6 +140,7 @@ export const DEFAULT_RESUME_PAYLOAD: ResumePayload = {
       ],
     },
   ],
+  /* ========== 代表项目（职责 responsibilities / 成果 outcomes 在卡片内可折叠） ========== */
   projects: [
     {
       name: '理想家多端响应式跨端应用（H5 / PC / 企微）',
@@ -256,6 +265,7 @@ export const DEFAULT_RESUME_PAYLOAD: ResumePayload = {
       ],
     },
   ],
+  /* ========== AI 辅助编程实践摘要 ========== */
   aiPractice: {
     title: 'AI 辅助编程',
     since: '深度实践 1 年+',
@@ -266,6 +276,7 @@ export const DEFAULT_RESUME_PAYLOAD: ResumePayload = {
       '建立“AI 输出可验证”原则：关键变更必须有可复现的验证路径（类型/单测/自测清单/回归点），把 AI 从“写代码”升级为“可规模化提效的交付体系”。',
     ],
   },
+  /* ========== 教育经历 ========== */
   education: [
     {
       school: '江西信息应用职业技术学院',

@@ -1,3 +1,6 @@
+/**
+ * 文章详情 `notFound()` 时展示的友好页面，引导返回文章列表。
+ */
 import Link from 'next/link';
 
 export default function BlogPostNotFound() {

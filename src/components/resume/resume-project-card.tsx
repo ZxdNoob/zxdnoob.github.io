@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ * 简历项目卡片：摘要区常显，职责/成果详情区可折叠，使用 `useId` 关联无障碍属性。
+ */
 import { useId, useState } from 'react';
 import type { ResumeProject } from '@/lib/resume-types';
 

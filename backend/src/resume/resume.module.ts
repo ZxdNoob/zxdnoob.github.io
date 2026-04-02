@@ -5,6 +5,9 @@ import { ResumeController } from './resume.controller';
 import { ResumeSeedService } from './resume-seed.service';
 import { ResumeService } from './resume.service';
 
+/**
+ * 简历模块：单接口 `GET /api/resume`，数据由 `ResumeSeedService` 与默认 payload 同步。
+ */
 @Module({
   imports: [TypeOrmModule.forFeature([ResumeEntity])],
   controllers: [ResumeController],

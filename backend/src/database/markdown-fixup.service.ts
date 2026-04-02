@@ -21,7 +21,7 @@ export class MarkdownFixupService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    // 仅处理 posts.content 中包含 `\`\`\`` 的记录。
+    // 仅处理 content 中含反引号三连转义序列的行（SQLite LIKE 需转义反引号）
     const candidates = await this.postsRepo.find({
       where: { content: Like('%\\`\\`\\`%') },
       select: { id: true, slug: true, content: true },

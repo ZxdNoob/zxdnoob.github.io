@@ -1,5 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
+  "$comment": "Nest CLI：collection 使用官方 schematics；sourceRoot 指向源码根；deleteOutDir 在 build 前清空 dist（与 tsconfig.build exclude 配合）。",
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {

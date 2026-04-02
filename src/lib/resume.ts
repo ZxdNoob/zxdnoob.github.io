@@ -4,6 +4,7 @@
 import { getBackendBaseUrl } from './api';
 import type { ResumePayload } from './resume-types';
 
+/** 对 `/api/resume` 等接口的统一 GET；静态导出时用可缓存策略，动态站用 no-store。 */
 async function fetchJson<T>(path: string): Promise<T | null> {
   const base = getBackendBaseUrl();
   try {

@@ -1,3 +1,7 @@
+/**
+ * 文章详情：动态路由 `[slug]`，含静态参数预生成、SEO metadata、正文目录与阅读工具条。
+ * 静态导出且无文章时使用占位 slug，避免 Next 构建报错。
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -18,6 +22,7 @@ import { extractToc } from '@/lib/toc';
 
 type Props = { params: Promise<{ slug: string }> };
 
+/** SSG：为每篇已发布文章生成一条路径；静态导出空列表时回退占位 slug。 */
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const posts = await fetchAllPostSummaries();
   if (posts.length > 0) {
@@ -29,6 +34,7 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
   return [];
 }
 
+/** 按 slug 生成标题、描述、OpenGraph 与 canonical；占位 slug 与 404 场景单独处理。 */
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { slug } = await props.params;
   if (slug === STATIC_EXPORT_PLACEHOLDER_SLUG) {
@@ -53,6 +59,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
+/** 文章页主体：进度条、双栏布局（正文 + 桌面端 sticky 目录）、沉浸式等客户端功能在子组件中。 */
 export default async function BlogPostPage(props: Props) {
   const { slug } = await props.params;
 

@@ -1,12 +1,14 @@
-# Dependabot：定期提出依赖更新 PR，与 CI 工作流配合可在合并前自动跑测试。
+# Dependabot：按周扫描 npm 依赖并开 PR；与 `.github/workflows/ci.yml` 一起在合并前验证构建。
 version: 2
 updates:
+  # 前端（Next.js）与根目录工具链
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
 
+  # NestJS 后端独立 package-lock
   - package-ecosystem: npm
     directory: /backend
     schedule:

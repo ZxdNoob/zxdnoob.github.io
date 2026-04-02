@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ResumeEntity } from '../database/resume.entity';
 import { DEFAULT_RESUME_PAYLOAD } from './default-resume.payload';
 
+/** 与 `ResumeService` 读取时使用的 id 一致，保证单行简历文档。 */
 const DEFAULT_ID = 'default';
 
 @Injectable()

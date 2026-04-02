@@ -1,3 +1,6 @@
+/**
+ * 首页主推文章大卡片：元信息、标题、描述与标签，hover 边框/阴影反馈。
+ */
 import Link from 'next/link';
 import {
   formatPostPublishedAt,

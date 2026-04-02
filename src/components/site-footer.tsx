@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ * 站点页脚：主导航、GitHub 与 sitemap 链接；当前路径高亮逻辑与顶栏一致。
+ */
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { site } from '@/lib/site';

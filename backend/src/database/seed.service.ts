@@ -17,6 +17,7 @@ export class SeedService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
+    // 仅查询 id + slug，用于判断种子文章是否已存在（按 slug 关联）
     const rows = await this.postsRepo.find({
       select: { id: true, slug: true },
     });
@@ -25,6 +26,7 @@ export class SeedService implements OnModuleInit {
     const toInsert: Partial<PostEntity>[] = [];
     const toUpdate: Partial<PostEntity>[] = [];
 
+    // 遍历内置种子：无则插入；有则只更新元信息，避免覆盖用户或运维已改过的正文
     for (const seed of SEED_POSTS) {
       const slug = seed.slug;
       if (!slug) continue;

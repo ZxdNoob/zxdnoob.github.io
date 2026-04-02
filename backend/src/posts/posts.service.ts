@@ -37,6 +37,7 @@ export class PostsService {
     return this.toDetail(row);
   }
 
+  /** 实体 → 列表/详情共用摘要字段，并即时计算 `readingMinutes`。 */
   private toSummary(row: PostEntity): PostSummary {
     return {
       slug: row.slug,
@@ -50,6 +51,7 @@ export class PostsService {
     };
   }
 
+  /** 在摘要基础上附带 Markdown 正文，供详情接口使用。 */
   private toDetail(row: PostEntity): PostDetail {
     return {
       ...this.toSummary(row),

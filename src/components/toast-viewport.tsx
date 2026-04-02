@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ * Toast 挂载点：通过 `useSyncExternalStore` 订阅 `toastState`，在右下角堆叠展示消息。
+ */
 import {
   useEffect,
   useState,
@@ -8,13 +11,14 @@ import {
 } from 'react';
 import { toastState, type ToastRecord, type ToastVariant } from '@/lib/toast';
 
+/** 变体 → 左侧色条、图标颜色、内联 SVG（与 `toast.ts` 中 variant 枚举一致） */
 function variantMeta(v: ToastVariant): {
   icon: ReactNode;
   bar: string;
   iconWrap: string;
 } {
   switch (v) {
-    case 'success':
+    case 'success': // 成功
       return {
         bar: 'bg-emerald-500',
         iconWrap: 'text-emerald-600 dark:text-emerald-400',
@@ -30,7 +34,7 @@ function variantMeta(v: ToastVariant): {
           </svg>
         ),
       };
-    case 'error':
+    case 'error': // 错误
       return {
         bar: 'bg-rose-500',
         iconWrap: 'text-rose-600 dark:text-rose-400',
@@ -46,7 +50,7 @@ function variantMeta(v: ToastVariant): {
           </svg>
         ),
       };
-    case 'info':
+    case 'info': // 提示
       return {
         bar: 'bg-sky-500',
         iconWrap: 'text-sky-600 dark:text-sky-400',
@@ -62,7 +66,7 @@ function variantMeta(v: ToastVariant): {
           </svg>
         ),
       };
-    case 'warning':
+    case 'warning': // 警告
       return {
         bar: 'bg-amber-500',
         iconWrap: 'text-amber-600 dark:text-amber-400',
@@ -78,7 +82,7 @@ function variantMeta(v: ToastVariant): {
           </svg>
         ),
       };
-    default:
+    default: // 中性（toast.message）
       return {
         bar: 'bg-stone-400 dark:bg-stone-500',
         iconWrap: 'text-stone-600 dark:text-stone-400',

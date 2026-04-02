@@ -1,3 +1,4 @@
+// 工作区推荐设置：与根目录 Prettier、ESLint 9 扁平配置配合；保存时格式化并显式触发 ESLint 修复。
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,

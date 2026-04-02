@@ -1,3 +1,7 @@
+/**
+ * 根布局：全站字体（思源黑体/宋体）、metadata、首屏主题脚本与站点壳（顶栏/页脚/Toast）。
+ * `suppressHydrationWarning` 用于 `<html>`：主题 class 由内联脚本在 hydration 前写入，与 SSR 可能不一致。
+ */
 import type { Metadata, Viewport } from 'next';
 import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
 import { SiteFooter } from '@/components/site-footer';
@@ -6,6 +10,7 @@ import { ToastViewport } from '@/components/toast-viewport';
 import { site } from '@/lib/site';
 import './globals.css';
 
+/** 正文无衬线字体，通过 CSS 变量 `--font-body` 供 `font-sans` 使用 */
 const sans = Noto_Sans_SC({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
@@ -13,6 +18,7 @@ const sans = Noto_Sans_SC({
   display: 'swap',
 });
 
+/** 标题衬线字体，通过 `--font-display` 用于 `font-serif` */
 const serif = Noto_Serif_SC({
   subsets: ['latin'],
   weight: ['500', '600', '700'],
@@ -48,6 +54,10 @@ export const viewport: Viewport = {
   ],
 };
 
+/**
+ * 首屏前同步执行：根据 localStorage `theme` 与系统偏好切换 `html.dark` 与 `color-scheme`，
+ * 避免浅色闪屏（FOUC）。需与 `theme-toggle` 写入的键名一致。
+ */
 const THEME_SCRIPT = `!function(){try{var d=document.documentElement,t=localStorage.getItem("theme"),s=matchMedia("(prefers-color-scheme:dark)").matches,i=(t==="dark"||(t!=="light"&&s));d.classList.toggle("dark",i);d.style.colorScheme=i?"dark":"light"}catch(e){}}()`;
 
 export default function RootLayout({

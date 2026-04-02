@@ -1,3 +1,4 @@
+/** `AppController` 单元测试：不启动 HTTP，直接实例化控制器。 */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 

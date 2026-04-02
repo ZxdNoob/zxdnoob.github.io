@@ -5,27 +5,38 @@
    * - `experimentalDecorators` / `emitDecoratorMetadata` 为 Nest 依赖注入所必需
    */
   "compilerOptions": {
+    /** NodeNext：与 package.json `type`/exports 字段对齐的解析方式 */
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    /** 尊重依赖的 package.json exports 映射 */
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
+    /** 生成 .d.ts 供库消费；应用项目亦便于类型追溯 */
     "declaration": true,
     /** 设为 false 以便在 `dist` 中保留注释（若你需要阅读编译产物） */
     "removeComments": false,
+    /** 反射元数据：Nest 依赖注入运行时所需 */
     "emitDecoratorMetadata": true,
+    /** 启用 TS 实验装饰器语法（与 Nest 一致） */
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    /** 与 Node 20+ 能力匹配 */
     "target": "ES2023",
+    /** 便于生产排错映射回 TS 源码 */
     "sourceMap": true,
+    /** `nest build` 输出目录 */
     "outDir": "./dist",
+    /** 非路径映射场景下的解析基准 */
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
+    /** 跨平台文件名大小写一致 */
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,
+    /** switch 必须 break/return，避免贯穿误用 */
     "noFallthroughCasesInSwitch": true
   }
 }

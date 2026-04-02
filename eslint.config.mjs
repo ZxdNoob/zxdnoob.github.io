@@ -12,7 +12,7 @@ import eslintConfigPrettier from 'eslint-config-prettier/flat';
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Turn off rules that conflict with Prettier formatting.
+  // 关闭与 Prettier 格式化冲突的 ESLint 规则（须放在扩展数组偏后位置）
   eslintConfigPrettier,
   globalIgnores([
     '.next/**',

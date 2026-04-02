@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * 主题切换：system / light / dark，读写 `localStorage.theme`，与根布局内联脚本一致。
+ * 含旧版 Safari `matchMedia` 回退与无 Pointer Events 环境的点击兼容。
+ */
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 type ThemeMode = 'system' | 'light' | 'dark';
@@ -36,16 +40,19 @@ const OPTIONS: Array<{
   },
 ];
 
+/** 根据当前模式解析是否应用 `dark` class（system 时读取系统偏好）。 */
 function resolveIsDark(mode: ThemeMode): boolean {
   if (mode === 'dark') return true;
   if (mode === 'light') return false;
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
+/** 切换 `html` 上的 `dark` class（Tailwind 暗色变体依赖此类名）。 */
 function applyClass(isDark: boolean) {
   document.documentElement.classList.toggle('dark', isDark);
 }
 
+/** 主题切换瞬间给根节点加 `theme-changing`，便于 CSS 抑制过渡闪屏。 */
 function withThemeChangeFreeze(fn: () => void) {
   const root = document.documentElement;
   root.classList.add('theme-changing');
