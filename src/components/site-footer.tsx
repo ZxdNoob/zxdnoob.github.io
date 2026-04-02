@@ -1,11 +1,11 @@
 'use client';
 
-/**
- * 站点页脚：主导航、GitHub 与 sitemap 链接；当前路径高亮逻辑与顶栏一致。
- */
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { SiteLogo } from '@/components/site-logo';
 import { site } from '@/lib/site';
+import { fetchSiteTotalViewsClient } from '@/lib/views';
 
 const nav = [
   { href: '/', label: '首页' },
@@ -22,6 +22,29 @@ function isActive(pathname: string, href: string): boolean {
 export function SiteFooter() {
   const pathname = usePathname() ?? '';
   const year = new Date().getFullYear();
+  const [totalViews, setTotalViews] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchSiteTotalViewsClient().then((v) => {
+      if (cancelled) return;
+      if (typeof v === 'number') setTotalViews(v);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    function onUpdate(e: Event) {
+      if (!(e instanceof CustomEvent)) return;
+      const v = (e.detail as { siteTotalViews?: unknown } | undefined)
+        ?.siteTotalViews;
+      if (typeof v === 'number') setTotalViews(v);
+    }
+    window.addEventListener('site:total-views', onUpdate);
+    return () => window.removeEventListener('site:total-views', onUpdate);
+  }, []);
   return (
     <footer
       data-site-footer
@@ -30,11 +53,21 @@ export function SiteFooter() {
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div className="text-center sm:text-left">
-            <p className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">
-              {site.name}
-            </p>
+            <div className="flex items-center justify-center gap-2 sm:justify-start">
+              <SiteLogo className="h-5 w-4 text-stone-400 dark:text-stone-600" />
+              <p className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">
+                {site.name}
+              </p>
+            </div>
             <p className="mt-1.5 text-sm text-stone-500 dark:text-stone-500">
               用心记录，认真生活
+            </p>
+            <p className="mt-3 text-xs text-stone-400 dark:text-stone-600">
+              按{' '}
+              <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1 py-0.5 font-mono text-[10px]">
+                ⌘K
+              </kbd>{' '}
+              快速导航到任意页面
             </p>
           </div>
           <nav className="flex gap-10 text-sm">
@@ -84,8 +117,18 @@ export function SiteFooter() {
             </div>
           </nav>
         </div>
-        <div className="mt-10 border-t border-[var(--border)]/60 pt-6 text-center text-xs text-stone-400 dark:text-stone-600">
-          &copy; {year} {site.author}. All rights reserved.
+        <div className="mt-10 flex flex-col items-center gap-4 border-t border-[var(--border)]/60 pt-6 sm:flex-row sm:justify-between">
+          <p className="text-xs text-stone-400 dark:text-stone-600">
+            &copy; {year} {site.author}. All rights reserved.
+          </p>
+          {typeof totalViews === 'number' ? (
+            <p className="text-xs text-stone-400 dark:text-stone-600">
+              总访问量 <span className="tabular-nums">{totalViews}</span>
+            </p>
+          ) : null}
+          <p className="text-xs text-stone-400 dark:text-stone-600">
+            Built with Next.js &middot; Styled with Tailwind CSS
+          </p>
         </div>
       </div>
     </footer>

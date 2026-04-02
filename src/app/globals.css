@@ -1,27 +1,18 @@
-/**
- * 全局样式入口（由 `src/app/layout.tsx` 引入）。
- *
- * - Tailwind v4：`@import 'tailwindcss'` + `@plugin` 启用 Typography（prose）
- * - `@variant dark`：仅在祖先带 `.dark` 时应用暗色变体（与根节点 class 联动）
- * - `:root` / `.dark`：设计 Token（背景、强调色、按钮、聚焦环）
- * - `.btn*`：全站按钮工具类；`.reading-immersive` / `.theme-changing` 由阅读工具条与主题切换脚本挂接
- */
-
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
 
 @variant dark (&:where(.dark, .dark *));
 
-/* ========== 浅色主题 Token ========== */
+/* ========== Light Theme Tokens ========== */
 :root {
   --background: #faf9f7;
   --foreground: #1c1917;
   --muted: #78716c;
   --accent: #d97706;
+  --accent-light: #fbbf24;
   --surface: #ffffff;
   --border: #e8e5e0;
 
-  /* 主/次按钮：背景、描边、阴影与高光（浅色下偏实体按钮质感） */
   --btn-primary-bg: #1c1917;
   --btn-primary-fg: #ffffff;
   --btn-primary-bg-hover: #292524;
@@ -38,18 +29,20 @@
   --btn-secondary-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 
   --focus-ring: rgba(217, 119, 6, 0.35);
+  --glow-color: rgba(217, 119, 6, 0.15);
+  --grain-opacity: 0.03;
 }
 
-/* ========== 深色主题 Token（html.dark） ========== */
+/* ========== Dark Theme Tokens ========== */
 .dark {
   --background: #0c0a09;
   --foreground: #e7e5e4;
   --muted: #a8a29e;
   --accent: #f59e0b;
+  --accent-light: #fcd34d;
   --surface: #171615;
   --border: #292524;
 
-  /* 主/次按钮：背景、描边、阴影与高光（浅色下偏实体按钮质感） */
   --btn-primary-bg: #fafaf9;
   --btn-primary-fg: #0c0a09;
   --btn-primary-bg-hover: #e7e5e4;
@@ -66,9 +59,10 @@
   --btn-secondary-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
   --focus-ring: rgba(245, 158, 11, 0.28);
+  --glow-color: rgba(245, 158, 11, 0.12);
+  --grain-opacity: 0.025;
 }
 
-/* Tailwind v4：把 CSS 变量注册进主题，使 `bg-background` 等与 Token 同步 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -87,7 +81,20 @@ body {
   font-family: var(--font-sans);
 }
 
-/* 沉浸式阅读：由 ReadingToolbar 给 html 加 class，隐藏顶栏/页脚 */
+/* ========== Grain / Noise Texture Overlay ========== */
+.grain-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px;
+}
+
+/* ========== Immersive Reading Mode ========== */
 html.reading-immersive [data-site-header],
 html.reading-immersive [data-site-footer] {
   display: none;
@@ -97,14 +104,13 @@ html.reading-immersive body {
   background: var(--background);
 }
 
-/* 主题切换瞬间禁用过渡，减轻布局抖动与误触感知 */
 html.theme-changing *,
 html.theme-changing *::before,
 html.theme-changing *::after {
   transition: none !important;
 }
 
-/* 按钮基类：仅过渡颜色类属性，避免 scale/shadow 在换肤时乱跳 */
+/* ========== Buttons ========== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -119,7 +125,8 @@ html.theme-changing *::after {
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
-    color 160ms ease;
+    color 160ms ease,
+    box-shadow 200ms ease;
 }
 
 .btn:focus-visible {
@@ -136,6 +143,9 @@ html.theme-changing *::after {
 
 .btn-primary:hover {
   background: var(--btn-primary-bg-hover);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    var(--btn-primary-highlight);
 }
 
 .btn-secondary {
@@ -148,6 +158,9 @@ html.theme-changing *::after {
 .btn-secondary:hover {
   background: var(--btn-secondary-bg-hover);
   border-color: var(--btn-secondary-border-hover);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    var(--btn-secondary-highlight);
 }
 
 ::selection {
@@ -160,6 +173,7 @@ html.theme-changing *::after {
   color: #fef3c7;
 }
 
+/* ========== Keyframe Animations ========== */
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -173,6 +187,289 @@ html.theme-changing *::after {
   }
 }
 
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(4px) rotate(-1deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes border-dance {
+  0%,
+  100% {
+    clip-path: inset(0 0 96% 0);
+  }
+  25% {
+    clip-path: inset(0 0 0 96%);
+  }
+  50% {
+    clip-path: inset(96% 0 0 0);
+  }
+  75% {
+    clip-path: inset(0 96% 0 0);
+  }
+}
+
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes reveal-right {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ========== Utility Animations ========== */
 @utility animate-in {
   animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-fade-in {
+  animation: fade-in 0.5s ease both;
+}
+
+@utility animate-scale-in {
+  animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-slide-up {
+  animation: slide-up-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@utility animate-gradient {
+  background-size: 200% auto;
+  animation: gradient-shift 6s ease infinite;
+}
+
+@utility animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+@utility animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@utility animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* ========== Gradient Text ========== */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    #ea580c 50%,
+    var(--accent-light) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 4s ease infinite;
+}
+
+.dark .gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--accent-light) 0%,
+    #f59e0b 50%,
+    #fbbf24 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ========== Spotlight Card ========== */
+.spotlight-card {
+  --spotlight-x: 50%;
+  --spotlight-y: 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(
+    600px circle at var(--spotlight-x) var(--spotlight-y),
+    var(--glow-color),
+    transparent 40%
+  );
+  pointer-events: none;
+}
+
+.spotlight-card:hover::after {
+  opacity: 1;
+}
+
+/* ========== Glow Border ========== */
+.glow-border {
+  position: relative;
+}
+
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    transparent 30%,
+    var(--accent) 50%,
+    transparent 70%
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.glow-border:hover::before {
+  opacity: 1;
+}
+
+/* ========== Scroll Reveal ========== */
+[data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal='scale'] {
+  transform: scale(0.95) translateY(12px);
+}
+
+[data-reveal='scale'].revealed {
+  transform: scale(1) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-float,
+  .animate-gradient,
+  .animate-shimmer,
+  .animate-pulse-glow,
+  .animate-spin-slow {
+    animation: none;
+  }
+  .gradient-text {
+    animation: none;
+    background-size: 100% auto;
+  }
+}
+
+/* ========== Command Palette ========== */
+.cmd-palette-backdrop {
+  animation: fade-in 0.15s ease both;
+}
+
+.cmd-palette-panel {
+  animation: scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ========== Dot Pattern Background ========== */
+.dot-pattern {
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ========== Skeleton Loading ========== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border) 0%,
+    var(--surface) 50%,
+    var(--border) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
 }

@@ -72,6 +72,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_006,
       SEED_RELEASE_007,
       SEED_RELEASE_008,
+      SEED_RELEASE_009,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -385,6 +386,106 @@ const SEED_RELEASE_008: Partial<ChangelogReleaseEntity> = {
       kind: 'fix',
       surface: 'web',
       text: '兼容旧版 Safari 主题跟随系统：`matchMedia` 监听在缺失 `addEventListener` 时回退到 `addListener/removeListener`，避免报错影响页面交互。',
+    },
+  ],
+};
+
+const SEED_RELEASE_009: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-03T00:02:26',
+  title: '访问统计与首页主题排版更新（0.0.9 / API 0.0.6）',
+  webVersion: '0.0.9',
+  apiVersion: '0.0.6',
+  sortOrder: 8,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '首页全面重排：Hero 采用更强的标题层级、背景氛围渐变与点阵纹理；模块分段更清晰，整体更“主题化”。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '首页新增“探索站点”Bento 卡片区：将「文章 / 简历 / 版本历史」作为明确入口，并使用 Spotlight/光晕交互强化可点击性。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '首页新增数据概览卡片：文章数、系列数、全站总浏览量（PV）用数字滚动计数器呈现，进入视口后再触发动画，避免首屏外“白跑”。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '首页“最新文章”区改为 1 主推 + 2 紧凑列表：卡片元信息中展示阅读时长/发布时间/浏览量，强化内容热度感知。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增 Scroll Reveal 动效体系：基于 IntersectionObserver 触发一次性显隐；遵循 `prefers-reduced-motion`，并统一在全局样式里管理过渡曲线与位移。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增 Cmd+K 命令面板（Command Palette）：支持搜索页面/链接、方向键选择、回车执行、ESC 关闭；作为全局能力挂载在根布局中。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '站点访问量展示：页脚展示“总访问量”，并在每次路由切换/进入时上报后立即广播事件，让 UI 能即时刷新。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章浏览量接入到列表与详情页：列表页服务端批量拉取各 slug 浏览量；详情页服务端预取首屏值，客户端 mount 时 POST 记录一次阅读并回写最新值。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '返回/缓存恢复兼容：针对 bfcache 恢复后 IntersectionObserver 不重跑导致内容“永久隐藏”的情况，在 `pageshow/popstate` 触发多次 reveal 兜底。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增路由级骨架与空态：`/loading`、`/blog/loading`、`/resume/loading`、`/changelog/loading` 与全站 `not-found`，弱网/首次加载体验更稳定。',
+    },
+    {
+      kind: 'perf',
+      surface: 'web',
+      text: '访问统计 API 封装分层：区分 RSC 服务端拉取（可用内网 `API_URL`）与浏览器端上报（仅用 `NEXT_PUBLIC_API_URL`）；静态导出场景下读接口使用 `force-cache` 避免构建失败。',
+    },
+    {
+      kind: 'docs',
+      surface: 'web',
+      text: '主题与组件样式体系更新：新增 background/foreground/surface/border 等 Token、按钮样式（primary/secondary）、以及多组动效 keyframes（渐入、漂浮、慢速旋转等），用于统一首页与全站视觉语言。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '新增浏览量模块 `ViewsModule`：提供 `GET /api/views`（批量/全量）、`GET /api/views/:slug`（单篇）、`POST /api/views/:slug`（记录阅读）、`GET /api/views/total`（全站累计阅读量 SUM）。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '新增全站 PV 计数：`GET/POST /api/views/site` 读取或自增全站访问量（刷新/进入均累加），并持久化在 `site_view_counts` 单行表。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '新增三表支撑统计：`page_views`（日志）、`page_view_counts`（按 slug 的计数缓存）、`site_view_counts`（全站 PV）；计数使用 SQLite UPSERT 原子自增，避免并发丢失更新。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '文章浏览量“短窗口防抖去重”：指纹 = SHA-256(IP|UA|slug)，以 10 秒时间桶做 UNIQUE 约束，避免刷新连击与重复触发刷量，同时允许超过窗口后正常增长。',
+    },
+    {
+      kind: 'fix',
+      surface: 'api',
+      text: '反向代理与跨域补齐：启用 `trust proxy` 以正确读取 `x-forwarded-for` 等真实 IP；CORS 显式放开 POST 以支持浏览器端上报。',
+    },
+    {
+      kind: 'perf',
+      surface: 'api',
+      text: '爬虫/探针流量过滤：基于 UA 的 bot 关键字正则做实用级过滤，避免小站点 PV 被抓取污染；过滤命中时不写入日志也不累加计数。',
     },
   ],
 };

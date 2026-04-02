@@ -1,6 +1,3 @@
-/**
- * 站点顶栏：sticky + 背景模糊；左侧 Logo/站名链到首页，右侧导航见 `SiteNavLinks`。
- */
 import Link from 'next/link';
 import { SiteLogo } from '@/components/site-logo';
 import { SiteNavLinks } from '@/components/site-nav-links';
@@ -17,8 +14,10 @@ export function SiteHeader() {
           href="/"
           className="group flex items-center gap-2.5 font-serif text-lg font-semibold tracking-tight text-stone-900 transition-colors dark:text-stone-100"
         >
-          <SiteLogo className="h-7 w-[1.4rem] shrink-0 transition-transform duration-300 group-hover:scale-110" />
-          <span>{site.name}</span>
+          <span className="relative">
+            <SiteLogo className="h-7 w-[1.4rem] shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" />
+          </span>
+          <span className="hidden sm:inline">{site.name}</span>
         </Link>
         <SiteNavLinks />
       </div>

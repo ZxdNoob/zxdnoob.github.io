@@ -5,6 +5,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { PageViewRecorder } from '@/components/page-view';
 import { PostBody } from '@/components/post-body';
 import { ReadingToolbar } from '@/components/reading-toolbar';
 import { ScrollProgress } from '@/components/scroll-progress';
@@ -19,6 +20,7 @@ import {
 } from '@/lib/posts';
 import { site } from '@/lib/site';
 import { extractToc } from '@/lib/toc';
+import { fetchViewCount } from '@/lib/views';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -86,7 +88,10 @@ export default async function BlogPostPage(props: Props) {
     );
   }
 
-  const post = await fetchPostBySlug(slug);
+  const [post, initialViews] = await Promise.all([
+    fetchPostBySlug(slug),
+    fetchViewCount(slug),
+  ]);
   if (!post || post.draft) notFound();
 
   const minutes =
@@ -130,6 +135,11 @@ export default async function BlogPostPage(props: Props) {
                   aria-hidden
                 />
                 <span>{minutes} 分钟阅读</span>
+                <span
+                  className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
+                  aria-hidden
+                />
+                <PageViewRecorder slug={slug} initialViews={initialViews} />
               </div>
               <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-stone-900 sm:text-4xl lg:text-[2.75rem] dark:text-stone-50">
                 {post.title}

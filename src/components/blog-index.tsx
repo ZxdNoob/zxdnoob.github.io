@@ -3,6 +3,11 @@
 /**
  * 文章索引客户端：系列/标签/关键词筛选、排序、渐进加载与自定义下拉（无障碍属性）。
  * 接收服务端传入的 `PostSummary[]`，不在此文件内发起列表 API 请求。
+ *
+ * ## SSR/Hydration 注意
+ * - 该组件是 Client Component，但仍会参与 SSR 输出 HTML
+ * - 因此**首屏渲染结果必须与客户端首次渲染一致**
+ * - `localStorage` 只能在浏览器读取：必须放在 `useEffect` 里同步，否则会触发 hydration mismatch
  */
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -12,7 +17,7 @@ import {
   type PostSummary,
 } from '@/lib/posts';
 
-type Props = { posts: PostSummary[] };
+type Props = { posts: PostSummary[]; viewCounts?: Record<string, number> };
 
 /** 去重后按中文排序，用于系列/标签筛选选项 */
 function uniqSorted(values: string[]) {
@@ -269,8 +274,7 @@ function PillButton({
   );
 }
 
-/** 索引页文章卡片（非首页 `PostCard` 组件）：紧凑元信息 + 标题/描述 */
-function PostCard({ post }: { post: PostSummary }) {
+function PostCard({ post, views }: { post: PostSummary; views: number }) {
   const dateLabel = formatPostPublishedAt(post.date, 'short');
   return (
     <li>
@@ -286,6 +290,27 @@ function PostCard({ post }: { post: PostSummary }) {
           <time dateTime={postPublishedAtIso(post.date)}>{dateLabel}</time>
           <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700" />
           <span>{post.readingMinutes} 分钟阅读</span>
+          {views > 0 ? (
+            <>
+              <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700" />
+              <span className="inline-flex items-center gap-1">
+                <svg
+                  className="h-3 w-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <span className="tabular-nums">{views}</span>
+              </span>
+            </>
+          ) : null}
           {post.series ? (
             <>
               <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700" />
@@ -318,8 +343,7 @@ function PostCard({ post }: { post: PostSummary }) {
   );
 }
 
-/** 文章索引主组件：派生筛选选项、维护可见数量与本地存储偏好 */
-export function BlogIndex({ posts }: Props) {
+export function BlogIndex({ posts, viewCounts = {} }: Props) {
   const storageKeyShowFilters = 'blog:index:show-filters:v1';
   const allTags = useMemo(
     () =>
@@ -344,17 +368,17 @@ export function BlogIndex({ posts }: Props) {
   const [sort, setSort] = useState<'new' | 'old'>('new');
   const [visible, setVisible] = useState(40);
   const [showAllTags, setShowAllTags] = useState(false);
-  const [showFilters, setShowFilters] = useState(() => {
-    if (typeof window === 'undefined') return true;
+  const [showFilters, setShowFilters] = useState(true);
+
+  useEffect(() => {
     try {
       const raw = window.localStorage.getItem(storageKeyShowFilters);
-      if (raw === '0') return false;
-      if (raw === '1') return true;
+      if (raw === '0') setShowFilters(false);
     } catch {
       // ignore
     }
-    return true;
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hasActiveFilter =
     query.trim().length > 0 || series !== '__all__' || selectedTags.size > 0;
@@ -624,7 +648,11 @@ export function BlogIndex({ posts }: Props) {
 
         <ol className="mt-5 grid gap-3 sm:gap-4">
           {shown.map((post) => (
-            <PostCard key={post.slug} post={post} />
+            <PostCard
+              key={post.slug}
+              post={post}
+              views={viewCounts[post.slug] ?? 0}
+            />
           ))}
         </ol>
 

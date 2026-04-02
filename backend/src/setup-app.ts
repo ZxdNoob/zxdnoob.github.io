@@ -12,6 +12,13 @@ export function applyAppGlobals(app: INestApplication): void {
   app.setGlobalPrefix('api');
 
   /**
+   * 反向代理场景下让 Express 正确理解 `x-forwarded-for`。
+   * 这会影响 `req.ip` / `req.ips` 等行为，也让日志/限流更接近真实客户端。
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (app as any).set('trust proxy', true);
+
+  /**
    * 浏览器端 fetch 需要服务端显式允许来源。
    * 生产环境建议把具体域名写进环境变量，而不是 `*`。
    */
@@ -22,7 +29,8 @@ export function applyAppGlobals(app: INestApplication): void {
 
   app.enableCors({
     origin: origins,
-    methods: ['GET', 'HEAD', 'OPTIONS'],
+    // 本项目主要是内容型站点：读接口是 GET；浏览量上报需要 POST，因此显式放开 POST。
+    methods: ['GET', 'HEAD', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 }

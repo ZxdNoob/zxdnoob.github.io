@@ -1,12 +1,8 @@
 'use client';
 
-/**
- * 顶栏导航：桌面横排链接 + 移动端抽屉菜单；打开菜单时锁定 `body` 滚动。
- * `mobileOpenPathname` 在路由变化时自动视为关闭，避免切换页面后菜单仍打开。
- */
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 const nav = [
@@ -21,9 +17,43 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function SearchTrigger() {
+  const trigger = useCallback(() => {
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'k',
+        metaKey: true,
+        bubbles: true,
+      }),
+    );
+  }, []);
+
+  return (
+    <button
+      type="button"
+      onClick={trigger}
+      className="hidden items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/60 px-3 py-1.5 text-xs text-stone-400 transition-colors hover:border-stone-300 hover:text-stone-600 dark:text-stone-500 dark:hover:border-stone-600 dark:hover:text-stone-300 lg:inline-flex"
+      aria-label="搜索 (⌘K)"
+    >
+      <svg
+        className="h-3.5 w-3.5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <span className="font-mono text-[10px]">⌘K</span>
+    </button>
+  );
+}
+
 export function SiteNavLinks() {
   const pathname = usePathname() ?? '';
-  // 记录「打开菜单时」的路径；若当前 path 与之不等，说明已导航，视为菜单已关
   const [mobileOpenPathname, setMobileOpenPathname] = useState<string | null>(
     null,
   );
@@ -70,7 +100,8 @@ export function SiteNavLinks() {
       </nav>
 
       {/* Controls */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
+        <SearchTrigger />
         <ThemeToggle />
         <button
           type="button"

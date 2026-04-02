@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "ZxdNoob NestJS 后端：TypeORM + SQLite（better-sqlite3），REST 含 /api/health、/api/posts、/api/changelog、/api/resume。脚本：start:dev=监听；start:prod=node dist/main；build=nest build（见 nest-cli.json、tsconfig.build.json）；test/jest 单测，test:e2e 使用 test/jest-e2e.config.cjs。",
   "author": "",
   "private": true,
