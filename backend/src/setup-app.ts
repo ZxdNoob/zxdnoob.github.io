@@ -1,4 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 
 /**
  * 对 Nest 应用实例应用与 `main.ts` 一致的「全局行为」：
@@ -15,8 +16,7 @@ export function applyAppGlobals(app: INestApplication): void {
    * 反向代理场景下让 Express 正确理解 `x-forwarded-for`。
    * 这会影响 `req.ip` / `req.ips` 等行为，也让日志/限流更接近真实客户端。
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (app as any).set('trust proxy', true);
+  (app as NestExpressApplication).set('trust proxy', true);
 
   /**
    * 浏览器端 fetch 需要服务端显式允许来源。

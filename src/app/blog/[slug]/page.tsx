@@ -139,7 +139,11 @@ export default async function BlogPostPage(props: Props) {
                   className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
                   aria-hidden
                 />
-                <PageViewRecorder slug={slug} initialViews={initialViews} />
+                <PageViewRecorder
+                  key={slug}
+                  slug={slug}
+                  initialViews={initialViews}
+                />
               </div>
               <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-stone-900 sm:text-4xl lg:text-[2.75rem] dark:text-stone-50">
                 {post.title}

@@ -34,8 +34,7 @@ export function PageViewRecorder({
   const lastRecordedSlug = useRef<string | null>(null);
 
   useEffect(() => {
-    // slug 变化时先回到服务端预取值，避免短暂显示上一个 slug 的 views
-    setViews(initialViews);
+    // slug 变化时由父级 `key={slug}` 重挂载，本组件 state 从 `initialViews` 重新初始化，无需在 effect 里同步 setState。
     // React 严格模式/某些缓存复用场景下，确保每个 slug 只触发一次 POST
     if (lastRecordedSlug.current === slug) return;
     lastRecordedSlug.current = slug;
@@ -44,7 +43,7 @@ export function PageViewRecorder({
     recordPageView(slug).then((result) => {
       if (result) setViews(result.views);
     });
-  }, [slug, initialViews]);
+  }, [slug]);
 
   // 路由跳转/返回（含 bfcache 恢复）时刷新当前文章的最新浏览量
   useEffect(() => {

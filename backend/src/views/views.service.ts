@@ -181,13 +181,13 @@ export class ViewsService {
    * 注意：这是“已去重窗口后的累计 PV”，不是 UV。
    */
   async getTotalViews(): Promise<number> {
-    const result = (await this.countRepo
+    const row = await this.countRepo
       .createQueryBuilder('c')
       .select('COALESCE(SUM(c.views), 0)', 'total')
-      .getRawOne()) as { total?: number | string } | undefined;
+      .getRawOne<{ total: number | string }>();
 
-    const total = result?.total ?? 0;
-    return typeof total === 'number' ? total : Number(total) || 0;
+    const raw = row?.total ?? 0;
+    return typeof raw === 'number' ? raw : Number(raw) || 0;
   }
 
   /**
