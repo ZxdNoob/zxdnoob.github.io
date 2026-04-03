@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { COMMAND_PALETTE_TOGGLE } from '@/components/command-palette';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 const nav = [
@@ -17,23 +18,13 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function SearchTrigger() {
-  const trigger = useCallback(() => {
-    window.dispatchEvent(
-      new KeyboardEvent('keydown', {
-        key: 'k',
-        metaKey: true,
-        bubbles: true,
-      }),
-    );
-  }, []);
-
+function SearchTrigger({ onOpen }: { onOpen: () => void }) {
   return (
     <button
       type="button"
-      onClick={trigger}
-      className="hidden items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/60 px-3 py-1.5 text-xs text-stone-400 transition-colors hover:border-stone-300 hover:text-stone-600 dark:text-stone-500 dark:hover:border-stone-600 dark:hover:text-stone-300 lg:inline-flex"
-      aria-label="搜索 (⌘K)"
+      onClick={onOpen}
+      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)]/60 text-stone-400 transition-colors hover:border-stone-300 hover:text-stone-600 dark:text-stone-500 dark:hover:border-stone-600 dark:hover:text-stone-300 lg:h-auto lg:w-auto lg:gap-2 lg:px-3 lg:py-1.5 lg:text-xs"
+      aria-label="搜索"
     >
       <svg
         className="h-3.5 w-3.5"
@@ -47,7 +38,7 @@ function SearchTrigger() {
         <circle cx="11" cy="11" r="8" />
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
       </svg>
-      <span className="font-mono text-[10px]">⌘K</span>
+      <span className="hidden font-mono text-[10px] lg:inline">⌘K</span>
     </button>
   );
 }
@@ -58,6 +49,11 @@ export function SiteNavLinks() {
     null,
   );
   const mobileOpen = mobileOpenPathname === pathname;
+
+  const openCommandPalette = useCallback(() => {
+    setMobileOpenPathname(null);
+    window.dispatchEvent(new CustomEvent(COMMAND_PALETTE_TOGGLE));
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
@@ -101,7 +97,7 @@ export function SiteNavLinks() {
 
       {/* Controls */}
       <div className="flex items-center gap-1.5">
-        <SearchTrigger />
+        <SearchTrigger onOpen={openCommandPalette} />
         <ThemeToggle />
         <button
           type="button"

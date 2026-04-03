@@ -192,16 +192,18 @@ export async function fetchViewCountClient(
  * 返回最新浏览数；失败时返回 null（不阻断页面展示）。
  */
 /**
- * 浏览器端推断 API 基址：优先使用环境变量，否则取当前页面同域 + 4000 端口。
- * 生产环境应始终配置 NEXT_PUBLIC_API_URL；此回退仅为本地开发兜底。
+ * 浏览器端推断 API 基址：优先使用 NEXT_PUBLIC_API_URL。
+ * 仅在 localhost / 127.0.0.1 下回退到 :4000（本仓库 dev 默认）；静态站（如 GitHub Pages）
+ * 未注入 NEXT_PUBLIC_API_URL 时不能猜测端口，否则会把 POST 发到错误主机并导致浏览量无法累加。
  */
 function getClientApiBaseUrl(): string | null {
-  // 1) 正式环境：使用 NEXT_PUBLIC_API_URL（例如 https://api.example.com）
   const explicit = getPublicApiBaseUrl();
   if (explicit) return explicit;
-  // 2) 本地开发：假设前端在 3000、后端在 4000（本仓库默认）
   if (typeof window !== 'undefined') {
-    return `${window.location.protocol}//${window.location.hostname}:4000`;
+    const { hostname, protocol } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:4000`;
+    }
   }
   return null;
 }

@@ -7,6 +7,7 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteViewRecorder } from '@/components/site-view-recorder';
 import { ToastViewport } from '@/components/toast-viewport';
 import { site } from '@/lib/site';
+import { fetchSiteTotalViews } from '@/lib/views';
 import './globals.css';
 
 /**
@@ -79,11 +80,14 @@ export const viewport: Viewport = {
  */
 const THEME_SCRIPT = `!function(){try{var d=document.documentElement,t=localStorage.getItem("theme"),s=matchMedia("(prefers-color-scheme:dark)").matches,i=(t==="dark"||(t!=="light"&&s));d.classList.toggle("dark",i);d.style.colorScheme=i?"dark":"light"}catch(e){}}()`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  /** 构建期从 API 拉取，静态导出时写入 HTML；客户端可再拉取/POST 更新 */
+  const initialSiteTotalViews = await fetchSiteTotalViews();
+
   return (
     <html
       lang="zh-CN"
@@ -101,7 +105,7 @@ export default function RootLayout({
         <SiteViewRecorder />
         <SiteHeader />
         <div className="flex-1">{children}</div>
-        <SiteFooter />
+        <SiteFooter initialSiteTotalViews={initialSiteTotalViews} />
         <ToastViewport />
         <CommandPalette />
       </body>

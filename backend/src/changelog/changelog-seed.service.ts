@@ -73,6 +73,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_007,
       SEED_RELEASE_008,
       SEED_RELEASE_009,
+      SEED_RELEASE_010,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -486,6 +487,51 @@ const SEED_RELEASE_009: Partial<ChangelogReleaseEntity> = {
       kind: 'perf',
       surface: 'api',
       text: '爬虫/探针流量过滤：基于 UA 的 bot 关键字正则做实用级过滤，避免小站点 PV 被抓取污染；过滤命中时不写入日志也不累加计数。',
+    },
+  ],
+};
+
+const SEED_RELEASE_010: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-03T20:20:09',
+  title: '前端 0.0.10：静态站访问统计与页脚总访问量（API 仍为 0.0.6）',
+  webVersion: '0.0.10',
+  apiVersion: '0.0.6',
+  sortOrder: 9,
+  items: [
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Summary：修复 GitHub Pages 静态站在生产环境无法正确上报/展示访问量的问题；通过“构建期注入公网 API 基址 + 前端仅对本地开发回退端口 + 页脚首屏预取”三步，保证 PV/文章浏览量可累计且 UI 首屏可见。',
+    },
+    {
+      kind: 'fix',
+      surface: 'both',
+      text: 'Changed（共通 / 部署）：GitHub Pages 构建流程注入 NEXT_PUBLIC_API_URL（浏览器可见），并与 PAGES_REMOTE_API_URL/Actions Variables 对齐，确保静态导出与线上浏览器请求命中同一公网 API 根地址。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Config（共通）：新增/强调构建期必须配置 NEXT_PUBLIC_API_URL（公网 API 根地址，无尾斜杠）。静态站点不会“自动猜到”后端地址；缺失该配置将导致浏览量无法上报。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：Web 版本升级至 0.0.10；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: 'Fixed（前端 / API 基址）：getClientApiBaseUrl 仅在 localhost/127.0.0.1 下回退到 :4000；生产域名不再误连 “当前站点:4000”。未配置 NEXT_PUBLIC_API_URL 时返回 null，使统计请求显式失败而非悄悄打到错误主机。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: 'Added（前端 / 首屏数据）：RootLayout 构建期/SSR 预取全站 PV（fetchSiteTotalViews），作为 initialSiteTotalViews 注入页脚，避免“必须等客户端请求成功才出现总访问量”的空白体验。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: 'Changed（前端 / 展示策略）：页脚总访问量改为“始终渲染”，使用 initialSiteTotalViews 作为初值；客户端仍会 GET 刷新，并继续响应 site:total-views 事件实时更新。',
     },
   ],
 };

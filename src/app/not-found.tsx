@@ -23,11 +23,15 @@ export default function NotFound() {
           页面去哪了？
         </h1>
         <p className="mx-auto mt-3 max-w-md text-stone-600 dark:text-stone-400">
-          你访问的页面不存在或已被移除。试试从首页重新开始， 或使用{' '}
-          <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-xs">
-            ⌘K
-          </kbd>{' '}
-          快速导航。
+          你访问的页面不存在或已被移除。试试从首页重新开始
+          <span className="lg:hidden">。</span>
+          <span className="hidden lg:inline">
+            ，或使用{' '}
+            <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-xs">
+              ⌘K
+            </kbd>{' '}
+            快速导航。
+          </span>
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link

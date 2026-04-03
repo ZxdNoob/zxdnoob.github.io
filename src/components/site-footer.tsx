@@ -19,10 +19,14 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function SiteFooter() {
+export function SiteFooter({
+  initialSiteTotalViews,
+}: {
+  initialSiteTotalViews: number;
+}) {
   const pathname = usePathname() ?? '';
   const year = new Date().getFullYear();
-  const [totalViews, setTotalViews] = useState<number | null>(null);
+  const [totalViews, setTotalViews] = useState(initialSiteTotalViews);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +66,7 @@ export function SiteFooter() {
             <p className="mt-1.5 text-sm text-stone-500 dark:text-stone-500">
               用心记录，认真生活
             </p>
-            <p className="mt-3 text-xs text-stone-400 dark:text-stone-600">
+            <p className="mt-3 hidden text-xs text-stone-400 dark:text-stone-600 lg:block">
               按{' '}
               <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1 py-0.5 font-mono text-[10px]">
                 ⌘K
@@ -121,11 +125,9 @@ export function SiteFooter() {
           <p className="text-xs text-stone-400 dark:text-stone-600">
             &copy; {year} {site.author}. All rights reserved.
           </p>
-          {typeof totalViews === 'number' ? (
-            <p className="text-xs text-stone-400 dark:text-stone-600">
-              总访问量 <span className="tabular-nums">{totalViews}</span>
-            </p>
-          ) : null}
+          <p className="text-xs text-stone-400 dark:text-stone-600">
+            总访问量 <span className="tabular-nums">{totalViews}</span>
+          </p>
           <p className="text-xs text-stone-400 dark:text-stone-600">
             Built with Next.js &middot; Styled with Tailwind CSS
           </p>

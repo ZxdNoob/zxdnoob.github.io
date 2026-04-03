@@ -126,6 +126,9 @@ const NAV_ITEMS: CommandItem[] = [
   },
 ];
 
+/** 与 Cmd+K 一致：导航栏搜索按钮等通过 `dispatchEvent` 触发 */
+export const COMMAND_PALETTE_TOGGLE = 'command-palette:toggle';
+
 function groupItems(items: CommandItem[]): Map<string, CommandItem[]> {
   const map = new Map<string, CommandItem[]>();
   for (const item of items) {
@@ -187,6 +190,14 @@ export function CommandPalette() {
   }, []);
 
   useEffect(() => {
+    function onToggle() {
+      setOpen((v) => !v);
+    }
+    window.addEventListener(COMMAND_PALETTE_TOGGLE, onToggle);
+    return () => window.removeEventListener(COMMAND_PALETTE_TOGGLE, onToggle);
+  }, []);
+
+  useEffect(() => {
     if (open) {
       window.setTimeout(() => inputRef.current?.focus(), 50);
     }
@@ -234,8 +245,17 @@ export function CommandPalette() {
         onClick={close}
         aria-hidden
       />
-      <div className="relative z-10 flex items-start justify-center px-4 pt-[15vh]">
-        <div className="cmd-palette-panel w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-2xl">
+      <div
+        className="relative z-10 flex items-start justify-center px-4 pt-[15vh]"
+        onPointerDown={(e) => {
+          // 点击“面板之外的空白区域”也关闭（backdrop 已覆盖全屏，但该容器位于其上方）
+          if (e.target === e.currentTarget) close();
+        }}
+      >
+        <div
+          className="cmd-palette-panel w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-2xl"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center gap-3 border-b border-[var(--border)] px-4">
             <svg
               className="h-4 w-4 shrink-0 text-stone-400"
@@ -260,7 +280,7 @@ export function CommandPalette() {
               autoComplete="off"
               spellCheck={false}
             />
-            <kbd className="hidden rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-stone-400 sm:inline">
+            <kbd className="hidden rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-stone-400 lg:inline">
               ESC
             </kbd>
           </div>
@@ -305,7 +325,7 @@ export function CommandPalette() {
                           ) : null}
                         </span>
                         {isActive ? (
-                          <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-stone-400">
+                          <kbd className="hidden rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-stone-400 lg:inline-block">
                             ↵
                           </kbd>
                         ) : null}
@@ -317,7 +337,7 @@ export function CommandPalette() {
             )}
           </div>
 
-          <div className="flex items-center justify-between border-t border-[var(--border)] px-4 py-2.5 text-[11px] text-stone-400 dark:text-stone-500">
+          <div className="hidden items-center justify-between border-t border-[var(--border)] px-4 py-2.5 text-[11px] text-stone-400 dark:text-stone-500 md:flex">
             <span className="flex items-center gap-2">
               <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1 py-0.5 font-mono">
                 ↑↓

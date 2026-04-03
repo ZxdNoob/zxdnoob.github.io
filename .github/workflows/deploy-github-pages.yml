@@ -7,6 +7,9 @@
 # - 默认：Runner 上启动 Nest + SQLite（种子文章），构建期 API_URL=http://127.0.0.1:4000。
 # - 可选：在仓库 Secret「PAGES_REMOTE_API_URL」填写公网 API 根 URL，则跳过本地 Nest、从该地址拉数据。
 #   不要使用通用名「API_URL」——易与其它环境误配冲突；本工作流也不再读取该 Secret。
+# - 浏览器端上报浏览量（POST）依赖构建期注入的「NEXT_PUBLIC_API_URL」：
+#   与 PAGES_REMOTE_API_URL 相同时会自动复用；若构建用本地 Nest 但线上 API 在别处，请在
+#   Settings → Variables → Actions 设置「NEXT_PUBLIC_API_URL」为公网 API 根地址。
 #
 # Pages：Settings → Build and deployment → Source「GitHub Actions」
 # =============================================================================
@@ -35,6 +38,8 @@ jobs:
       USE_LOCAL_NEST: ${{ secrets.PAGES_REMOTE_API_URL == '' && '1' || '0' }}
       STATIC_EXPORT: '1'
       NEXT_PUBLIC_SITE_URL: https://zxdnoob.github.io
+      # 与 API_URL 同源时浏览量 POST 才能命中线上 Nest；未配置 PAGES_REMOTE_API_URL 时可改用 Variables
+      NEXT_PUBLIC_API_URL: ${{ secrets.PAGES_REMOTE_API_URL != '' && secrets.PAGES_REMOTE_API_URL || vars.NEXT_PUBLIC_API_URL }}
       NEXT_TELEMETRY_DISABLED: '1'
       NODE_OPTIONS: --max-old-space-size=6144
       API_URL: ${{ secrets.PAGES_REMOTE_API_URL != '' && secrets.PAGES_REMOTE_API_URL || 'http://127.0.0.1:4000' }}
