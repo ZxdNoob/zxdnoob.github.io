@@ -1,3 +1,5 @@
+import publicApiConfig from '@/config/public-api.json';
+
 /**
  * 后端 API 基址。
  *
@@ -7,14 +9,21 @@
 export function getBackendBaseUrl(): string {
   const a = process.env.API_URL?.trim();
   const b = process.env.NEXT_PUBLIC_API_URL?.trim();
-  const raw = (a || b || 'http://127.0.0.1:4000').replace(/\/$/, '');
+  const c = resolvePublicApiBaseFromConfig();
+  const raw = (a || b || c || 'http://127.0.0.1:4000').replace(/\/$/, '');
   return raw;
+}
+
+function resolvePublicApiBaseFromConfig(): string | undefined {
+  const u = publicApiConfig.apiBaseUrl?.trim();
+  return u ? u.replace(/\/$/, '') : undefined;
 }
 
 /** 浏览器端可用的公共变量（未设置时返回 `undefined`） */
 export function getPublicApiBaseUrl(): string | undefined {
-  const url = process.env.NEXT_PUBLIC_API_URL;
-  return url?.replace(/\/$/, '');
+  const fromEnv = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, '');
+  return resolvePublicApiBaseFromConfig();
 }
 
 export function apiHealthUrl(): string | undefined {

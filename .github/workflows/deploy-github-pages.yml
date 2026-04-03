@@ -98,6 +98,27 @@ jobs:
           tail -80 api.log || true
           exit 1
 
+      # 未配置 Actions Variable / Secret 时，允许在仓库内提交 src/config/public-api.json 的 apiBaseUrl，
+      # 使静态包内仍带有浏览器可访问的公网 API 根地址（浏览量 POST 依赖此项）。
+      - name: Fill NEXT_PUBLIC_API_URL from src/config/public-api.json if empty
+        run: |
+          set -e
+          if [ -n "${NEXT_PUBLIC_API_URL}" ]; then
+            echo "NEXT_PUBLIC_API_URL already set"
+            exit 0
+          fi
+          node <<'NODE'
+          const fs = require('fs');
+          const raw = fs.readFileSync('src/config/public-api.json', 'utf8');
+          const u = (JSON.parse(raw).apiBaseUrl || '').trim().replace(/\/$/, '');
+          if (!u) {
+            console.log('::warning::浏览量上报：未设置 NEXT_PUBLIC_API_URL，且 public-api.json 中 apiBaseUrl 为空；线上 POST 不会发出。请在 Actions Variables 配置 NEXT_PUBLIC_API_URL，或在 src/config/public-api.json 填写公网 API 根 URL。');
+            process.exit(0);
+          }
+          fs.appendFileSync(process.env.GITHUB_ENV, `NEXT_PUBLIC_API_URL=${u}\n`);
+          console.log('NEXT_PUBLIC_API_URL taken from src/config/public-api.json');
+          NODE
+
       - name: Build (static export from API / DB)
         run: npm run build:static
 

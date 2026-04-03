@@ -21,16 +21,43 @@ export function applyAppGlobals(app: INestApplication): void {
   /**
    * 浏览器端 fetch 需要服务端显式允许来源。
    * 生产环境建议把具体域名写进环境变量，而不是 `*`。
+   *
+   * 未设置 `CORS_ORIGIN` 时除本机开发端口外，额外允许 `https://*.github.io`（GitHub Pages），
+   * 否则静态站上的浏览量 POST 会被浏览器拦截，计数无法累加。
    */
   const raw = process.env.CORS_ORIGIN;
-  const origins = raw
-    ? raw.split(',').map((s) => s.trim())
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'];
-
-  app.enableCors({
-    origin: origins,
-    // 本项目主要是内容型站点：读接口是 GET；浏览量上报需要 POST，因此显式放开 POST。
-    methods: ['GET', 'HEAD', 'POST', 'OPTIONS'],
+  const corsOptions = {
+    methods: ['GET', 'HEAD', 'POST', 'OPTIONS'] as const,
     allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+  };
+
+  if (raw) {
+    const origins = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    app.enableCors({
+      ...corsOptions,
+      origin: origins,
+    });
+  } else {
+    app.enableCors({
+      ...corsOptions,
+      origin: (
+        origin: string | undefined,
+        callback: (err: Error | null, allow?: boolean) => void,
+      ) => {
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        if (origin === 'http://localhost:3000' || origin === 'http://127.0.0.1:3000') {
+          callback(null, true);
+          return;
+        }
+        if (/^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(null, false);
+      },
+    });
+  }
 }
