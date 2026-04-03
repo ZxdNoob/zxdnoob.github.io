@@ -26,6 +26,17 @@ export function getPublicApiBaseUrl(): string | undefined {
   return resolvePublicApiBaseFromConfig();
 }
 
+/**
+ * 是否在 UI 中展示访问量 / 文章浏览量，并挂载上报组件。
+ *
+ * - **开发**（`next dev`，`NODE_ENV === 'development'`）：始终展示，便于对接本机 `:4000`（客户端已有 localhost 回退）。
+ * **生产**（静态导出、线上构建）：仅当配置了浏览器可用的 API 根（`NEXT_PUBLIC_API_URL` 或 `public-api.json`）时才展示；未配置公网 API 时隐藏，避免误导性数字。
+ */
+export function isPublicViewStatsEnabled(): boolean {
+  if (process.env.NODE_ENV === 'development') return true;
+  return Boolean(getPublicApiBaseUrl());
+}
+
 export function apiHealthUrl(): string | undefined {
   const base = getPublicApiBaseUrl();
   return base ? `${base}/api/health` : undefined;

@@ -18,6 +18,7 @@ import {
   postPublishedAtIso,
   readingMinutesFromMarkdown,
 } from '@/lib/posts';
+import { isPublicViewStatsEnabled } from '@/lib/api';
 import { site } from '@/lib/site';
 import { extractToc } from '@/lib/toc';
 import { fetchViewCount } from '@/lib/views';
@@ -88,9 +89,10 @@ export default async function BlogPostPage(props: Props) {
     );
   }
 
+  const showViewStats = isPublicViewStatsEnabled();
   const [post, initialViews] = await Promise.all([
     fetchPostBySlug(slug),
-    fetchViewCount(slug),
+    showViewStats ? fetchViewCount(slug) : Promise.resolve(0),
   ]);
   if (!post || post.draft) notFound();
 
@@ -135,15 +137,19 @@ export default async function BlogPostPage(props: Props) {
                   aria-hidden
                 />
                 <span>{minutes} 分钟阅读</span>
-                <span
-                  className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
-                  aria-hidden
-                />
-                <PageViewRecorder
-                  key={slug}
-                  slug={slug}
-                  initialViews={initialViews}
-                />
+                {showViewStats ? (
+                  <>
+                    <span
+                      className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
+                      aria-hidden
+                    />
+                    <PageViewRecorder
+                      key={slug}
+                      slug={slug}
+                      initialViews={initialViews}
+                    />
+                  </>
+                ) : null}
               </div>
               <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-stone-900 sm:text-4xl lg:text-[2.75rem] dark:text-stone-50">
                 {post.title}

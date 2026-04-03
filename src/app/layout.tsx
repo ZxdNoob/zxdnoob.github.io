@@ -6,6 +6,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { SiteViewRecorder } from '@/components/site-view-recorder';
 import { ToastViewport } from '@/components/toast-viewport';
+import { isPublicViewStatsEnabled } from '@/lib/api';
 import { site } from '@/lib/site';
 import { fetchSiteTotalViews } from '@/lib/views';
 import './globals.css';
@@ -85,8 +86,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const showViewStats = isPublicViewStatsEnabled();
   /** 构建期从 API 拉取，静态导出时写入 HTML；客户端可再拉取/POST 更新 */
-  const initialSiteTotalViews = await fetchSiteTotalViews();
+  const initialSiteTotalViews = showViewStats ? await fetchSiteTotalViews() : 0;
 
   return (
     <html
@@ -102,10 +104,13 @@ export default async function RootLayout({
       </head>
       <body className="grain-overlay flex min-h-full flex-col bg-[var(--background)] font-sans text-[var(--foreground)]">
         <BfcacheRevealRestore />
-        <SiteViewRecorder />
+        {showViewStats ? <SiteViewRecorder /> : null}
         <SiteHeader />
         <div className="flex-1">{children}</div>
-        <SiteFooter initialSiteTotalViews={initialSiteTotalViews} />
+        <SiteFooter
+          initialSiteTotalViews={initialSiteTotalViews}
+          showViewStats={showViewStats}
+        />
         <ToastViewport />
         <CommandPalette />
       </body>

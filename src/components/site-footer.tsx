@@ -21,14 +21,17 @@ function isActive(pathname: string, href: string): boolean {
 
 export function SiteFooter({
   initialSiteTotalViews,
+  showViewStats,
 }: {
   initialSiteTotalViews: number;
+  showViewStats: boolean;
 }) {
   const pathname = usePathname() ?? '';
   const year = new Date().getFullYear();
   const [totalViews, setTotalViews] = useState(initialSiteTotalViews);
 
   useEffect(() => {
+    if (!showViewStats) return;
     let cancelled = false;
     fetchSiteTotalViewsClient().then((v) => {
       if (cancelled) return;
@@ -37,9 +40,10 @@ export function SiteFooter({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [showViewStats]);
 
   useEffect(() => {
+    if (!showViewStats) return;
     function onUpdate(e: Event) {
       if (!(e instanceof CustomEvent)) return;
       const v = (e.detail as { siteTotalViews?: unknown } | undefined)
@@ -48,7 +52,7 @@ export function SiteFooter({
     }
     window.addEventListener('site:total-views', onUpdate);
     return () => window.removeEventListener('site:total-views', onUpdate);
-  }, []);
+  }, [showViewStats]);
   return (
     <footer
       data-site-footer
@@ -125,9 +129,11 @@ export function SiteFooter({
           <p className="text-xs text-stone-400 dark:text-stone-600">
             &copy; {year} {site.author}. All rights reserved.
           </p>
-          <p className="text-xs text-stone-400 dark:text-stone-600">
-            总访问量 <span className="tabular-nums">{totalViews}</span>
-          </p>
+          {showViewStats ? (
+            <p className="text-xs text-stone-400 dark:text-stone-600">
+              总访问量 <span className="tabular-nums">{totalViews}</span>
+            </p>
+          ) : null}
           <p className="text-xs text-stone-400 dark:text-stone-600">
             Built with Next.js &middot; Styled with Tailwind CSS
           </p>

@@ -8,6 +8,7 @@ import {
   formatPostPublishedAt,
   postPublishedAtIso,
 } from '@/lib/posts';
+import { isPublicViewStatsEnabled } from '@/lib/api';
 import { site } from '@/lib/site';
 import { fetchSiteTotalViews, fetchViewCounts } from '@/lib/views';
 
@@ -15,10 +16,12 @@ function CompactPostRow({
   post,
   index,
   views,
+  showViewStats,
 }: {
   post: Awaited<ReturnType<typeof fetchAllPostSummaries>>[number];
   index: number;
   views: number;
+  showViewStats: boolean;
 }) {
   const dateLabel = formatPostPublishedAt(post.date, 'short');
   return (
@@ -39,11 +42,15 @@ function CompactPostRow({
               aria-hidden
             />
             <span>{post.readingMinutes} 分钟阅读</span>
-            <span
-              className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
-              aria-hidden
-            />
-            <PageViewBadge views={views} />
+            {showViewStats ? (
+              <>
+                <span
+                  className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
+                  aria-hidden
+                />
+                <PageViewBadge views={views} />
+              </>
+            ) : null}
             {post.series ? (
               <>
                 <span
@@ -163,10 +170,13 @@ export default async function HomePage() {
   const featured = posts[0];
   const rest = posts.slice(1);
 
-  const [viewsMap, totalViews] = await Promise.all([
-    fetchViewCounts(posts.map((p) => p.slug)),
-    fetchSiteTotalViews(),
-  ]);
+  const showViewStats = isPublicViewStatsEnabled();
+  const [viewsMap, totalViews] = showViewStats
+    ? await Promise.all([
+        fetchViewCounts(posts.map((p) => p.slug)),
+        fetchSiteTotalViews(),
+      ])
+    : [new Map<string, number>(), 0];
 
   const totalPosts = all.length;
   const totalSeries = new Set(all.map((p) => p.series).filter(Boolean)).size;
@@ -344,7 +354,13 @@ export default async function HomePage() {
       {/* ====== Stats ====== */}
       <section className="mx-auto max-w-5xl px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8">
         <ScrollReveal>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div
+            className={
+              showViewStats
+                ? 'grid grid-cols-2 gap-4 lg:grid-cols-4'
+                : 'grid grid-cols-2 gap-4 lg:grid-cols-3'
+            }
+          >
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/60 p-5 backdrop-blur-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500">
                 文章
@@ -361,14 +377,16 @@ export default async function HomePage() {
                 <AnimatedCounter target={totalSeries} />
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/60 p-5 backdrop-blur-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500">
-                总浏览量
-              </p>
-              <p className="mt-2 font-serif text-3xl font-bold text-stone-900 dark:text-stone-100">
-                <AnimatedCounter target={totalViews} suffix="+" />
-              </p>
-            </div>
+            {showViewStats ? (
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/60 p-5 backdrop-blur-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500">
+                  总浏览量
+                </p>
+                <p className="mt-2 font-serif text-3xl font-bold text-stone-900 dark:text-stone-100">
+                  <AnimatedCounter target={totalViews} suffix="+" />
+                </p>
+              </div>
+            ) : null}
             <div className="rounded-2xl border border-amber-300/40 bg-gradient-to-br from-amber-50/80 to-transparent p-5 dark:border-amber-500/15 dark:from-amber-500/5">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700/80 dark:text-amber-300/80">
                 技术栈
@@ -437,11 +455,17 @@ export default async function HomePage() {
                         aria-hidden
                       />
                       <span>{featured.readingMinutes} 分钟阅读</span>
-                      <span
-                        className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
-                        aria-hidden
-                      />
-                      <PageViewBadge views={viewsMap.get(featured.slug) ?? 0} />
+                      {showViewStats ? (
+                        <>
+                          <span
+                            className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700"
+                            aria-hidden
+                          />
+                          <PageViewBadge
+                            views={viewsMap.get(featured.slug) ?? 0}
+                          />
+                        </>
+                      ) : null}
                     </div>
                     <h3 className="mt-3 font-serif text-xl font-semibold tracking-tight text-stone-900 transition-colors group-hover:text-[var(--accent)] dark:text-stone-100">
                       {featured.title}
@@ -497,6 +521,7 @@ export default async function HomePage() {
                       post={post}
                       index={idx + 2}
                       views={viewsMap.get(post.slug) ?? 0}
+                      showViewStats={showViewStats}
                     />
                   </ScrollReveal>
                 ))}

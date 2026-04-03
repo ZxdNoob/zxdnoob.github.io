@@ -17,7 +17,12 @@ import {
   type PostSummary,
 } from '@/lib/posts';
 
-type Props = { posts: PostSummary[]; viewCounts?: Record<string, number> };
+type Props = {
+  posts: PostSummary[];
+  viewCounts?: Record<string, number>;
+  /** 未配置公网 API 时不展示阅读数 */
+  showViewCounts?: boolean;
+};
 
 /** 去重后按中文排序，用于系列/标签筛选选项 */
 function uniqSorted(values: string[]) {
@@ -274,7 +279,15 @@ function PillButton({
   );
 }
 
-function PostCard({ post, views }: { post: PostSummary; views: number }) {
+function PostCard({
+  post,
+  views,
+  showViewCounts,
+}: {
+  post: PostSummary;
+  views: number;
+  showViewCounts: boolean;
+}) {
   const dateLabel = formatPostPublishedAt(post.date, 'short');
   return (
     <li>
@@ -290,7 +303,7 @@ function PostCard({ post, views }: { post: PostSummary; views: number }) {
           <time dateTime={postPublishedAtIso(post.date)}>{dateLabel}</time>
           <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700" />
           <span>{post.readingMinutes} 分钟阅读</span>
-          {views > 0 ? (
+          {showViewCounts && views > 0 ? (
             <>
               <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-700" />
               <span className="inline-flex items-center gap-1">
@@ -343,7 +356,11 @@ function PostCard({ post, views }: { post: PostSummary; views: number }) {
   );
 }
 
-export function BlogIndex({ posts, viewCounts = {} }: Props) {
+export function BlogIndex({
+  posts,
+  viewCounts = {},
+  showViewCounts = true,
+}: Props) {
   const storageKeyShowFilters = 'blog:index:show-filters:v1';
   const allTags = useMemo(
     () =>
@@ -373,11 +390,12 @@ export function BlogIndex({ posts, viewCounts = {} }: Props) {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(storageKeyShowFilters);
+      // 仅在客户端挂载后从 localStorage 恢复筛选区折叠偏好，需在此同步 setState
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 外部存储 → React 状态
       if (raw === '0') setShowFilters(false);
     } catch {
       // ignore
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const hasActiveFilter =
@@ -652,6 +670,7 @@ export function BlogIndex({ posts, viewCounts = {} }: Props) {
               key={post.slug}
               post={post}
               views={viewCounts[post.slug] ?? 0}
+              showViewCounts={showViewCounts}
             />
           ))}
         </ol>

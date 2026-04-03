@@ -3,6 +3,7 @@
  */
 import type { Metadata } from 'next';
 import { BlogIndex } from '@/components/blog-index';
+import { isPublicViewStatsEnabled } from '@/lib/api';
 import { fetchAllPostSummaries } from '@/lib/posts';
 import { site } from '@/lib/site';
 import { fetchViewCounts } from '@/lib/views';
@@ -14,8 +15,10 @@ export const metadata: Metadata = {
 
 export default async function BlogIndexPage() {
   const posts = await fetchAllPostSummaries();
-  const viewsMap = await fetchViewCounts(posts.map((p) => p.slug));
-  const viewCounts = Object.fromEntries(viewsMap);
+  const showViewCounts = isPublicViewStatsEnabled();
+  const viewCounts = showViewCounts
+    ? Object.fromEntries(await fetchViewCounts(posts.map((p) => p.slug)))
+    : {};
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16 lg:px-8">
@@ -49,7 +52,11 @@ export default async function BlogIndexPage() {
           </p>
         </div>
       ) : (
-        <BlogIndex posts={posts} viewCounts={viewCounts} />
+        <BlogIndex
+          posts={posts}
+          viewCounts={viewCounts}
+          showViewCounts={showViewCounts}
+        />
       )}
     </main>
   );

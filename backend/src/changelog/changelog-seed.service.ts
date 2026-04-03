@@ -74,6 +74,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_008,
       SEED_RELEASE_009,
       SEED_RELEASE_010,
+      SEED_RELEASE_011,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -532,6 +533,26 @@ const SEED_RELEASE_010: Partial<ChangelogReleaseEntity> = {
       kind: 'feature',
       surface: 'web',
       text: 'Changed（前端 / 展示策略）：页脚总访问量改为“始终渲染”，使用 initialSiteTotalViews 作为初值；客户端仍会 GET 刷新，并继续响应 site:total-views 事件实时更新。',
+    },
+  ],
+};
+
+const SEED_RELEASE_011: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-03T21:32:06',
+  title: '前端 0.0.11：未配置公网 API 时隐藏访问量展示（API 仍为 0.0.6）',
+  webVersion: '0.0.11',
+  apiVersion: '0.0.6',
+  sortOrder: 10,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '未配置浏览器可访问的 API 根地址（`NEXT_PUBLIC_API_URL` 或 `src/config/public-api.json` 的 `apiBaseUrl`）时，隐藏首页/文章列表/文章详情/页脚中的访问量与浏览量展示，并停止全站 PV 上报，避免无后端时展示误导性数字。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：Web 版本升级至 0.0.11；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
     },
   ],
 };
