@@ -32,7 +32,10 @@ export function applyAppGlobals(app: INestApplication): void {
   };
 
   if (raw) {
-    const origins = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    const origins = raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
     app.enableCors({
       ...corsOptions,
       origin: origins,
@@ -48,7 +51,10 @@ export function applyAppGlobals(app: INestApplication): void {
           callback(null, true);
           return;
         }
-        if (origin === 'http://localhost:3000' || origin === 'http://127.0.0.1:3000') {
+        if (
+          origin === 'http://localhost:3000' ||
+          origin === 'http://127.0.0.1:3000'
+        ) {
           callback(null, true);
           return;
         }
