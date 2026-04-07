@@ -39,7 +39,9 @@ const DEFAULT_FILTERS: BlogFilters = {
 };
 
 function uniqSorted(values: string[]) {
-  return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b, 'zh-CN'));
+  return Array.from(new Set(values)).sort((a, b) =>
+    a.localeCompare(b, 'zh-CN'),
+  );
 }
 
 function normalizeText(value: string) {
@@ -165,7 +167,9 @@ export function filterBlogPosts(posts: PostSummary[], filters: BlogFilters) {
 
   if (filters.tags.length > 0) {
     const selected = new Set(filters.tags);
-    next = next.filter((post) => (post.tags ?? []).some((tag) => selected.has(tag)));
+    next = next.filter((post) =>
+      (post.tags ?? []).some((tag) => selected.has(tag)),
+    );
   }
 
   if (query) {

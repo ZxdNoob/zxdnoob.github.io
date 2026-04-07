@@ -99,8 +99,7 @@ export const hello = "写你想写的，发你想发的。";
 祝写作愉快。`;
 
 const TAILWIND_SERIES = 'TailwindCSS 从入门到精通（学习与实战路线）';
-const FE_INTERVIEW_SERIES =
-  '前端面试准备（8 年一线工程师知识体系与学习路线）';
+const FE_INTERVIEW_SERIES = '前端面试准备（8 年一线工程师知识体系与学习路线）';
 
 const SEED_POSTS: Partial<PostEntity>[] = [
   {
@@ -311,7 +310,8 @@ const SEED_POSTS: Partial<PostEntity>[] = [
   },
   {
     slug: 'fe-interview-01-js-runtime',
-    title: '前端面试准备 01：JavaScript 运行时——执行上下文、闭包、原型链与事件循环（能推导版）',
+    title:
+      '前端面试准备 01：JavaScript 运行时——执行上下文、闭包、原型链与事件循环（能推导版）',
     date: '2026-04-01T20:30:00+08:00',
     description:
       '把 JS 面试高频点组织成“可推导”的模型：执行上下文/作用域链/this/原型链/事件循环。附典型追问、手写题拆解与易错边界。',
@@ -710,7 +710,8 @@ function myInstanceof(obj, Ctor) {
   },
   {
     slug: 'fe-interview-02-typescript',
-    title: '前端面试准备 02：TypeScript 工程能力——类型系统、泛型、条件类型与“类型体操”的边界',
+    title:
+      '前端面试准备 02：TypeScript 工程能力——类型系统、泛型、条件类型与“类型体操”的边界',
     date: '2026-04-02T12:00:00+08:00',
     description:
       'TS 面试别只讲 keyof/extends：要能说清类型系统能力边界、如何在团队里落地、如何避免类型体操失控。附高频类型题与工程规范。',
@@ -895,7 +896,8 @@ export function pick<T extends object, K extends keyof T>(
   },
   {
     slug: 'fe-interview-03-browser-network',
-    title: '前端面试准备 03：浏览器与网络——渲染流水线、缓存、CORS、Cookie、HTTP/2（高频追问一网打尽）',
+    title:
+      '前端面试准备 03：浏览器与网络——渲染流水线、缓存、CORS、Cookie、HTTP/2（高频追问一网打尽）',
     date: '2026-04-03T14:30:00+08:00',
     description:
       '把浏览器与网络题整理成“从输入到像素”的链路：渲染流水线、回流重绘、合成、缓存策略、CORS、Cookie/SameSite、HTTP/2/3。',
@@ -1018,7 +1020,8 @@ export async function fetchCacheFirst(request) {
   },
   {
     slug: 'fe-interview-04-react-core',
-    title: '前端面试准备 04：React 核心——渲染、更新、Hooks 心智模型、并发与 SSR（面试表达模板）',
+    title:
+      '前端面试准备 04：React 核心——渲染、更新、Hooks 心智模型、并发与 SSR（面试表达模板）',
     date: '2026-04-04T16:30:00+08:00',
     description:
       '用“渲染=计算 UI”与“更新=调度”两句话讲清 React：Hooks 规则、闭包陷阱、性能优化点、并发渲染与 SSR/Streaming 的取舍。',
@@ -1149,7 +1152,8 @@ export function useLatest<T>(value: T) {
   },
   {
     slug: 'fe-interview-05-engineering',
-    title: '前端面试准备 05：工程化——构建、依赖治理、质量体系、CI/CD 与发布回滚',
+    title:
+      '前端面试准备 05：工程化——构建、依赖治理、质量体系、CI/CD 与发布回滚',
     date: '2026-04-05T18:30:00+08:00',
     description:
       '工程化题的本质是“可持续交付”。从构建与依赖图、代码分割、质量门禁、测试金字塔到灰度发布与回滚，把面试回答讲成“我在团队里怎么做”。',
@@ -1222,7 +1226,8 @@ export function useLatest<T>(value: T) {
   },
   {
     slug: 'fe-interview-06-performance-observability',
-    title: '前端面试准备 06：性能与可观测——Web Vitals、长任务、缓存、监控与定位方法',
+    title:
+      '前端面试准备 06：性能与可观测——Web Vitals、长任务、缓存、监控与定位方法',
     date: '2026-04-05T20:00:00+08:00',
     description:
       '性能面试要讲“指标→定位→手段→验证→回归”。覆盖 Web Vitals、Long Task、资源优化、缓存、以及埋点/日志/Tracing 的前端可观测体系。',
@@ -1363,7 +1368,8 @@ export function useLatest<T>(value: T) {
   },
   {
     slug: 'fe-interview-08-frontend-system-design',
-    title: '前端面试准备 08：系统设计——从需求到架构（模块边界、状态、扩展性、治理）',
+    title:
+      '前端面试准备 08：系统设计——从需求到架构（模块边界、状态、扩展性、治理）',
     date: '2026-04-06T14:00:00+08:00',
     description:
       '高阶面试常见题：设计一个控制台/低代码/组件库/多租户前端。用系统设计框架回答：边界、数据流、权限、扩展性、性能、可观测与演进。',
@@ -1463,7 +1469,8 @@ export function useLatest<T>(value: T) {
   },
   {
     slug: 'fe-interview-09-project-storytelling',
-    title: '前端面试准备 09：项目表达与行为面——用 STAR 讲清楚你的价值（含模板与示例）',
+    title:
+      '前端面试准备 09：项目表达与行为面——用 STAR 讲清楚你的价值（含模板与示例）',
     date: '2026-04-06T20:30:00+08:00',
     description:
       '把项目经历讲成“可量化的贡献”：背景、目标、行动、结果、复盘。附简历要点提炼法、常见追问、以及把技术点转成业务价值的表达模板。',

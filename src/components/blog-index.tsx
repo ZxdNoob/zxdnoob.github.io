@@ -250,8 +250,7 @@ function SelectField({
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const selected =
-    options.find((option) => option.value === value) ??
+  const selected = options.find((option) => option.value === value) ??
     options[0] ?? {
       value: '',
       label: '',
@@ -436,7 +435,9 @@ function BlogResults({
             type="button"
             className="btn btn-secondary"
             onClick={() =>
-              setVisibleCount((current) => Math.min(posts.length, current + step))
+              setVisibleCount((current) =>
+                Math.min(posts.length, current + step),
+              )
             }
           >
             加载更多文章
@@ -770,7 +771,11 @@ export function BlogIndex({
               <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-400">
                 可以尝试清空关键词、切换系列，或减少标签筛选条件。
               </p>
-              <button type="button" className="btn btn-secondary mt-6" onClick={clearFilters}>
+              <button
+                type="button"
+                className="btn btn-secondary mt-6"
+                onClick={clearFilters}
+              >
                 重置筛选
               </button>
             </div>

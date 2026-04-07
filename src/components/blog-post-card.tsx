@@ -24,12 +24,7 @@ function StatDot() {
   );
 }
 
-export function BlogPostCard({
-  post,
-  views,
-  showViewCounts,
-  view,
-}: Props) {
+export function BlogPostCard({ post, views, showViewCounts, view }: Props) {
   const isList = view === 'list';
   const dateLabel = formatPostPublishedAt(post.date, 'short');
 
@@ -47,7 +42,9 @@ export function BlogPostCard({
           className={[
             'group relative flex h-full flex-col rounded-[1.65rem] p-5 sm:p-6',
             'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)]',
-            isList ? 'sm:flex-row sm:items-start sm:justify-between sm:gap-6' : '',
+            isList
+              ? 'sm:flex-row sm:items-start sm:justify-between sm:gap-6'
+              : '',
           ].join(' ')}
         >
           <div className="min-w-0 flex-1">
