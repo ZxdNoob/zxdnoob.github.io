@@ -75,6 +75,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_009,
       SEED_RELEASE_010,
       SEED_RELEASE_011,
+      SEED_RELEASE_012,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -553,6 +554,41 @@ const SEED_RELEASE_011: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：Web 版本升级至 0.0.11；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
+    },
+  ],
+};
+
+const SEED_RELEASE_012: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-07T18:52:33',
+  title: '前端 0.0.12：文章索引页双视图与筛选体验升级（API 仍为 0.0.6）',
+  webVersion: '0.0.12',
+  apiVersion: '0.0.6',
+  sortOrder: 11,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章索引页升级：新增网格/列表双视图、搜索 + 系列 + 标签筛选、排序（最新/最早/阅读时长）与“活跃筛选”摘要展示，整体信息密度与可用性更好。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '筛选状态与 URL 查询参数同步（q/series/tag/sort/view），支持分享与刷新后保留筛选；筛选条支持桌面端置顶与滚动后紧凑模式。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '文章列表卡片组件化：新增 `BlogPostCard`（Spotlight 卡片风格），在卡片内统一展示发布时间、阅读时长、系列/标签与“阅读全文”引导。',
+    },
+    {
+      kind: 'perf',
+      surface: 'web',
+      text: '渐进加载体验优化：首屏更小的初始展示量，后续按屏幕尺寸自适应每次加载步长，并在移动端提供“继续下滑自动加载更多”的提示与加载状态。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：Web 版本升级至 0.0.12；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
     },
   ],
 };
