@@ -24,7 +24,7 @@
 
 - **前端（Next.js App Router）**
   - 页面渲染：从 API 拉文章/简历/版本历史；文章正文 Markdown 用 `react-markdown` 渲染
-  - 统计上报：浏览器端 `POST /api/views/`* 记录 PV
+  - 统计上报：浏览器端 `POST /api/views/`\* 记录 PV
 - **后端（NestJS + TypeORM + SQLite）**
   - 数据库：单文件 SQLite，默认 `backend/data/blog.sqlite`
   - 首次启动：自动创建表并写入种子数据（示例文章/简历/版本历史）
@@ -33,13 +33,11 @@
 
 ## 技术栈
 
-
-| 层级  | 技术                                                  |
-| --- | --------------------------------------------------- |
-| 前端  | Next.js App Router、React、TypeScript、Tailwind CSS    |
-| 后端  | NestJS 11、TypeORM、better-sqlite3                    |
-| 数据  | SQLite 文件（默认 `backend/data/blog.sqlite`），首次启动自动种子数据 |
-
+| 层级 | 技术                                                                 |
+| ---- | -------------------------------------------------------------------- |
+| 前端 | Next.js App Router、React、TypeScript、Tailwind CSS                  |
+| 后端 | NestJS 11、TypeORM、better-sqlite3                                   |
+| 数据 | SQLite 文件（默认 `backend/data/blog.sqlite`），首次启动自动种子数据 |
 
 ## 目录结构
 
@@ -159,16 +157,14 @@ npm run build:api
 
 推送代码到 GitHub 后，**Actions** 会按工作流执行；页面顶部徽章可点进对应流水线。
 
-
-| 工作流                                                                  | 说明                                                                                                       |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| [CI](.github/workflows/ci.yml)                                       | 对 **main/master** 的 push 与 PR 运行：前端 `lint` + `build` + `build:static`，后端 `lint` + `build` + 单元/E2E 测试    |
-| [Deploy GitHub Pages](.github/workflows/deploy-github-pages.yml)     | 推送 **main/master** 时将 `**npm run build:static`** 产物 `**out/**` 部署到 `**https://zxdnoob.github.io/**`（见下节） |
-| [Deploy frontend (Vercel)](.github/workflows/deploy-vercel.yml)      | 配置了 `VERCEL_*` 密钥时，用 CLI 将 **Next.js** 推到 **Vercel 生产环境**；未配置时该工作流会跳过                                    |
-| [Publish backend image](.github/workflows/publish-backend-image.yml) | 变更 **backend/** 或手动 **Run workflow** 时构建镜像并推送到 `**ghcr.io/<小写 owner>/<小写 repo>/backend`**                |
-| [Aliyun OSS backup](.github/workflows/aliyun-oss-backup.yml)         | （可选）将 ECS 上 Docker 卷中的 SQLite 备份到阿里云 OSS（可定时/链式触发）                                                       |
-| [Dependabot](.github/dependabot.yml)                                 | 每周检查根目录与 `backend/` 的 npm 依赖，发起更新 PR                                                                     |
-
+| 工作流                                                               | 说明                                                                                                                 |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [CI](.github/workflows/ci.yml)                                       | 对 **main/master** 的 push 与 PR 运行：前端 `lint` + `build` + `build:static`，后端 `lint` + `build` + 单元/E2E 测试 |
+| [Deploy GitHub Pages](.github/workflows/deploy-github-pages.yml)     | 推送 **main/master** 时将 `**npm run build:static`** 产物 `**out/**`部署到`**https://zxdnoob.github.io/**`（见下节） |
+| [Deploy frontend (Vercel)](.github/workflows/deploy-vercel.yml)      | 配置了 `VERCEL_*` 密钥时，用 CLI 将 **Next.js** 推到 **Vercel 生产环境**；未配置时该工作流会跳过                     |
+| [Publish backend image](.github/workflows/publish-backend-image.yml) | 变更 **backend/** 或手动 **Run workflow** 时构建镜像并推送到 `**ghcr.io/<小写 owner>/<小写 repo>/backend`\*\*        |
+| [Aliyun OSS backup](.github/workflows/aliyun-oss-backup.yml)         | （可选）将 ECS 上 Docker 卷中的 SQLite 备份到阿里云 OSS（可定时/链式触发）                                           |
+| [Dependabot](.github/dependabot.yml)                                 | 每周检查根目录与 `backend/` 的 npm 依赖，发起更新 PR                                                                 |
 
 仓库根目录 [vercel.json](vercel.json) 指定 `framework: nextjs` 与 `npm ci` / `npm run build`，便于 Vercel 与本地行为一致。
 
@@ -179,18 +175,22 @@ npm run build:api
 [Deploy GitHub Pages](.github/workflows/deploy-github-pages.yml) 在 `**main**` 上构建 `**out/**`，再通过官方 `**actions/upload-pages-artifact**` 与 `**actions/deploy-pages**` 发布；仓库 **[Deployments](https://github.com/ZxdNoob/zxdnoob.github.io/deployments)** 中会出现对应部署记录。
 
 1. 打开 **Settings → Pages**，在 **Build and deployment** 中：
-  - **Source** 必须选 **GitHub Actions**（不要选 **Deploy from a branch** 指望本工作流去更新站点——仅推 `gh-pages` 分支在「Actions 源」下**不会**替换线上内容）。
-  - 首次使用若提示选择工作流，选 **Deploy GitHub Pages**。
-2. 推送 **main** 或手动 **Run workflow** 后：先跑 **Build static site**，再跑 **Deploy to GitHub Pages**；成功几分钟后 `**https://zxdnoob.github.io/`** 更新。若 **github-pages** 环境启用了审批，需在 Deployments / Environments 里批准后再上线。
-3. **文章与版本历史**在构建时通过 HTTP 从 Nest API 拉取。默认在 Runner 上启动临时 Nest + SQLite（含种子文章），**无需**配置 Secret。若要从**已部署的公网 API**拉数据，在 Actions 中配置 Secret `**PAGES_REMOTE_API_URL`**（API 根 URL，无尾部斜杠）。不要用 `**API_URL**` 做这件事——工作流不读取它；且 **GitHub 禁止在 `if:` 里直接使用 `secrets.*`**，旧版工作流会整段校验失败、部署不更新。若曾添加 `API_URL` 导致构建跳过本地 API 又拉不到远程，可删除该 Secret 或改用 `PAGES_REMOTE_API_URL`。
+
+- **Source** 必须选 **GitHub Actions**（不要选 **Deploy from a branch** 指望本工作流去更新站点——仅推 `gh-pages` 分支在「Actions 源」下**不会**替换线上内容）。
+- 首次使用若提示选择工作流，选 **Deploy GitHub Pages**。
+
+2. 推送 **main** 或手动 **Run workflow** 后：先跑 **Build static site**，再跑 **Deploy to GitHub Pages**；成功几分钟后 `**https://zxdnoob.github.io/`** 更新。若 **github-pages\*\* 环境启用了审批，需在 Deployments / Environments 里批准后再上线。
+3. **文章与版本历史**在构建时通过 HTTP 从 Nest API 拉取。默认在 Runner 上启动临时 Nest + SQLite（含种子文章），**无需**配置 Secret。若要从**已部署的公网 API**拉数据，在 Actions 中配置 Secret `**PAGES_REMOTE_API_URL`**（API 根 URL，无尾部斜杠）。不要用 `**API_URL**` 做这件事——工作流不读取它；且 **GitHub 禁止在 `if:` 里直接使用 `secrets.*`\*\*，旧版工作流会整段校验失败、部署不更新。若曾添加 `API_URL` 导致构建跳过本地 API 又拉不到远程，可删除该 Secret 或改用 `PAGES_REMOTE_API_URL`。
 4. 根目录 `**public/.nojekyll**` 会进入 `**out/**`，避免 Jekyll 忽略 `**_next**`。工作流使用 `**pages: write**` 与 `**id-token: write**` 以通过 OIDC 部署 Pages（已在 YAML 中声明）。
 
 ### 前端：推荐用 Vercel 连接 GitHub（零配置 Actions）
 
 1. 登录 [Vercel](https://vercel.com)，**Add New → Project**，导入本仓库。
 2. 在 Project → **Settings → Environment Variables** 中配置：
-  - `NEXT_PUBLIC_SITE_URL`：生产站点根 URL（如 `https://xxx.vercel.app`）
-  - `NEXT_PUBLIC_API_URL`：线上 **Nest API** 根 URL（须与浏览器可访问域名、HTTPS 一致）
+
+- `NEXT_PUBLIC_SITE_URL`：生产站点根 URL（如 `https://xxx.vercel.app`）
+- `NEXT_PUBLIC_API_URL`：线上 **Nest API** 根 URL（须与浏览器可访问域名、HTTPS 一致）
+
 3. 保存后每次 push **main** 会自动构建部署（由 Vercel 托管，不依赖仓库内 `deploy-vercel.yml`）。
 
 若更希望在 **GitHub Actions** 里调用 Vercel CLI 部署，可在仓库 **Settings → Secrets and variables → Actions** 添加 `VERCEL_TOKEN`、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`（本地执行 `npx vercel link` 后见 `.vercel/project.json`），再使用 [deploy-vercel.yml](.github/workflows/deploy-vercel.yml)。
@@ -239,4 +239,4 @@ docker run -d --name zxd-api -p 4000:4000 \
 
 ---
 
-*Hello — 热爱编程与生活，愿你我都能把每一天过好。*
+_Hello — 热爱编程与生活，愿你我都能把每一天过好。_
