@@ -8,12 +8,12 @@
 
 ## 配置文件
 
-| 文件 | 说明 |
-|------|------|
-| `src/app.module.ts` | `TypeOrmModule.forRootAsync` 注册 `better-sqlite3` |
-| `src/database/post.entity.ts` | 文章实体 |
-| `src/database/seed.service.ts` | 初始数据 |
-| `nest-cli.json` | Nest CLI（标准 JSON，无行内注释） |
+| 文件                           | 说明                                               |
+| ------------------------------ | -------------------------------------------------- |
+| `src/app.module.ts`            | `TypeOrmModule.forRootAsync` 注册 `better-sqlite3` |
+| `src/database/post.entity.ts`  | 文章实体                                           |
+| `src/database/seed.service.ts` | 初始数据                                           |
+| `nest-cli.json`                | Nest CLI（标准 JSON，无行内注释）                  |
 
 ## 常用命令
 

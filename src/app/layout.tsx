@@ -106,7 +106,7 @@ export default async function RootLayout({
         <BfcacheRevealRestore />
         {showViewStats ? <SiteViewRecorder /> : null}
         <SiteHeader />
-        <div className="flex-1">{children}</div>
+        <div className="relative z-10 flex-1">{children}</div>
         <SiteFooter
           initialSiteTotalViews={initialSiteTotalViews}
           showViewStats={showViewStats}

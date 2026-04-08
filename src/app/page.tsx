@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { AnimatedCounter } from '@/components/animated-counter';
+import { HeroCanvas } from '@/components/hero-canvas';
 import { PageViewBadge } from '@/components/page-view';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { SpotlightCard } from '@/components/spotlight-card';
@@ -182,31 +183,12 @@ export default async function HomePage() {
   const totalSeries = new Set(all.map((p) => p.series).filter(Boolean)).size;
 
   return (
-    <main>
+    <main className="relative z-10">
+      {/* Fullscreen canvas dynamic background */}
+      <HeroCanvas />
+
       {/* ====== Hero ====== */}
       <section className="relative overflow-hidden border-b border-[var(--border)]/60">
-        {/* Ambient gradients */}
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute -top-1/2 -left-1/4 h-[600px] w-[600px] rounded-full bg-amber-200/30 blur-[120px] animate-pulse-glow dark:bg-amber-900/20" />
-          <div
-            className="absolute -right-1/4 -bottom-1/2 h-[500px] w-[500px] rounded-full bg-orange-200/20 blur-[100px] animate-pulse-glow dark:bg-orange-900/15"
-            style={{ animationDelay: '1.5s' }}
-          />
-          <div className="absolute top-1/4 right-1/3 h-[400px] w-[400px] rounded-full bg-stone-200/30 blur-[100px] animate-float dark:bg-stone-800/20" />
-          {/* Decorative spinning ring */}
-          <div className="absolute top-12 right-[10%] h-48 w-48 rounded-full border border-dashed border-amber-300/20 animate-spin-slow dark:border-amber-600/15 hidden lg:block" />
-          <div
-            className="absolute bottom-20 left-[8%] h-32 w-32 rounded-full border border-dashed border-stone-300/30 animate-spin-slow dark:border-stone-700/20 hidden lg:block"
-            style={{ animationDirection: 'reverse', animationDuration: '25s' }}
-          />
-        </div>
-
-        {/* Dot pattern */}
-        <div
-          className="pointer-events-none absolute inset-0 dot-pattern opacity-[0.04] dark:opacity-[0.03]"
-          aria-hidden
-        />
-
         <div className="relative mx-auto max-w-5xl px-4 pb-24 pt-20 sm:px-6 sm:pb-32 sm:pt-28 lg:px-8">
           <div className="animate-in flex items-center gap-3">
             <div className="h-px flex-1 max-w-12 bg-gradient-to-r from-transparent to-[var(--accent)]" />
@@ -291,7 +273,7 @@ export default async function HomePage() {
             {TECH_STACK.map((tech, i) => (
               <span
                 key={tech}
-                className="animate-in rounded-full border border-[var(--border)]/60 bg-[var(--surface)]/50 px-3 py-1 text-xs font-medium text-stone-500 backdrop-blur-sm dark:text-stone-400"
+                className="animate-in rounded-full border border-[var(--border)]/60 bg-[var(--surface)]/80 px-3 py-1 text-xs font-medium text-stone-500 dark:text-stone-400"
                 style={{ animationDelay: `${360 + i * 40}ms` }}
               >
                 {tech}
@@ -361,7 +343,7 @@ export default async function HomePage() {
                 : 'grid grid-cols-2 gap-4 lg:grid-cols-3'
             }
           >
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/60 p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/80 p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500">
                 文章
               </p>
@@ -369,7 +351,7 @@ export default async function HomePage() {
                 <AnimatedCounter target={totalPosts} suffix="+" />
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/60 p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/80 p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500">
                 系列
               </p>
@@ -378,7 +360,7 @@ export default async function HomePage() {
               </p>
             </div>
             {showViewStats ? (
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/60 p-5 backdrop-blur-sm">
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/80 p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500">
                   总浏览量
                 </p>

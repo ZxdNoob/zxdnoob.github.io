@@ -76,6 +76,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_010,
       SEED_RELEASE_011,
       SEED_RELEASE_012,
+      SEED_RELEASE_013,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -589,6 +590,36 @@ const SEED_RELEASE_012: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：Web 版本升级至 0.0.12；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
+    },
+  ],
+};
+
+const SEED_RELEASE_013: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-08T11:06:32',
+  title: '前端 0.0.13：全屏 Canvas 动态背景与首页性能优化（API 仍为 0.0.6）',
+  webVersion: '0.0.13',
+  apiVersion: '0.0.6',
+  sortOrder: 12,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '首页新增沉浸式全屏 Canvas 动态背景：粒子星座连线 + 极光波浪层 + 鼠标交互，铺满整个视窗并作为固定背景渲染。',
+    },
+    {
+      kind: 'perf',
+      surface: 'web',
+      text: 'Canvas 性能优化：帧率节流、粒子数量下调、空间网格加速邻域连线、连线按透明度分桶批量绘制、粒子精灵预渲染避免每帧创建渐变对象，并在页面隐藏时暂停动画。',
+    },
+    {
+      kind: 'perf',
+      surface: 'web',
+      text: '首页与全站视觉层性能优化：减少 `backdrop-blur` 的使用、优化噪点纹理成本，并为 Spotlight 卡片增加 containment 以降低 hover/鼠标移动的布局开销。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：Web 版本升级至 0.0.13；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
     },
   ],
 };
