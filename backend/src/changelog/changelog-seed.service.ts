@@ -77,6 +77,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_011,
       SEED_RELEASE_012,
       SEED_RELEASE_013,
+      SEED_RELEASE_014,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -620,6 +621,31 @@ const SEED_RELEASE_013: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：Web 版本升级至 0.0.13；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
+    },
+  ],
+};
+
+const SEED_RELEASE_014: Partial<ChangelogReleaseEntity> = {
+  date: '2026-04-15T17:05:06',
+  title: '前端 0.0.14：移动端文章列表视图切换优化（API 仍为 0.0.6）',
+  webVersion: '0.0.14',
+  apiVersion: '0.0.6',
+  sortOrder: 13,
+  items: [
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '移动端文章列表页移除无效的「网格/列表」视图切换按钮：因移动端两种模式渲染结果完全一致，使用 `hidden sm:contents` 在小屏下隐藏切换入口，避免用户误操作。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '移动端文章列表结果摘要中隐藏"展示模式为 网格/列表"描述文本，与切换按钮的可见性保持一致。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：Web 版本升级至 0.0.14；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
     },
   ],
 };

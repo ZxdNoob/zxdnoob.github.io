@@ -567,24 +567,26 @@ export function BlogIndex({
                 </span>
                 <span className="ml-1">篇结果</span>
               </div>
-              <SurfaceButton
-                active={filters.view === 'grid'}
-                onClick={() =>
-                  replaceFilters((current) => ({ ...current, view: 'grid' }))
-                }
-                ariaLabel="切换为网格视图"
-              >
-                网格
-              </SurfaceButton>
-              <SurfaceButton
-                active={filters.view === 'list'}
-                onClick={() =>
-                  replaceFilters((current) => ({ ...current, view: 'list' }))
-                }
-                ariaLabel="切换为列表视图"
-              >
-                列表
-              </SurfaceButton>
+              <div className="hidden sm:contents">
+                <SurfaceButton
+                  active={filters.view === 'grid'}
+                  onClick={() =>
+                    replaceFilters((current) => ({ ...current, view: 'grid' }))
+                  }
+                  ariaLabel="切换为网格视图"
+                >
+                  网格
+                </SurfaceButton>
+                <SurfaceButton
+                  active={filters.view === 'list'}
+                  onClick={() =>
+                    replaceFilters((current) => ({ ...current, view: 'list' }))
+                  }
+                  ariaLabel="切换为列表视图"
+                >
+                  列表
+                </SurfaceButton>
+              </div>
               <SurfaceButton
                 active={advancedOpen}
                 onClick={() => setAdvancedOpen((open) => !open)}
@@ -698,9 +700,11 @@ export function BlogIndex({
                   <span className="font-semibold text-stone-900 dark:text-stone-100">
                     {selectedSeries}
                   </span>
-                  ，展示模式为{' '}
-                  <span className="font-semibold text-stone-900 dark:text-stone-100">
-                    {filters.view === 'grid' ? '网格' : '列表'}
+                  <span className="hidden sm:inline">
+                    ，展示模式为{' '}
+                    <span className="font-semibold text-stone-900 dark:text-stone-100">
+                      {filters.view === 'grid' ? '网格' : '列表'}
+                    </span>
                   </span>
                   。
                 </p>
