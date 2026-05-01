@@ -27,8 +27,19 @@ export function applyAppGlobals(app: INestApplication): void {
    */
   const raw = process.env.CORS_ORIGIN;
   const corsOptions = {
-    methods: ['GET', 'HEAD', 'POST', 'OPTIONS'] as const,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    /**
+     * `PUT` / `DELETE` 是 AI 向导多会话接口（`/api/agent/sessions/:id`、
+     * `/api/agent/memory`）必需的方法。漏掉它们会让浏览器 preflight 直接被拒，
+     * 线上「重命名 / 删除会话 / 写回 messages」会全部失败。
+     */
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'] as const,
+    /**
+     * `X-Agent-User` 是匿名身份头（前端在 localStorage 里生成 `u_<rand>`），
+     * 必须显式加入 allowedHeaders，否则 preflight 阶段就会被浏览器拦截。
+     */
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Agent-User'],
+    /** 让 preflight 缓存一段时间，减少高频 PUT 时的重复 OPTIONS 请求 */
+    maxAge: 600,
   };
 
   if (raw) {

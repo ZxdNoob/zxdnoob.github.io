@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
+import { AgentLauncher } from '@/components/agent/agent-launcher';
 import { BfcacheRevealRestore } from '@/components/bfcache-reveal-restore';
 import { CommandPalette } from '@/components/command-palette';
 import { SiteFooter } from '@/components/site-footer';
@@ -113,6 +114,7 @@ export default async function RootLayout({
         />
         <ToastViewport />
         <CommandPalette />
+        <AgentLauncher />
       </body>
     </html>
   );

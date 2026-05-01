@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { applyAppGlobals } from './setup-app';
 
@@ -15,6 +16,17 @@ async function bootstrap(): Promise<void> {
     /** 生产环境可改为 false 以略微减少日志量 */
     logger: ['error', 'warn', 'log'],
   });
+
+  /**
+   * 显式收紧 JSON body 上限（默认 100KB 偏被动）。
+   *
+   * 主要服务于 AI 向导：`/api/agent/sessions/:id` PUT 时会一次性把会话内
+   * 的 `messages[]` 序列化回写。前端做了 `MAX_MESSAGES = 80` 的截断，配合
+   * 正常长度的对话，256KB 完全够用；超出大概率是异常或攻击流量，应当 413。
+   */
+  const expressApp = app as unknown as NestExpressApplication;
+  expressApp.useBodyParser('json', { limit: '256kb' });
+  expressApp.useBodyParser('urlencoded', { limit: '256kb', extended: true });
 
   applyAppGlobals(app);
 

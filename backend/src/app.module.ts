@@ -6,11 +6,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { ChangelogModule } from './changelog/changelog.module';
 import { ChangelogReleaseEntity } from './database/changelog-release.entity';
+import { AgentMemoryEntity } from './database/agent-memory.entity';
+import { AgentSessionEntity } from './database/agent-session.entity';
 import { PageViewCountEntity } from './database/page-view-count.entity';
 import { PageViewEntity } from './database/page-view.entity';
 import { PostEntity } from './database/post.entity';
 import { ResumeEntity } from './database/resume.entity';
 import { SiteViewCountEntity } from './database/site-view-count.entity';
+import { AgentMemoryModule } from './agent-memory/agent-memory.module';
+import { AgentSessionsModule } from './agent-sessions/agent-sessions.module';
 import { PostsModule } from './posts/posts.module';
 import { ResumeModule } from './resume/resume.module';
 import { ViewsModule } from './views/views.module';
@@ -52,6 +56,8 @@ import { ViewsModule } from './views/views.module';
             PostEntity,
             ChangelogReleaseEntity,
             ResumeEntity,
+            AgentMemoryEntity,
+            AgentSessionEntity,
             PageViewEntity,
             PageViewCountEntity,
             SiteViewCountEntity,
@@ -63,6 +69,8 @@ import { ViewsModule } from './views/views.module';
     PostsModule,
     ChangelogModule,
     ResumeModule,
+    AgentMemoryModule,
+    AgentSessionsModule,
     ViewsModule,
   ],
   controllers: [AppController],

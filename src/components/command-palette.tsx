@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AGENT_PANEL_OPEN } from '@/components/agent/agent-launcher';
 
 /**
  * 命令面板（Command Palette / Cmd+K）。
@@ -26,9 +27,57 @@ interface CommandItem {
   href: string;
   icon: React.ReactNode;
   group: string;
+  /** 命令型条目：执行回调而非跳转 */
+  action?: () => void;
 }
 
 const NAV_ITEMS: CommandItem[] = [
+  {
+    id: 'agent',
+    label: '打开 AI 向导',
+    description: '让 Noob 帮你找文章、看简历、调主题（⌘+I）',
+    href: '/agent',
+    group: 'AI',
+    action: () => {
+      if (typeof window === 'undefined') return;
+      window.dispatchEvent(new CustomEvent(AGENT_PANEL_OPEN));
+    },
+    icon: (
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1v1a4 4 0 0 1-8 0v-1H7a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z" />
+        <path d="M9 14c.8.8 2 1.2 3 1.2s2.2-.4 3-1.2" />
+      </svg>
+    ),
+  },
+  {
+    id: 'agent-page',
+    label: '进入 AI 向导页',
+    description: '/agent · 全屏体验',
+    href: '/agent',
+    group: 'AI',
+    icon: (
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <path d="M9 9h6v6H9z" />
+      </svg>
+    ),
+  },
   {
     id: 'home',
     label: '首页',
@@ -169,6 +218,10 @@ export function CommandPalette() {
   const execute = useCallback(
     (item: CommandItem) => {
       close();
+      if (item.action) {
+        item.action();
+        return;
+      }
       if (item.href.startsWith('http')) {
         window.open(item.href, '_blank', 'noopener,noreferrer');
       } else {

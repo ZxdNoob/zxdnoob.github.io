@@ -78,6 +78,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_012,
       SEED_RELEASE_013,
       SEED_RELEASE_014,
+      SEED_RELEASE_015,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -646,6 +647,41 @@ const SEED_RELEASE_014: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：Web 版本升级至 0.0.14；API 版本保持 0.0.6（无后端发版）。Breaking changes：无。',
+    },
+  ],
+};
+
+const SEED_RELEASE_015: Partial<ChangelogReleaseEntity> = {
+  date: '2026-05-01T11:01:00',
+  title: '站内 Agent 上线（Web 0.1.0 / API 0.0.7）',
+  webVersion: '0.1.0',
+  apiVersion: '0.0.7',
+  sortOrder: 14,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增站内 AI 向导（Agent）页面 `/agent`：支持启动/切换会话、展示事件流（模型输出/工具步骤）、以及更贴近“可观测”的交互面板体验。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增 Agent 组件与运行时：`use-agent` 状态机、消息/工具步骤渲染、快捷操作与启动器组件，便于在站点内快速调用与复用。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '新增 Agent Sessions 模块：提供会话管理与持久化（SQLite），支持创建/查询会话，为前端多会话切换与追踪奠定基础。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '新增 Agent Memory 模块：提供记忆写入/读取接口与数据库实体，支持把关键上下文沉淀为长期信息以改善后续对话质量。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：前端版本升级至 0.1.0；后端版本升级至 0.0.7，并在版本历史中同步记录本次 Agent 能力上线。',
     },
   ],
 };

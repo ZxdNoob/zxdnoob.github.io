@@ -11,6 +11,7 @@ const nav = [
   { href: '/blog', label: '文章' },
   { href: '/resume', label: '简历' },
   { href: '/changelog', label: '版本历史' },
+  { href: '/agent', label: 'AI 向导' },
 ] as const;
 
 function isActive(pathname: string, href: string): boolean {
