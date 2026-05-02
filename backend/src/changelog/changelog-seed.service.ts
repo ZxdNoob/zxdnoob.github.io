@@ -79,6 +79,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_013,
       SEED_RELEASE_014,
       SEED_RELEASE_015,
+      SEED_RELEASE_016,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -682,6 +683,36 @@ const SEED_RELEASE_015: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：前端版本升级至 0.1.0；后端版本升级至 0.0.7，并在版本历史中同步记录本次 Agent 能力上线。',
+    },
+  ],
+};
+
+const SEED_RELEASE_016: Partial<ChangelogReleaseEntity> = {
+  date: '2026-05-02T09:35:23',
+  title: 'Java 系列种子正文与 AI 向导站点露出（Web 0.1.1 / API 0.0.8）',
+  webVersion: '0.1.1',
+  apiVersion: '0.0.8',
+  sortOrder: 15,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '首页强化站内 AI 向导露出：探索区新增「AI 向导」Bento 卡、Hero 区主操作与 ⌘I 快捷键提示；底部行动区补充「打开 AI 向导」入口。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: 'SEO：`sitemap.xml` 增加静态路由 `/agent`；页脚导航新增「AI 向导」，并在宽屏说明文案中补充 ⌘I 与 `/agent` 直达链接。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: 'SQLite 种子文章扩充：新增「Java 从基础到精通（初级 · 高级 · 专家路线）」系列多篇示例正文（路线图与基础/进阶/精通各篇），便于本地与 CI 构建拉取完整教程演示数据。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：前端版本升级至 0.1.1；后端版本升级至 0.0.8，并在版本历史中同步记录。',
     },
   ],
 };

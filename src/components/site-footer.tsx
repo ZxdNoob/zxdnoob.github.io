@@ -12,6 +12,7 @@ const nav = [
   { href: '/blog', label: '文章' },
   { href: '/resume', label: '简历' },
   { href: '/changelog', label: '版本历史' },
+  { href: '/agent', label: 'AI 向导' },
 ] as const;
 
 function isActive(pathname: string, href: string): boolean {
@@ -71,11 +72,27 @@ export function SiteFooter({
               用心记录，认真生活
             </p>
             <p className="mt-3 hidden text-xs text-stone-400 dark:text-stone-600 lg:block">
-              按{' '}
-              <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1 py-0.5 font-mono text-[10px]">
-                ⌘K
-              </kbd>{' '}
-              快速导航到任意页面
+              <span className="block">
+                按{' '}
+                <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1 py-0.5 font-mono text-[10px]">
+                  ⌘K
+                </kbd>{' '}
+                快速导航到任意页面
+              </span>
+              <span className="mt-1.5 block">
+                按{' '}
+                <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1 py-0.5 font-mono text-[10px]">
+                  ⌘I
+                </kbd>{' '}
+                打开 AI 向导（或访问{' '}
+                <Link
+                  href="/agent"
+                  className="text-stone-500 underline decoration-[var(--border)] underline-offset-2 transition-colors hover:text-stone-800 dark:text-stone-500 dark:hover:text-stone-300"
+                >
+                  /agent
+                </Link>
+                ）
+              </span>
             </p>
           </div>
           <nav className="flex gap-10 text-sm">

@@ -4,6 +4,7 @@ import { HeroCanvas } from '@/components/hero-canvas';
 import { PageViewBadge } from '@/components/page-view';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { SpotlightCard } from '@/components/spotlight-card';
+import { AGENT_TAGLINE } from '@/lib/agent';
 import {
   fetchAllPostSummaries,
   formatPostPublishedAt,
@@ -152,6 +153,28 @@ const BENTO_ITEMS = [
       'from-emerald-500/10 to-teal-500/5 dark:from-emerald-500/8 dark:to-teal-500/4',
     span: '',
   },
+  {
+    href: '/agent',
+    label: 'AI 向导',
+    description: AGENT_TAGLINE,
+    icon: (
+      <svg
+        className="h-6 w-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1v1a4 4 0 0 1-8 0v-1H7a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z" />
+        <path d="M9 14c.8.8 2 1.2 3 1.2s2.2-.4 3-1.2" />
+      </svg>
+    ),
+    gradient:
+      'from-sky-500/10 to-indigo-500/5 dark:from-sky-500/8 dark:to-indigo-500/4',
+    span: 'sm:col-span-2 lg:col-span-4',
+  },
 ] as const;
 
 const TECH_STACK = [
@@ -237,6 +260,24 @@ export default async function HomePage() {
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </Link>
+            <Link
+              href="/agent"
+              className="inline-flex items-center justify-center rounded-full border border-sky-300/60 bg-gradient-to-br from-sky-50/90 to-indigo-50/40 px-7 py-3.5 text-sm font-semibold text-sky-900 shadow-sm transition-all hover:border-sky-400/80 hover:shadow-md active:scale-[0.98] dark:border-sky-500/25 dark:from-sky-950/40 dark:to-indigo-950/30 dark:text-sky-100 dark:hover:border-sky-400/40"
+            >
+              <svg
+                className="mr-2 h-4 w-4 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1v1a4 4 0 0 1-8 0v-1H7a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z" />
+                <path d="M9 14c.8.8 2 1.2 3 1.2s2.2-.4 3-1.2" />
+              </svg>
+              AI 向导
+            </Link>
             <a
               href="https://github.com/ZxdNoob/zxdnoob.github.io"
               className="inline-flex items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)]/80 px-7 py-3.5 text-sm font-semibold text-stone-700 shadow-sm transition-all hover:border-stone-300 hover:bg-[var(--surface)] hover:shadow-md active:scale-[0.98] dark:text-stone-300 dark:hover:border-stone-600"
@@ -254,14 +295,25 @@ export default async function HomePage() {
             </a>
 
             {/* Keyboard shortcut hint */}
-            <span className="hidden items-center gap-1.5 text-xs text-stone-400 dark:text-stone-600 lg:inline-flex">
-              <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[11px] font-medium shadow-sm">
-                ⌘
-              </kbd>
-              <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[11px] font-medium shadow-sm">
-                K
-              </kbd>
-              <span className="ml-1">快速导航</span>
+            <span className="hidden flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-400 dark:text-stone-600 lg:inline-flex">
+              <span className="inline-flex items-center gap-1.5">
+                <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[11px] font-medium shadow-sm">
+                  ⌘
+                </kbd>
+                <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[11px] font-medium shadow-sm">
+                  K
+                </kbd>
+                <span className="ml-1">快速导航</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[11px] font-medium shadow-sm">
+                  ⌘
+                </kbd>
+                <kbd className="rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[11px] font-medium shadow-sm">
+                  I
+                </kbd>
+                <span className="ml-1">AI 向导</span>
+              </span>
             </span>
           </div>
 
@@ -552,6 +604,9 @@ export default async function HomePage() {
                     </svg>
                     GitHub
                   </a>
+                  <Link href="/agent" className="btn btn-secondary">
+                    打开 AI 向导
+                  </Link>
                   <Link href="/changelog" className="btn btn-secondary">
                     查看更新日志
                   </Link>

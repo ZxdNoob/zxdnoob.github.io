@@ -100,6 +100,7 @@ export const hello = "写你想写的，发你想发的。";
 
 const TAILWIND_SERIES = 'TailwindCSS 从入门到精通（学习与实战路线）';
 const FE_INTERVIEW_SERIES = '前端面试准备（8 年一线工程师知识体系与学习路线）';
+const JAVA_TEACHING_SERIES = 'Java 从基础到精通（初级 · 高级 · 专家路线）';
 
 const SEED_POSTS: Partial<PostEntity>[] = [
   {
@@ -2567,5 +2568,1033 @@ A11y 不是“无障碍专用”，它会直接提升你组件的可靠性与专
 - 把 Token 抽成一份文档，写清楚用途（背景/表面/边框/强调）
 
 至此，你已经不再是“会写 Tailwind 的人”，而是能用 Tailwind 交付并维护一套 UI 系统的人。`,
+  },
+  {
+    slug: 'java-00-roadmap',
+    title: 'Java 路线 00：从初级到专家的三层能力模型、学习顺序与全系列索引',
+    date: '2026-05-02T08:00:00+08:00',
+    description:
+      '面向初级、高级与资深/专家 Java 工程师的分层路线：每层该学什么、如何验收、与本系列各篇的对应关系；附统一练习模板与进阶节奏。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', '学习路线', '方法论'],
+    draft: false,
+    content: `本系列把 Java 能力拆成三层：**基础交付**（初级）、**复杂系统与运行时**（高级）、**分布式、性能与架构治理**（资深/专家）。下面给出**可勾选的知识点清单**、**每篇对应的动手 Lab**与**验收口径**，便于对照补缺，做到学完能用。
+
+---
+
+## 01 三层模型 × 知识点明细表
+
+### A. 初级（对应 \`java-fundamentals-*\`）
+
+| 知识域 | 你要会的具体点 | 学以致用（交付物） |
+| --- | --- | --- |
+| 工具链 | \`javac\`/\`java\`、\`-cp\`/\`-classpath\`、\`--module-path\` 概念 | 命令行编译运行；读懂「找不到符号」vs「找不到类」 |
+| 字节码 | \`.class\`、类加载「加载→链接→初始化」直觉 | 知道 static 初始化何时触发 |
+| 构建 | Maven \`pom.xml\` 三坐标、\`src/main|test/java\` | 可重复构建；依赖冲突能定位 |
+| OOP | 接口/抽象/组合、\`final\`、可见性 | 职责单一；便于单测的依赖注入构造 |
+| 集合 | \`ArrayList\` 扩容、\`HashMap\` 装载因子直觉、\`LinkedHashMap\` 有序 | 按读写模式选型；不写 O(n²) 嵌套查找 |
+| 契约 | \`equals\`/\`hashCode\`、\`Comparable\` | \`HashSet\`/\`HashMap\` 键稳定；排序 TreeSet |
+| 泛型 | 类型参数、上界、\`? extends\`/\`? super\`（PECS） | 集合 API 不再靠强转 |
+| 异常 | \`Error\` vs \`Exception\`、受检/非受检、异常链 | \`try-with-resources\`；包装后保留 cause |
+| IO | \`Charset\`、\`Path\`、\`Files.lines\` 流式读 | 指定 UTF-8；大文件不 OOM |
+| 时间 | \`Instant\`、\`ZonedDateTime\`、\`Duration\`、\`DateTimeFormatter\` | 存 UTC；展示按用户时区 |
+| 并发入门 | \`ExecutorService\`、\`submit\`/\`invokeAll\`、\`shutdown\` | 批量任务并行；优雅退出 |
+
+**初级验收**：实现「注册接口」：校验 + 写库 + 日志（含 requestId）+ 3 条 JUnit；能口述异常如何从 DAO 传到全局处理器。
+
+### B. 高级（对应 \`java-advanced-*\`）
+
+| 知识域 | 具体点 | 学以致用 |
+| --- | --- | --- |
+| JMM | happens-before、\`volatile\` 可见性（非复合原子） | 解释「偶发读到过期值」 |
+| JUC | \`ReentrantLock\`、\`Atomic*\`、\`ConcurrentHashMap\`、\`Semaphore\` | 限流；分段统计 |
+| 线程池 | 核心/最大/队列/拒绝策略、\`CallerRunsPolicy\` 含义 | 队列打满时延迟背压而不是静默丢 |
+| 异步 | \`CompletableFuture\` 组合、\`orTimeout\`/\`completeOnTimeout\` | 多依赖合并；统一异常映射 |
+| JVM | 堆分代、GC pause、分配速率、Metaspace | 读 GC 日志判断 Young GC 是否过密 |
+| Spring | Bean 生命周期、JDK/CGLIB 代理、事务传播、\`rollbackFor\` | 定位事务不生效；缩小事务边界 |
+
+### C. 资深/专家（对应 \`java-expert-*\`）
+
+幂等表 + 状态机 + Outbox；RED/USE 与 SLO；限界上下文 + ADR。
+
+---
+
+## 02 全系列 × 推荐 Lab（务必动手）
+
+| slug | Lab（最小可运行） |
+| --- | --- |
+| \`java-fundamentals-01-platform-and-jvm\` | Maven/Gradle 工程 + \`DiscountCalculator\` 纯函数 + JUnit + \`java -jar\` |
+| \`java-fundamentals-02-oop-collections-generics\` | 购物车 \`Map\` + 正确 equals/hashCode + 泛型 \`max(List<T>)\` |
+| \`java-fundamentals-03-exceptions-io-concurrency-intro\` | \`Files.walk\` 统计行数 + 线程池并行哈希 |
+| \`java-advanced-01-juc-and-async\` | 三依赖异步合并 + 2s 超时 + 线程池隔离 |
+| \`java-advanced-02-jvm-and-gc\` | 开 GC 日志压测短命对象，标 Young GC pause |
+| \`java-advanced-03-spring-ecosystem\` | 自调用 vs 拆 Bean 的 \`@Transactional\` 对比 |
+| \`java-expert-01-distributed-consistency\` | 订单状态机 + 幂等键 DDL + Outbox 伪代码 |
+| \`java-expert-02-performance-and-observability\` | 3 个 SLI + 报警阈值 + 日志字段规范 |
+| \`java-expert-03-architecture-and-ddd\` | 一页 ADR + 上下文映射草图 |
+
+---
+
+## 03 学习顺序
+
+基础 01→02→03 → 进阶 01→02→03 → 精通 01→02→03。并发弱则基础 03 与进阶 01 连着做两遍。
+
+---
+
+## 04 课后复盘（10 分钟）
+
+1. 写出 5 个术语各一句人话解释。  
+2. 今天敲过的命令/测试输出截图或粘贴一行日志。  
+3. 对应线上事故场景（字符集/事务/线程池队列满…）。  
+4. 若只保留一个监控维度你选什么？  
+5. 下一篇前置是否补齐？
+
+---
+
+## 05 节奏参考
+
+全职初学：基础 2～3 周；进阶 3～4 周。在职：每周 3×90min，每次「一节理论 + 半套 Lab」。
+
+下一篇：\`java-fundamentals-01-platform-and-jvm\`——从 \`javac\` 与 Maven 坐标开始搭「可测」工程。
+`,
+  },
+  {
+    slug: 'java-fundamentals-01-platform-and-jvm',
+    title: 'Java 基础 01：平台、JDK、字节码与可维护的最小项目骨架',
+    date: '2026-05-02T08:06:00+08:00',
+    description:
+      '写给初级工程师：JVM/JRE/JDK 分工、源码到字节码的路径、classpath 与模块的基础心智；用 Maven 或 Gradle 搭一个最小可测试骨架。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', 'JVM', '基础', '工程化'],
+    draft: false,
+    content: `> **本篇目标**：你能脱离 IDE「黑盒运行」，说清楚「编译期 vs 运行期」错误；用 Maven **或** Gradle 搭出带测试的最小工程；遇到 \`ClassNotFoundException\` / \`NoClassDefFoundError\` 知道往哪查。
+
+---
+
+## 1. 知识点：JVM / JRE / JDK
+
+| 名词 | 职责 | 你该记住的一句话 |
+| --- | --- | --- |
+| JVM | 执行字节码、线程、GC、JIT | 跨平台跑的是「字节码 + JVM 实现」 |
+| JRE | JVM + 运行类库 | 服务器只有运行环境时可能没有 \`javac\` |
+| JDK | JRE + \`javac\`、诊断工具 | 开发机永远装 JDK |
+
+**学以致用**：终端执行 \`javac -version\` 与 \`java -version\`，确认版本一致（避免「编译用 21、运行用 17」）。
+
+---
+
+## 2. 知识点：从 \`.java\` 到运行的链路
+
+1. **编译**：\`javac -d out src/com/example/App.java\` → 生成 \`out/com/example/App.class\`。  
+2. **运行**：\`java -cp out com.example.App\`（注意包名对应目录）。  
+3. **类加载**：加载（读字节码）→链接（校验、准备、解析）→初始化（执行 static 块）。  
+
+**学以致用**：给 \`App\` 加一个 static 块打印日志，观察「首次主动使用类」时才初始化（对比只引用常量不一定初始化——了解即可）。
+
+---
+
+## 3. 知识点：\`CLASSPATH\` 与模块（JPMS）
+
+- **classpath**：告诉 JVM 去哪找 **已编译** 的类与 jar。  
+- **常见错误**：少 jar → \`NoClassDefFoundError\`（链接阶段）；错类名/错包 → \`ClassNotFoundException\`。  
+- **JPMS（Java 9+）**：\`module-info.java\` 控制导出包；大型项目逐步模块化。初级先会用构建工具管理依赖，少手写超长 \`-cp\`。
+
+**对比表（排障用）**
+
+| 异常 | 常见触发 | 第一反应 |
+| --- | --- | --- |
+| \`ClassNotFoundException\` | \`Class.forName\`、ClassLoader 找不到 | 检查坐标、包名、shade 规则 |
+| \`NoClassDefFoundError\` | 编译有，运行时缺传递依赖 | 查依赖树 \`mvn dependency:tree\` |
+
+---
+
+## 4. 动手：Maven 最小骨架（核心片段）
+
+在空目录：
+
+\`\`\`bash
+mvn -B archetype:generate   -DgroupId=com.example   -DartifactId=demo   -DarchetypeArtifactId=maven-archetype-quickstart   -DarchetypeVersion=1.5
+\`\`\`
+
+重点看 \`pom.xml\`：
+
+- **\`groupId\`/\`artifactId\`/\`version\`**：坐标，定位 jar。  
+- **\`dependencies\`**：\`junit-jupiter\` scope \`test\`。  
+- **\`maven.compiler.release\`**：锁语言级别（如 17）。
+
+**学以致用**：把以下纯函数放进 \`src/main/java\` 并写测试（边界：负数、零、100% 边界）。
+
+\`\`\`java
+public final class DiscountCalculator {
+  private DiscountCalculator() {}
+
+  /** 返回折后价（分），四舍五入；费率 [0,1]。 */
+  public static long applyPercent(long priceFen, double rate) {
+    if (priceFen < 0) throw new IllegalArgumentException("price");
+    if (rate < 0 || rate > 1) throw new IllegalArgumentException("rate");
+    return Math.round(priceFen * (1 - rate));
+  }
+}
+\`\`\`
+
+\`\`\`java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+
+class DiscountCalculatorTest {
+  @Test
+  void roundsHalfUp() {
+    assertEquals(901L, DiscountCalculator.applyPercent(1000L, 0.099)); // 四舍五入
+  }
+}
+\`\`\`
+
+---
+
+## 5. 知识点：\`java.time\`（务必替换 \`Date\`/\`Calendar\`）
+
+| API | 用途 |
+| --- | --- |
+| \`Instant\` | UTC 时间轴上的点，适合存库/日志 |
+| \`ZonedDateTime\` | 带时区的墙上时间，适合展示 |
+| \`Duration\` | 两个 Instant 的间隔 |
+| \`DateTimeFormatter\` | 解析/格式化（线程安全） |
+
+**学以致用**：把「用户时区展示」与「数据库存 UTC」拆清；永远不要用手动 \`+ 8 * 3600 * 1000\`。
+
+\`\`\`java
+import java.time.*;
+
+Instant now = Instant.now();
+ZonedDateTime shanghai = now.atZone(ZoneId.of("Asia/Shanghai"));
+String label = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(shanghai);
+\`\`\`
+
+---
+
+## 6. 知识点：字符集（线上乱码首位嫌疑）
+
+读写文件必须显式 charset：
+
+\`\`\`java
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+
+String text = Files.readString(Path.of("note.txt"), StandardCharsets.UTF_8);
+Files.writeString(Path.of("out.txt"), text, StandardCharsets.UTF_8);
+\`\`\`
+
+---
+
+## 7. 自测清单（须能口述或演示）
+
+1. 用命令行完成「编译 + 运行」你的 \`App\`，并解释 \`-cp\` 指向哪里。  
+2. 故意删掉一个依赖，复现 \`NoClassDefFoundError\`，再用 \`dependency:tree\` 解释原因。  
+3. \`DiscountCalculator\` 三条测试：正常、非法费率、边界四舍五入。  
+4. 写出「为何要用 \`Instant\` 存库」的一句话答案。
+
+下一篇：\`java-fundamentals-02-oop-collections-generics\`，把集合从「背 API」变成「按复杂度与语义选型」。
+`,
+  },
+  {
+    slug: 'java-fundamentals-02-oop-collections-generics',
+    title: 'Java 基础 02：面向对象、集合框架与泛型（正确用上接口与算法复杂度）',
+    date: '2026-05-02T08:12:00+08:00',
+    description:
+      '初级必读：类/接口/抽象的分工、equals 与 hashCode 契约、List/Set/Map 选型、迭代与并发修改；泛型如何避免强制转换地狱。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', '集合', '泛型', '基础'],
+    draft: false,
+    content: `> **本篇目标**：你能为业务对象正确实现 \`equals\`/\`hashCode\`；能说明 \`ArrayList\`/\`HashMap\` 常见操作复杂度；能用泛型避免强转；能解释 fail-fast 与「可变对象作 key」的坑。
+
+---
+
+## 1. 知识点：接口 / 抽象类 / 组合
+
+| 机制 | 何时用 | 反模式 |
+| --- | --- | --- |
+| \`interface\` | 多种实现、对外契约 | 接口膨胀成「上帝接口」 |
+| \`abstract class\` | 复用骨架，保留一步抽象 | 深层继承树 |
+| 组合 | 「有一个」能力委托 | 仅为复用代码而继承 |
+
+**学以致用**：价格策略 \`interface Pricing { Money quote(Order o); }\`，促销/会员各实现一类，上层只依赖接口。
+
+---
+
+## 2. 知识点：\`equals\` 与 \`hashCode\` 契约（逐项）
+
+对用作 \`HashMap\`/\`HashSet\` 元素的类型：
+
+1. **自反**：\`x.equals(x)\`。  
+2. **对称**：\`x.equals(y)\` ⇒ \`y.equals(x)\`。  
+3. **传递**：相等关系传递。  
+4. **一致**：不变对象多次比较结果不变。  
+5. **对 null 返回 false**。  
+6. **hashCode 一致**：若相等，则 \`hashCode\` 必须相同；反之不必。  
+
+**实践**：用 IDE 生成或 Java 16+ \`record\`（自动生成 equals/hashCode），并对值字段设置为 \`final\`。
+
+**反例（必须能讲清）**：
+
+\`\`\`java
+import java.util.*;
+
+public class BadKey {
+  String name;
+  BadKey(String name) { this.name = name; }
+  @Override public boolean equals(Object o) {
+    return o instanceof BadKey b && Objects.equals(name, b.name);
+  }
+  @Override public int hashCode() { return Objects.hash(name); }
+
+  public static void main(String[] args) {
+    Map<BadKey, String> map = new HashMap<>();
+    BadKey k = new BadKey("a");
+    map.put(k, "v");
+    k.name = "b";
+    System.out.println(map.get(k)); // 可能 null：破坏了 hash 桶假设
+  }
+}
+\`\`\`
+
+---
+
+## 3. 知识点：List 选型
+
+| 实现 | \`get(i)\` | 尾部 \`add\` | 头插/中间插 | 备注 |
+| --- | --- | --- | --- | --- |
+| \`ArrayList\` | O(1) 摊销 | 均摊 O(1) | O(n) | 默认首选；内部数组扩容（通常 1.5×） |
+| \`LinkedList\` | O(n) | O(1) | O(1) 节点 | 随机访问差；多数业务不如 ArrayList |
+
+**学以致用**：大量随机下标访问 → \`ArrayList\`；实现 LRU 常配合 \`LinkedHashMap\` 而非盲目 \`LinkedList\`。
+
+---
+
+## 4. 知识点：Map / Set
+
+| 类型 | 有序性 | 底层直觉 |
+| --- | --- | --- |
+| \`HashMap\` | 无序 | 数组 + 链表/树 |
+| \`LinkedHashMap\` | 插入顺序 | 额外双向链表 |
+| \`TreeMap\` | 键排序 | 红黑树，\`O(log n)\` |
+
+\`HashMap.get\` 平均 O(1)；\`TreeMap\` 需要 \`Comparable\` 或 \`Comparator\`。
+
+---
+
+## 5. 知识点：迭代与 fail-fast
+
+\`\`\`java
+List<Integer> xs = new ArrayList<>(List.of(1, 2, 3));
+for (Integer x : xs) {
+  if (x == 2) xs.remove(x); // ConcurrentModificationException
+}
+\`\`\`
+
+正确姿势：用 \`Iterator.remove()\`、\`removeIf\`，或收集后再删。
+
+---
+
+## 6. 知识点：泛型与 PECS
+
+**PECS**：Producer Extends, Consumer Super。
+
+- 只**读出** \`T\`：\`List<? extends T>\`  
+- 只**写入** \`T\`：\`List<? super T>\`  
+
+**学以致用**：工具方法拷贝：
+
+\`\`\`java
+public static <T> void copy(List<? extends T> src, List<? super T> dst) {
+  for (T t : src) dst.add(t);
+}
+\`\`\`
+
+---
+
+## 7. 知识点：\`Stream\` 初用（注意副作用）
+
+\`\`\`java
+Map<String, Long> freq = words.stream()
+    .collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+\`\`\`
+
+避免在 \`forEach\` 里修改外部可变集合 unless 清楚并发语义。
+
+---
+
+## 8. Lab：购物车
+
+- \`record LineItem(ProductId id, int qty, Money price) {}\`  
+- \`Map<ProductId, LineItem> lines\`；合并同款商品数量。  
+- 覆盖 \`ProductId\` 的 equals/hashCode（或 record）。
+
+---
+
+## 9. 自测清单
+
+1. 解释 \`ArrayList\` 扩容触发点与摊销意义。  
+2. 为何「可变对象作 HashMap 键」危险？  
+3. 写 \`static <T extends Comparable<T>> T max(List<T> xs)\` 空表抛 \`NoSuchElementException\`。  
+4. fail-fast 与设计并发修改的关系？
+
+下一篇：异常、NIO.2 与线程池入门。
+`,
+  },
+  {
+    slug: 'java-fundamentals-03-exceptions-io-concurrency-intro',
+    title:
+      'Java 基础 03：异常体系、try-with-resources、IO/NIO.2 入门与并发初探',
+    date: '2026-05-02T08:18:00+08:00',
+    description:
+      '初级收尾篇：受检/非受检异常取舍、异常链与日志；现代 IO 用法；线程与 synchronized 的最小正确用法，为进阶 JUC 铺路。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', '异常', 'IO', '并发'],
+    draft: false,
+    content: `> **本篇目标**：你能用异常表达失败并保留链；用 \`try-with-resources\` 关闭资源；用 \`Files\`/\`Path\` 安全读写文本；用 \`ExecutorService\` 做批量并行并正确 \`shutdown\`。
+
+---
+
+## 1. 知识点：异常层次
+
+\`\`\`
+Throwable
+├── Error          # 严重系统问题，通常不捕获
+└── Exception
+    ├── RuntimeException  # 非受检：编程错误/不可恢复
+    └── 其他受检异常       # 调用方必须处理或 throws
+\`\`\`
+
+**取舍**：业务可恢复 → 受检或 Result 对象；编程错误/断言失败 → 非受检。不要在循环里 \`catch\` 后空块。
+
+**异常链**：
+
+\`\`\`java
+try {
+  Files.readString(Path.of("x"));
+} catch (IOException e) {
+  throw new IllegalStateException("load config failed", e);
+}
+\`\`\`
+
+---
+
+## 2. 知识点：\`try-with-resources\`
+
+\`\`\`java
+try (var in = Files.newInputStream(Path.of("data.bin"))) {
+  // use
+}
+\`\`\`
+
+任何 \`AutoCloseable\` 适用；禁止在 finally 里重复 close 导致掩盖异常——优先 try-with-resources（支持 suppressed）。
+
+---
+
+## 3. 知识点：NIO.2 常用 API
+
+| API | 说明 |
+| --- | --- |
+| \`Paths.get\` / \`Path.of\` | 路径 |
+| \`Files.readString\` / \`writeString\` | 小文本 |
+| \`Files.lines\` | \`Stream<String>\`，需 try-with-resources |
+| \`Files.walk\` | 遍历树 |
+
+**大文件**：用 \`BufferedReader\` + 行迭代，避免 \`readAllBytes()\` OOM。
+
+\`\`\`java
+long lines = 0;
+try (var br = Files.newBufferedReader(Path.of("big.log"), StandardCharsets.UTF_8)) {
+  while (br.readLine() != null) lines++;
+}
+\`\`\`
+
+---
+
+## 4. 知识点：并发入门
+
+### 4.1 \`synchronized\` 保护共享可变状态
+
+\`\`\`java
+class Counter {
+  private int n;
+  synchronized void inc() { n++; }
+  synchronized int get() { return n; }
+}
+\`\`\`
+
+\`n++\` 非原子：读-改-写，必须同步或使用 \`AtomicInteger\`。
+
+### 4.2 \`volatile\`
+
+保证可见性，不保证 \`i++\` 复合操作原子性。
+
+### 4.3 \`ExecutorService\`
+
+\`\`\`java
+import java.util.concurrent.*;
+
+try (ExecutorService pool = Executors.newFixedThreadPool(4)) {
+  Future<String> f = pool.submit(() -> "ok");
+  System.out.println(f.get(1, TimeUnit.SECONDS));
+}
+\`\`\`
+
+**学以致用**：批量任务用 \`invokeAll\`；关闭时 \`shutdown\` + \`awaitTermination\`，任务需响应中断。
+
+---
+
+## 5. Lab
+
+1. 递归统计目录下 \`.java\` 文件非空行数（跳过 \`//\`、\`/* */\` 可简化）。  
+2. 用固定 4 线程池并行计算多个文件的 SHA-256 十六进制字符串，汇总到 \`Map<Path,String>\`。
+
+---
+
+## 6. 自测清单
+
+1. 受检 vs 非受检各自一例。  
+2. \`try-with-resources\` 与单次 finally close 的差异（suppressed）。  
+3. 为何线程池必须关闭？不关闭会怎样？  
+4. \`volatile\` 能否替代 \`synchronized\` 做 counter？
+
+基础篇结束。进阶篇从 JMM 与 JUC 开始。
+`,
+  },
+  {
+    slug: 'java-advanced-01-juc-and-async',
+    title: 'Java 进阶 01：JUC、线程池、CompletableFuture 与异步组合实战',
+    date: '2026-05-02T08:24:00+08:00',
+    description:
+      '写给高级工程师：happens-before 直觉、Lock 与原子类、ExecutorService 参数含义、超时/取消/组合异步；常见踩坑与背压入门。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', '并发', 'JUC', '异步'],
+    draft: false,
+    content: `> **本篇目标**：能画出 happens-before 关系；能配置 \`ThreadPoolExecutor\` 而不是只会 \`Executors.newFixedThreadPool\`；能用 \`CompletableFuture\` 组合异步并在全链路加超时；知道 MDC/trace id 在异步里会丢。
+
+---
+
+## 1. 知识点：JMM 与 happens-before（最小集）
+
+- **程序次序**：同线程内语句顺序（在不重排破坏 as-if-serial 前提下）。  
+- **监视器锁**：解锁 happens-before 后续加锁同锁的其他线程。  
+- **\`volatile\` 写** happens-before **后续 volatile 读**。  
+- **\`Thread.start\`** happens-before 新线程任何动作；**join** 返回 happens-before 后续。  
+
+**学以致用**：解释「未同步读共享字段可能永远看到 false」的双检锁为何需要 \`volatile\` 或静态 holder。
+
+---
+
+## 2. 知识点：\`ReentrantLock\` vs \`synchronized\`
+
+| 能力 | \`synchronized\` | \`ReentrantLock\` |
+| --- | --- | --- |
+| 可中断等待 | 否 | \`lockInterruptibly\` |
+| 尝试超时 | 否 | \`tryLock\` |
+| 条件队列 | \`wait/notify\` | \`Condition\` |
+
+---
+
+## 3. 知识点：\`ThreadPoolExecutor\` 七个参数
+
+\`\`\`java
+new ThreadPoolExecutor(
+    4,                      // corePoolSize
+    8,                      // maximumPoolSize
+    60L, TimeUnit.SECONDS, // keepAliveTime
+    new ArrayBlockingQueue<>(1000),
+    Executors.defaultThreadFactory(),
+    new ThreadPoolExecutor.CallerRunsPolicy()
+);
+\`\`\`
+
+**必答**：任务进来先扩 core → 入队 → 扩到 max → 触发拒绝策略。**无界队列 + 固定 max** 会让 max 形同虚设。
+
+---
+
+## 4. 知识点：\`CompletableFuture\`
+
+| 方法 | 含义 |
+| --- | --- |
+| \`supplyAsync\` | 有返回值异步 |
+| \`thenApply\` | 转换 |
+| \`thenCompose\` | 扁平化异步 |
+| \`thenCombine\` | 合并两个独立异步 |
+| \`orTimeout\` / \`completeOnTimeout\` | Java 9+ 超时 |
+
+\`\`\`java
+CompletableFuture<String> a = CompletableFuture.supplyAsync(() -> slowA(), pool);
+CompletableFuture<String> b = CompletableFuture.supplyAsync(() -> slowB(), pool);
+String out = a.thenCombine(b, (x, y) -> x + y).orTimeout(2, TimeUnit.SECONDS).join();
+\`\`\`
+
+**坑**：业务线程池与 IO 线程池隔离；异常用 \`exceptionally\`/\`handle\` 统一映射；MDC 需手动传递或用框架封装。
+
+---
+
+## 5. 知识点：\`Semaphore\` 限流
+
+\`\`\`java
+Semaphore sem = new Semaphore(10);
+sem.acquire();
+try {
+  callRemote();
+} finally {
+  sem.release();
+}
+\`\`\`
+
+---
+
+## 6. 知识点：\`ConcurrentHashMap.computeIfAbsent\` 提醒
+
+长耗时计算禁止在 \`computeIfAbsent\` 里做且锁粒度可能阻塞其他桶——热点 key 下会放大停顿。复杂场景考虑分段加载或异步刷新。
+
+---
+
+## 7. Lab
+
+并行调用三个模拟延迟服务（\`Thread.sleep\`），合并 JSON 字段；全链路 2s 超时，超时返回降级对象；统计超时次数用 \`LongAdder\`。
+
+---
+
+## 8. 自测清单
+
+1. 说出两条 happens-before 规则并举例。  
+2. \`CallerRunsPolicy\` 对系统负载意味着什么？  
+3. \`thenCompose\` 与 \`thenApply\` 区别？  
+4. 为何异步链路里日志找不到 traceId？
+
+下一篇：JVM 与 GC。
+`,
+  },
+  {
+    slug: 'java-advanced-02-jvm-and-gc',
+    title: 'Java 进阶 02：JVM 运行时、GC 与调参入门（从现象到证据）',
+    date: '2026-05-02T08:30:00+08:00',
+    description:
+      '堆/栈/元空间、对象分配与 TLAB、常见 GC 算法对比、GC 日志与 jcmd/jstack 入门；Stop-The-World 与延迟取舍，避免迷信参数大全。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', 'JVM', 'GC', '性能'],
+    draft: false,
+    content: `> **本篇目标**：能说清堆、栈、元空间职责；知道 Young/Old GC 直觉；能打开 GC 日志并从 pause 与频次入手分析；避免「盲目 -Xmx」。
+
+---
+
+## 1. 知识点：运行时数据区（HotSpot 心智）
+
+| 区域 | 存什么 | GC 参与 |
+| --- | --- | --- |
+| 虚拟机栈 | 栈帧、局部变量 | 否 |
+| 堆 | 对象实例 | 是（主战场） |
+| 元空间 | 类元数据 | 部分回收/卸载 |
+| 直接内存 | NIO Buffer 等 | \`Cleaner\`，需警惕泄漏 |
+
+---
+
+## 2. 知识点：分代收集直觉
+
+- **Young GC**：短命对象批量回收，通常频繁但 pause 较短（取决于收集器与存活）。  
+- **Old/Major**：老年代不足或晋升失败触发；pause 往往更长。  
+- **Full GC**：整堆压缩类操作（口语常混用）；需看具体收集器日志。
+
+**分配速率**：单位时间新建对象量过高 → Young GC 过密 → CPU 消耗在 GC。
+
+---
+
+## 3. 知识点：常用 JVM 参数（JDK 11+，示例）
+
+> 具体收集器名随 JDK 变化，以官方文档为准；原则是「先开日志，再调堆」。
+
+\`\`\`text
+-Xms2g -Xmx2g
+-XX:+AlwaysPreTouch
+-XX:+UseStringDeduplication   # 视场景
+-Xlog:gc*:file=gc.log:time,uptime,level,tags
+\`\`\`
+
+**学以致用**：堆 \`-Xms=-Xmx\` 减少 resize；生产开启 GC 日志轮转。
+
+---
+
+## 4. 知识点：诊断命令（示例）
+
+\`\`\`bash
+jcmd <pid> VM.flags
+jcmd <pid> GC.heap_info
+jstack <pid> > threads.txt
+\`\`\`
+
+CPU 高：优先线程栈看锁与 RUNNABLE 热点；再结合剖析工具。
+
+---
+
+## 5. Lab
+
+写循环分配短命 \`byte[]\`（例如 1MB × N），固定堆 512MB，打开 \`-Xlog:gc*\`，记录 Young GC 次数与最大 pause。
+
+---
+
+## 6. 自测清单
+
+1. 栈溢出 vs 堆 OOM 典型栈特征？  
+2. 为何「增大堆」不一定降低 pause？  
+3. Young GC 过密可能说明什么？  
+4. 如何用 \`jstack\` 怀疑死锁？
+
+下一篇：Spring 事务与集成边界。
+`,
+  },
+  {
+    slug: 'java-advanced-03-spring-ecosystem',
+    title: 'Java 进阶 03：Spring 生态与典型服务端架构（IoC、AOP、事务与集成）',
+    date: '2026-05-02T08:36:00+08:00',
+    description:
+      'Spring Boot 心智：依赖注入与 Bean 生命周期、AOP 的典型用途、声明式事务传播与失效场景；与 Web、持久化、缓存、消息的常见集成边界。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', 'Spring', '架构', '后端'],
+    draft: false,
+    content: `> **本篇目标**：能描述 Bean 生命周期与代理对象；能解释 \`@Transactional\` 传播、\`rollbackFor\`、只读事务；能列举至少三种「事务不生效」；能说清缓存与 DB 一致性常见路径。
+
+---
+
+## 1. 知识点：IoC 容器要点
+
+- **BeanDefinition → 实例化 → 属性注入 → 初始化回调 → 就绪**。  
+- **作用域**：\`singleton\`（默认）、\`prototype\`、\`request\`/\`session\`（Web）。  
+- **循环依赖**：Spring 用三级缓存解决部分字段注入场景；构造器循环仍应避免——设计问题。
+
+---
+
+## 2. 知识点：AOP 代理
+
+| 方式 | 适用 | 限制 |
+| --- | --- | --- |
+| JDK 动态代理 | 接口 | 只能代理接口方法 |
+| CGLIB | 类 | \`final\` 方法不可拦截 |
+
+**自调用陷阱**：同类 \`this.foo()\` 不走代理 → \`@Transactional\`/\`@Cacheable\` 可能失效。
+
+**修复**：拆 \`@Service\`、自注入（谨慎）、或 \`AopContext.currentProxy()\`（需开启 expose）。
+
+---
+
+## 3. 知识点：\`@Transactional\`
+
+**传播**（常用）：
+
+| 传播 | 语义 |
+| --- | --- |
+| \`REQUIRED\`（默认） | 加入当前事务；无则新建 |
+| \`REQUIRES_NEW\` | 挂起当前，开新事务 |
+| \`NESTED\` | 嵌套保存点（DataSource 支持） |
+
+**rollbackFor**：默认不回滚受检异常——业务异常若是 checked，必须指定。
+
+\`\`\`java
+@Transactional(rollbackFor = Exception.class)
+public void placeOrder(...) { ... }
+\`\`\`
+
+**只读**：优化 hint + 避免无意写入；仍可能因驱动忽略而不绝对。
+
+---
+
+## 4. 知识点：事务边界设计
+
+- 远程 RPC、发消息、跨库：**与本地事务解耦**（Outbox 见精通篇）。  
+- 重逻辑移出事务：缩短锁持有，降低死锁概率。
+
+---
+
+## 5. 知识点：缓存三连击
+
+| 问题 | 处置思路 |
+| --- | --- |
+| 穿透 | 布隆过滤器或缓存空值（短 TTL） |
+| 击穿 | 热点互斥或逻辑过期 |
+| 雪崩 | TTL 抖动、集群、限流 |
+
+更新路径：**先 DB 再删缓存** 或 **订阅 binlog**——团队选一种并文档化。
+
+---
+
+## 6. Lab（迷你转账）
+
+- \`transfer(from,to,amount)\`：\`REQUIRES_NEW\` 审计日志 vs \`REQUIRED\` 同事务对比。  
+- 故意同类 \`private @Transactional\` 自调用观察失效。
+
+---
+
+## 7. 自测清单
+
+1. 三种事务失效场景。  
+2. \`REQUIRES_NEW\` 典型用途？  
+3. 缓存与 DB 不一致的常见触发？  
+4. JDK 代理为何导致注入自身失效？
+
+进阶篇结束。
+`,
+  },
+  {
+    slug: 'java-expert-01-distributed-consistency',
+    title: 'Java 精通 01：分布式一致性、事务模式与幂等——从理论到可交付方案',
+    date: '2026-05-02T08:42:00+08:00',
+    description:
+      '面向资深/专家：CAP 的实践读法、BASE、2PC/Saga/TCC 的取舍、Outbox 与消息语义；Java 业务里如何实现幂等与补偿的可观测闭环。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', '分布式', '一致性', '架构'],
+    draft: false,
+    content: `> **本篇目标**：能把 CAP 讲成工程取舍；能为订单类业务画状态机；能设计幂等键与去重表；能口述 Outbox 解决的原子性问题；知道至少一次投递下为何必须幂等。
+
+---
+
+## 1. 知识点：CAP 的工程读法
+
+分区发生时：**一致性 vs 可用性**拉扯。多数互联网业务选择「最终一致 + 可观测补偿」，而不是强行线性一致一切读。
+
+---
+
+## 2. 知识点：订单状态机（示例）
+
+| 状态 | 允许事件 | 下一状态 |
+| --- | --- | --- |
+| CREATED | PAY | PAID |
+| PAID | SHIP | SHIPPED |
+| SHIPPED | CONFIRM | DONE |
+
+非法迁移返回业务错误码；状态迁移与幂等键同事务写入。
+
+---
+
+## 3. 知识点：幂等表（示意 DDL）
+
+\`\`\`sql
+CREATE TABLE idempotency (
+  biz_key    VARCHAR(64) PRIMARY KEY,
+  response   TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL
+);
+\`\`\`
+
+处理流程：\`INSERT\` 幂等键冲突 → 直接返回历史响应；成功则写入响应 JSON。
+
+并发：\`PRIMARY KEY\` + 捕获 duplicate key，或用 DB 事务隔离。
+
+---
+
+## 4. 知识点：Saga
+
+长事务拆本地事务 + 补偿：每笔本地事务可提交，失败执行逆操作。**要点**：补偿也要幂等；状态机记录当前步骤。
+
+---
+
+## 5. 知识点：Outbox
+
+问题：**写库成功、发消息失败** → 不一致。
+
+做法：业务事务内写 \`outbox\` 表；异步线程扫描 \`published=false\` 投递 MQ；成功后标记。
+
+\`\`\`sql
+CREATE TABLE outbox (
+  id BIGSERIAL PRIMARY KEY,
+  payload JSONB NOT NULL,
+  published BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL
+);
+\`\`\`
+
+---
+
+## 6. 知识点：消息语义
+
+| 语义 | 含义 | 消费者 |
+| --- | --- | --- |
+| at-most-once | 可能丢 | 简单 |
+| at-least-once | 可能重复 | 必须幂等 |
+| exactly-once | 端到端代价高 | 事务消息或幂等 + 去重 |
+
+---
+
+## 7. Lab
+
+画出「下单→扣库存→支付回调」三状态机；写出幂等键命名规范（\`bizType + bizId + operation\`）；伪代码 Outbox 发布器循环。
+
+---
+
+## 8. 自测清单
+
+1. Outbox 相对「先发消息后写库」解决什么？  
+2. Saga 补偿失败怎么办？  
+3. 为何不能用 wall clock 做全局顺序？  
+4. at-least-once + 非幂等 Consumer 会怎样？
+`,
+  },
+  {
+    slug: 'java-expert-02-performance-and-observability',
+    title: 'Java 精通 02：性能剖析、容量规划与可观测性（指标 · 日志 · 链路）',
+    date: '2026-05-02T08:48:00+08:00',
+    description:
+      '专家必备：从基准测试误区到火焰图/JFR、线程与分配剖析；RED/USE 类指标、结构化日志、分布式追踪与 SLO；压测如何服务于容量决策。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', '性能', '可观测性', 'SLO'],
+    draft: false,
+    content: `> **本篇目标**：能制定 RED 指标；能解释 p99 抬升而均值不变；能列出基准测试误区；能设计结构化日志字段；能把压测结论映射到扩容/限流/缓存。
+
+---
+
+## 1. 知识点：Golden signals（RED + 扩展）
+
+| 信号 | 例子 |
+| --- | --- |
+| Rate | QPS |
+| Errors | 5xx 比例 |
+| Duration | p95/p99 延迟 |
+
+Saturation：线程池队列长度、连接池等待时间、CPU runnable 队列。
+
+---
+
+## 2. 知识点：分位数比均值诚实
+
+p99 变差常由尾部锁等待、GC pause、偶发慢查询引起——均值仍「好看」。
+
+---
+
+## 3. 知识点：基准测试误区（JMH 心智）
+
+- 未预热 JIT  
+- 死代码消除  
+- 共享计数竞争  
+- 测试数据不符合生产分布  
+
+微基准结论默认「仅供参考」，上线以线上剖析为准。
+
+---
+
+## 4. 知识点：剖析路径
+
+1. 外部依赖 RT / 错误率  
+2. 线程栈锁竞争  
+3. GC 日志 pause  
+4. CPU 火焰图热点  
+
+---
+
+## 5. 知识点：日志字段规范（示例）
+
+\`\`\`json
+{"ts":"ISO-8601","level":"INFO","traceId":"...","spanId":"...","svc":"order","msg":"placed","orderId":"..."}
+\`\`\`
+
+规则：**稳定字段名**、**禁止拼接 PII**、采样降本。
+
+---
+
+## 6. 知识点：SLO 模板
+
+- **SLI**：成功请求延迟 < 300ms 的比例  
+- **SLO**：30 天内 SLI ≥ 99.9%  
+- **错误预算**：1 - SLO，用于发布节奏
+
+---
+
+## 7. Lab
+
+写出你负责服务的 3 个 SLI、对应的采集方式（Micrometer/Prometheus 等）、报警阈值与「仅工单不电话」的降噪策略。
+
+---
+
+## 8. 自测清单
+
+1. p99 上升排查顺序？  
+2. 线程池队列持续增长意味着什么？  
+3. 为何日志采样要与 trace 关联？  
+4. 错误预算耗尽时团队该做什么？
+`,
+  },
+  {
+    slug: 'java-expert-03-architecture-and-ddd',
+    title: 'Java 精通 03：架构演进、模块化单体与领域建模（专家级的边界与治理）',
+    date: '2026-05-02T08:54:00+08:00',
+    description:
+      '微服务不是默认答案：模块化单体、限界上下文、聚合与领域事件、API 版本化与契约测试；多团队协作下的架构治理与演进策略。',
+    series: JAVA_TEACHING_SERIES,
+    tags: ['Java', '架构', 'DDD', '微服务'],
+    draft: false,
+    content: `> **本篇目标**：能解释限界上下文；能划定聚合一致性边界；能写一页 ADR；能批判「为微服务而微服务」。
+
+---
+
+## 1. 知识点：模块化单体
+
+在单部署单元内用 **Maven/Gradle 模块 + 包边界 + ArchUnit** 约束依赖，降低分布式复杂度。
+
+---
+
+## 2. 知识点：限界上下文（例：电商）
+
+| 上下文 | 核心概念 | 对外接口 |
+| --- | --- | --- |
+| 目录 | SKU、类目 | 查询 API |
+| 库存 | 预留、扣减 | 预留命令 |
+| 订单 | 订单、支付状态 | 下单用例 |
+
+上下文之间 **防腐层** 翻译 DTO，禁止领域模型泄漏。
+
+---
+
+## 3. 知识点：聚合
+
+一致性边界：**一个事务修改一个聚合根**；跨聚合用最终一致（事件/消息）。
+
+反模式：巨型聚合导致长事务、热点锁。
+
+---
+
+## 4. 知识点：API 演进
+
+- 兼容字段只增不减（或通过版本隔离）  
+- 破坏性变更：双写、灰度、回放测试  
+- **契约测试**：消费者驱动契约（Pact）或提供者验证
+
+---
+
+## 5. 知识点：ADR 模板
+
+\`\`\`text
+# ADR-12：订单拆分库存上下文
+
+## 状态
+Accepted
+
+## 上下文
+单体耦合导致发布停摆...
+
+## 决策
+引入库存服务，订单通过同步 API 预留...
+
+## 后果
++ 独立扩缩容
+- RT 依赖增加，需要超时与舱壁
+\`\`\`
+
+---
+
+## 6. Lab
+
+为你当前系统画上下文映射（upstream/downstream）；写 ADR 记录「为何不拆支付」。
+
+---
+
+## 7. 自测清单
+
+1. 聚合 vs 实体 vs 值对象职责？  
+2. 防腐层解决什么？  
+3. 两个「伪微服务」信号？  
+4. ADR 与 RFC 差异心智？
+
+系列闭环：回到 \`java-00-roadmap\` 做分层复盘，把 Lab 产物沉淀为团队 wiki。
+`,
   },
 ];
