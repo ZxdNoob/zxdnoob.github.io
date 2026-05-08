@@ -11,10 +11,15 @@ export {
   nextToolCallId,
 } from './tools';
 export { runAgent } from './runner';
+export { streamChat } from './llm-client';
+export type { LLMChatMessage } from './llm-client';
 export {
   clientFetchPosts,
   clientFetchPostContent,
   clientFetchChangelog,
   clientFetchResume,
+  clientFetchPostSearch,
+  clientFetchRelevantPassages,
   clearAgentClientCache,
 } from './client-fetchers';
+export type { PostSearchHit, PostSearchPassage } from './client-fetchers';

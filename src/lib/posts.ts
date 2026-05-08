@@ -27,6 +27,12 @@ export type Post = PostSummary & {
   content: string;
 };
 
+/** 与后端 `PostSearchHit` 对齐：摘要 + 相关性分值 + 站内 URL */
+export type PostHit = PostSummary & {
+  score: number;
+  url: string;
+};
+
 /** 内部通用 GET：404/网络错误返回 null，由上层决定默认空列表或 notFound。 */
 async function fetchJson<T>(path: string): Promise<T | null> {
   const base = getBackendBaseUrl();
@@ -54,6 +60,50 @@ export async function fetchAllPostSummaries(): Promise<PostSummary[]> {
 /** 单篇详情；不存在或未发布返回 `null` */
 export async function fetchPostBySlug(slug: string): Promise<Post | null> {
   return fetchJson<Post>(`/api/posts/${encodeURIComponent(slug)}`);
+}
+
+/** 服务端：拉取相关阅读（SSG 友好，文章页末尾使用）。失败/无相关项返回空数组。 */
+export async function fetchRelatedPosts(
+  slug: string,
+  limit = 4,
+): Promise<PostHit[]> {
+  const safeLim = Math.min(10, Math.max(1, Math.round(limit)));
+  const data = await fetchJson<{ slug: string; related: PostHit[] }>(
+    `/api/posts/${encodeURIComponent(slug)}/related?limit=${safeLim}`,
+  );
+  return data?.related ?? [];
+}
+
+/** 服务端：拉取「今日精选」（SSG 时按构建当天选；客户端可二次校正） */
+export async function fetchDailyPick(): Promise<PostSummary | null> {
+  return fetchJson<PostSummary>(`/api/posts/daily-pick`);
+}
+
+/** 知识图谱节点 / 边 */
+export type GraphNode = {
+  slug: string;
+  title: string;
+  series: string;
+  tags: string[];
+  readingMinutes: number;
+  url: string;
+};
+export type GraphLink = {
+  source: string;
+  target: string;
+  weight: number;
+};
+export type PostsGraph = {
+  nodes: GraphNode[];
+  links: GraphLink[];
+};
+
+/** 服务端：拉取知识图谱（用于 `/blog/graph` 页 SSG） */
+export async function fetchPostsGraph(threshold = 1.0): Promise<PostsGraph> {
+  const data = await fetchJson<PostsGraph>(
+    `/api/posts/graph?threshold=${encodeURIComponent(threshold)}`,
+  );
+  return data ?? { nodes: [], links: [] };
 }
 
 /**

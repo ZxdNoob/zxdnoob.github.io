@@ -10,6 +10,7 @@
 import type { ChangelogEntry } from '@/lib/changelog';
 import type { PostSummary } from '@/lib/posts';
 import type { ResumePayload } from '@/lib/resume-types';
+import type { PostSearchHit, PostSearchPassage } from './client-fetchers';
 
 /** 消息角色 */
 export type AgentRole = 'system' | 'user' | 'assistant' | 'tool';
@@ -76,6 +77,13 @@ export interface AgentToolContext {
   fetchPostContent: (slug: string) => Promise<string | null>;
   fetchChangelog: () => Promise<ChangelogEntry[]>;
   fetchResume: () => Promise<ResumePayload | null>;
+  /** RAG：FTS5 全文搜索（命中标题/描述/正文/标签） */
+  fetchPostSearch: (query: string, limit?: number) => Promise<PostSearchHit[]>;
+  /** RAG：返回最相关的正文片段（含 `<mark>` 高亮） */
+  fetchRelevantPassages: (
+    query: string,
+    limit?: number,
+  ) => Promise<PostSearchPassage[]>;
 }
 
 /** 工具定义：name/description/JSON Schema 兼容 OpenAI 的 `tools` 字段 */

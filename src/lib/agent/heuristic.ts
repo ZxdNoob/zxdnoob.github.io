@@ -200,10 +200,11 @@ function planFromInput(input: string): IntentPlan {
     raw.match(/(?:关于|有关)(.+?)(?:的文章|的内容|的笔记)?$/);
   if (searchMatch && searchMatch[1]) {
     const q = searchMatch[1].trim().replace(/[?？!！。.\s]+$/g, '');
-    if (q && q.length <= 40) {
+    if (q && q.length <= 60) {
+      /** 优先走全文检索（FTS5），失败由后端自动回退 LIKE，再不行 search_posts 兜底 */
       return {
-        text: `好，我来搜一下「${q}」。`,
-        calls: [makeCall('search_posts', { query: q, limit: 5 })],
+        text: `好，我用全文检索找一下「${q}」。`,
+        calls: [makeCall('semantic_search_posts', { query: q, limit: 5 })],
       };
     }
   }
@@ -220,11 +221,11 @@ function planFromInput(input: string): IntentPlan {
     };
   }
 
-  /** 10) 兜底：如果用户问句较长，按全文做一次搜索 */
-  if (raw.length >= 2 && raw.length <= 40) {
+  /** 10) 兜底：用 FTS5 做一次全文搜索，附带告知未接入 LLM */
+  if (raw.length >= 2 && raw.length <= 80) {
     return {
-      text: `还没接入 LLM，先按关键字给你搜一下「${raw}」。如需对话能力，可在部署时配置 NEXT_PUBLIC_AGENT_BASE_URL / NEXT_PUBLIC_AGENT_MODEL。`,
-      calls: [makeCall('search_posts', { query: raw, limit: 5 })],
+      text: `还没接入 LLM，我用全文检索给你搜一下「${raw}」。如需开放式问答，可在部署时配置 NEXT_PUBLIC_AGENT_BASE_URL / NEXT_PUBLIC_AGENT_MODEL。`,
+      calls: [makeCall('semantic_search_posts', { query: raw, limit: 5 })],
     };
   }
 

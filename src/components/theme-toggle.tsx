@@ -52,9 +52,22 @@ function applyClass(isDark: boolean) {
   document.documentElement.classList.toggle('dark', isDark);
 }
 
-/** 主题切换瞬间给根节点加 `theme-changing`，便于 CSS 抑制过渡闪屏。 */
+/**
+ * 主题切换：现代浏览器走 View Transitions（淡出 + 淡入），老浏览器降级 `theme-changing` 抑制闪屏。
+ * 注意：View Transitions 会快照整个 root，所以即便切深色背景也是丝滑过渡。
+ */
 function withThemeChangeFreeze(fn: () => void) {
   const root = document.documentElement;
+  type DocWithVT = Document & {
+    startViewTransition?: (cb: () => void) => { finished: Promise<void> };
+  };
+  const doc = document as DocWithVT;
+  if (typeof doc.startViewTransition === 'function') {
+    root.classList.add('theme-flipping');
+    const t = doc.startViewTransition(fn);
+    void t.finished.finally(() => root.classList.remove('theme-flipping'));
+    return;
+  }
   root.classList.add('theme-changing');
   fn();
   window.setTimeout(() => {

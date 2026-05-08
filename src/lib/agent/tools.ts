@@ -226,6 +226,62 @@ const TOOLS: AgentTool[] = [
     },
     execute: createCopyText(),
   },
+  {
+    definition: {
+      name: 'semantic_search_posts',
+      description:
+        '基于 SQLite FTS5 的全文搜索：命中标题/描述/正文/标签，按 BM25 相关度排序。比 search_posts 更适合「关于 xxx 的内容」「介绍 yyy 的文章」这类需要进入正文匹配的查询；如果失败可降级为 search_posts。',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: '搜索关键字或自然语言短语' },
+          limit: {
+            type: 'number',
+            description: '返回条数上限，默认 6，最多 12',
+          },
+        },
+        required: ['query'],
+      },
+    },
+    execute: createSemanticSearchPosts(),
+  },
+  {
+    definition: {
+      name: 'find_relevant_passages',
+      description:
+        'RAG 段落检索：返回若干篇文章中与 query 最相关的正文片段（含 <mark> 高亮）。当用户提出「在你的文章里有没有提到…」「请基于你的博客回答…」这类需要溯源的问题时优先使用，**多取一些段落（建议 8-10 条）**，然后在回答前自行评估每段的相关度，**只引用 top 2-3 段**，并明确告诉读者引用了哪些段。',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: '问题或查询，可较长，可包含完整句子',
+          },
+          limit: {
+            type: 'number',
+            description: '段落数上限，默认 8（推荐多取以便重排），最多 12',
+          },
+        },
+        required: ['query'],
+      },
+    },
+    execute: createFindRelevantPassages(),
+  },
+  {
+    definition: {
+      name: 'summarize_post',
+      description:
+        '获取指定文章的正文（自动截断到合理长度）+ 显式摘要指令。模型应基于返回的 content 生成一段 3-5 句的中文摘要 + 关键观点 + 推荐阅读人群；不要复制原文，要重新组织。',
+      parameters: {
+        type: 'object',
+        properties: {
+          slug: { type: 'string', description: '文章 slug' },
+        },
+        required: ['slug'],
+      },
+    },
+    execute: createSummarizePost(),
+  },
 ];
 
 function createListPosts(): AgentToolExecutor {
@@ -477,6 +533,140 @@ function createCopyText(): AgentToolExecutor {
     return ok2
       ? ok(callId, 'copy_text', '已复制到剪贴板。', { length: text.length })
       : fail(callId, 'copy_text', '剪贴板不可用，请手动复制。', { text });
+  };
+}
+
+function createSemanticSearchPosts(): AgentToolExecutor {
+  return async (args, ctx) => {
+    const callId = getStr(args, '_callId') || nextToolCallId();
+    const query = getStr(args, 'query').trim();
+    const limit = Math.min(
+      12,
+      Math.max(1, Math.round(getNum(args, 'limit', 6))),
+    );
+    if (!query) {
+      return fail(callId, 'semantic_search_posts', '没有提供搜索关键字。');
+    }
+    const hits = await ctx.fetchPostSearch(query, limit);
+    if (hits.length === 0) {
+      return ok(
+        callId,
+        'semantic_search_posts',
+        `没有找到与「${query}」相关的文章。`,
+        { posts: [], query },
+      );
+    }
+    return ok(
+      callId,
+      'semantic_search_posts',
+      `命中 ${hits.length} 篇与「${query}」相关的文章。`,
+      {
+        query,
+        posts: hits.map((h) => ({
+          slug: h.slug,
+          title: h.title,
+          description: h.description,
+          url: h.url,
+          date: h.date,
+          publishedAtLabel: formatPostPublishedAt(h.date, 'short'),
+          readingMinutes: h.readingMinutes,
+          series: h.series ?? null,
+          tags: h.tags ?? [],
+          score: Number.isFinite(h.score) ? h.score : 0,
+        })),
+      },
+    );
+  };
+}
+
+function createFindRelevantPassages(): AgentToolExecutor {
+  return async (args, ctx) => {
+    const callId = getStr(args, '_callId') || nextToolCallId();
+    const query = getStr(args, 'query').trim();
+    /** 默认取 8（建议重排选 top 3）；上限 12，避免 token 爆炸 */
+    const limit = Math.min(
+      12,
+      Math.max(1, Math.round(getNum(args, 'limit', 8))),
+    );
+    if (!query) {
+      return fail(callId, 'find_relevant_passages', '没有提供查询。');
+    }
+    const passages = await ctx.fetchRelevantPassages(query, limit);
+    if (passages.length === 0) {
+      return ok(
+        callId,
+        'find_relevant_passages',
+        `没有从博客正文里找到与「${query}」相关的段落。`,
+        { passages: [], query },
+      );
+    }
+    /** snippet 中的 <mark> 标签保留以便 LLM 识别命中词；同时给一个去标签版本以便直接引用 */
+    const cleaned = passages.map((p, i) => ({
+      /** rank 从 1 开始，让 LLM 在「我引用了第 1, 3 段」时表达更自然 */
+      rank: i + 1,
+      slug: p.slug,
+      title: p.title,
+      url: p.url,
+      date: p.date,
+      publishedAtLabel: formatPostPublishedAt(p.date, 'short'),
+      snippet: p.snippet,
+      snippetText: p.snippet.replace(/<\/?mark>/g, ''),
+    }));
+    /**
+     * 在 summary 里直接给 LLM 重排指令 — 这样 prompt 不必每次提醒，工具返回值本身在引导。
+     * 这是「让工具自带 meta-instruction」的设计，比单纯加 system prompt 更稳。
+     */
+    const instruction = [
+      `候选段落 ${cleaned.length} 段，按 hybrid 检索原始顺序给出。`,
+      '请先快速评估每段的相关度（高/中/低），',
+      '只在回答中引用最相关的 2-3 段，并对每段标注来源链接。',
+      '若候选都不直接相关，请坦诚告知用户「博客里暂未涉及」。',
+    ].join('');
+    return ok(
+      callId,
+      'find_relevant_passages',
+      `命中 ${cleaned.length} 段相关正文。${instruction}`,
+      { query, passages: cleaned, instruction },
+    );
+  };
+}
+
+function createSummarizePost(): AgentToolExecutor {
+  return async (args, ctx) => {
+    const callId = getStr(args, '_callId') || nextToolCallId();
+    const slug = getStr(args, 'slug').trim();
+    if (!slug) return fail(callId, 'summarize_post', '没有提供 slug。');
+    const md = await ctx.fetchPostContent(slug);
+    if (!md) {
+      return fail(
+        callId,
+        'summarize_post',
+        `没有找到 slug 为「${slug}」的文章。`,
+      );
+    }
+    /** 给 LLM 截断到 8000 字，含代码块；保留正文头部，覆盖大多数博客摘要场景 */
+    const truncated =
+      md.length > 8000 ? `${md.slice(0, 8000)}\n\n…（已截断）` : md;
+    const instruction = [
+      '请基于下面的 Markdown 正文，用简洁中文输出：',
+      '1) 一段 3-5 句的整体摘要（不要复制原文）；',
+      '2) 3-5 条核心观点 / 要点（短句，每条 ≤ 30 字）；',
+      '3) 一句「适合谁读」推荐。',
+      '',
+      '不要编造文中没有的内容；如不确定，直接说不确定。',
+    ].join('\n');
+    return ok(
+      callId,
+      'summarize_post',
+      `已加载文章正文（${md.length} 字符）用于摘要。`,
+      {
+        slug,
+        url: `/blog/${slug}`,
+        content: truncated,
+        contentLength: md.length,
+        instruction,
+      },
+    );
   };
 }
 

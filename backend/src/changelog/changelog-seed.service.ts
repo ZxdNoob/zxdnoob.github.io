@@ -80,6 +80,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_014,
       SEED_RELEASE_015,
       SEED_RELEASE_016,
+      SEED_RELEASE_017,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -713,6 +714,61 @@ const SEED_RELEASE_016: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：前端版本升级至 0.1.1；后端版本升级至 0.0.8，并在版本历史中同步记录。',
+    },
+  ],
+};
+
+const SEED_RELEASE_017: Partial<ChangelogReleaseEntity> = {
+  date: '2026-05-08T18:00:00',
+  title: '混合检索、阅读增强与 PWA / OG（Web 0.1.2 / API 0.0.9）',
+  webVersion: '0.1.2',
+  apiVersion: '0.0.9',
+  sortOrder: 16,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '文章检索增强：SQLite FTS5 与基于重叠度的 RRF 融合排序；新增 `GET /api/posts/search` 与 Agent 工具 `semantic_search_posts` 对接。',
+    },
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '阅读与发现 API：新增 `POST /api/posts/relevant`、`GET /api/posts/:slug/related`、`GET /api/posts/daily-pick` 与 `GET /api/posts/graph`（节点/边供知识图谱页消费）。',
+    },
+    {
+      kind: 'perf',
+      surface: 'api',
+      text: 'Agent RAG：`find_relevant_passages` 扩大候选并取 Top 10；系统提示引导模型先评估相关性再引用，减少误引与幻觉。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '博客阅读体验：文章页「相关阅读」与「每日精选」；文末集成 Giscus（GitHub Discussions）评论；主题切换启用 View Transitions。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '站内 AI：首页 Hero 可发起对话、文章页 Post Companion；命令面板未命中时转入 Agent；向导工具与后端新检索/相关接口对齐。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: 'PWA：`manifest`、Service Worker 离线缓存（HTML / 静态资源 / 近期文章）与注册组件。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '社交分享：`app/blog/[slug]/opengraph-image` 在构建期生成品牌化 OG 图；站点级默认 OG 图补充。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '新增 `/blog/graph`：力导向 SVG 可视化文章关联网络。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：前端版本升级至 0.1.2；后端版本升级至 0.0.9，并在版本历史中同步记录。',
     },
   ],
 };

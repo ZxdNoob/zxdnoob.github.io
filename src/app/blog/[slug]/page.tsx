@@ -5,15 +5,22 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import {
+  PostCompanion,
+  PostSelectionAssistant,
+} from '@/components/agent/post-companion';
+import { GiscusComments } from '@/components/giscus-comments';
 import { PageViewRecorder } from '@/components/page-view';
 import { PostBody } from '@/components/post-body';
 import { ReadingToolbar } from '@/components/reading-toolbar';
+import { RelatedPosts } from '@/components/related-posts';
 import { ScrollProgress } from '@/components/scroll-progress';
 import { TableOfContents } from '@/components/table-of-contents';
 import {
   STATIC_EXPORT_PLACEHOLDER_SLUG,
   fetchAllPostSummaries,
   fetchPostBySlug,
+  fetchRelatedPosts,
   formatPostPublishedAt,
   postPublishedAtIso,
   readingMinutesFromMarkdown,
@@ -90,9 +97,10 @@ export default async function BlogPostPage(props: Props) {
   }
 
   const showViewStats = isPublicViewStatsEnabled();
-  const [post, initialViews] = await Promise.all([
+  const [post, initialViews, related] = await Promise.all([
     fetchPostBySlug(slug),
     showViewStats ? fetchViewCount(slug) : Promise.resolve(0),
+    fetchRelatedPosts(slug, 4),
   ]);
   if (!post || post.draft) notFound();
 
@@ -173,10 +181,14 @@ export default async function BlogPostPage(props: Props) {
               ) : null}
               <div className="mt-8 h-px bg-gradient-to-r from-[var(--border)] via-[var(--border)]/60 to-transparent" />
             </header>
+            <PostCompanion slug={slug} title={post.title} />
             <div className="pt-2">
               <PostBody content={post.content} />
             </div>
-            <footer className="mt-16 border-t border-[var(--border)]/60 pt-8">
+            <PostSelectionAssistant title={post.title} />
+            <RelatedPosts posts={related} />
+            <GiscusComments slug={slug} title={post.title} />
+            <footer className="mt-12 border-t border-[var(--border)]/60 pt-8">
               <Link
                 href="/blog"
                 className="group inline-flex items-center text-sm font-medium text-stone-500 transition-colors hover:text-[var(--accent)] dark:text-stone-400"

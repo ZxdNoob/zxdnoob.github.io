@@ -3,6 +3,7 @@ import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
 import { AgentLauncher } from '@/components/agent/agent-launcher';
 import { BfcacheRevealRestore } from '@/components/bfcache-reveal-restore';
 import { CommandPalette } from '@/components/command-palette';
+import { ServiceWorkerRegistry } from '@/components/service-worker-registry';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { SiteViewRecorder } from '@/components/site-view-recorder';
@@ -115,6 +116,7 @@ export default async function RootLayout({
         <ToastViewport />
         <CommandPalette />
         <AgentLauncher />
+        <ServiceWorkerRegistry />
       </body>
     </html>
   );

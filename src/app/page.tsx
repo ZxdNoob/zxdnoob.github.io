@@ -1,12 +1,15 @@
 import Link from 'next/link';
 import { AnimatedCounter } from '@/components/animated-counter';
+import { DailyPick } from '@/components/daily-pick';
 import { HeroCanvas } from '@/components/hero-canvas';
+import { HeroPrompt } from '@/components/agent/hero-prompt';
 import { PageViewBadge } from '@/components/page-view';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { SpotlightCard } from '@/components/spotlight-card';
 import { AGENT_TAGLINE } from '@/lib/agent';
 import {
   fetchAllPostSummaries,
+  fetchDailyPick,
   formatPostPublishedAt,
   postPublishedAtIso,
 } from '@/lib/posts';
@@ -189,7 +192,11 @@ const TECH_STACK = [
 ];
 
 export default async function HomePage() {
-  const all = await fetchAllPostSummaries();
+  /** 并行：文章列表、今日精选、统计数据；其中 `daily-pick` 在空库时返回 null */
+  const [all, dailyPick] = await Promise.all([
+    fetchAllPostSummaries(),
+    fetchDailyPick(),
+  ]);
   const posts = all.slice(0, 3);
   const featured = posts[0];
   const rest = posts.slice(1);
@@ -238,10 +245,18 @@ export default async function HomePage() {
             {site.description}
           </p>
 
+          {/* AI Prompt Hero — 站内 AI 向导一句话直达内容 */}
+          <div
+            className="animate-in mt-10 max-w-2xl"
+            style={{ animationDelay: '200ms' }}
+          >
+            <HeroPrompt />
+          </div>
+
           {/* CTA Buttons */}
           <div
-            className="animate-in mt-10 flex flex-wrap items-center gap-4"
-            style={{ animationDelay: '240ms' }}
+            className="animate-in mt-8 flex flex-wrap items-center gap-4"
+            style={{ animationDelay: '280ms' }}
           >
             <Link
               href="/blog"
@@ -262,7 +277,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/agent"
-              className="inline-flex items-center justify-center rounded-full border border-sky-300/60 bg-gradient-to-br from-sky-50/90 to-indigo-50/40 px-7 py-3.5 text-sm font-semibold text-sky-900 shadow-sm transition-all hover:border-sky-400/80 hover:shadow-md active:scale-[0.98] dark:border-sky-500/25 dark:from-sky-950/40 dark:to-indigo-950/30 dark:text-sky-100 dark:hover:border-sky-400/40"
+              className="inline-flex items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)]/80 px-7 py-3.5 text-sm font-semibold text-stone-700 shadow-sm transition-all hover:border-stone-300 hover:bg-[var(--surface)] hover:shadow-md active:scale-[0.98] dark:text-stone-300 dark:hover:border-stone-600"
             >
               <svg
                 className="mr-2 h-4 w-4 shrink-0"
@@ -273,10 +288,10 @@ export default async function HomePage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1v1a4 4 0 0 1-8 0v-1H7a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z" />
-                <path d="M9 14c.8.8 2 1.2 3 1.2s2.2-.4 3-1.2" />
+                <rect x="3" y="3" width="18" height="18" rx="3" />
+                <path d="M9 9h6v6H9z" />
               </svg>
-              AI 向导
+              全屏 AI 体验
             </Link>
             <a
               href="https://github.com/ZxdNoob/zxdnoob.github.io"
@@ -334,6 +349,11 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ====== Daily Pick (AI) ====== */}
+      <ScrollReveal>
+        <DailyPick post={dailyPick} />
+      </ScrollReveal>
 
       {/* ====== Bento Grid ====== */}
       <section className="mx-auto max-w-5xl px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8">

@@ -2,6 +2,7 @@
  * 文章索引路由：服务端拉取全部摘要后交给客户端组件 `BlogIndex`（筛选、排序、无限加载）。
  */
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Suspense } from 'react';
 import { BlogIndex } from '@/components/blog-index';
 import { isPublicViewStatsEnabled } from '@/lib/api';
@@ -36,7 +37,7 @@ export default async function BlogIndexPage() {
               聚合全部技术文章，支持快速搜索、系列聚合、标签筛选与多视图浏览。
             </p>
           </div>
-          <div className="mt-5 flex flex-wrap gap-2.5">
+          <div className="mt-5 flex flex-wrap items-center gap-2.5">
             <div className="rounded-full border border-[var(--border)] bg-gradient-to-br from-stone-50 to-amber-50/70 px-4 py-2 text-sm text-stone-700 shadow-sm shadow-black/5 dark:from-stone-900 dark:to-stone-800 dark:text-stone-200 dark:shadow-black/20">
               <span className="font-semibold text-stone-900 dark:text-stone-50">
                 {posts.length}
@@ -46,9 +47,39 @@ export default async function BlogIndexPage() {
             <div className="rounded-full border border-[var(--border)] bg-gradient-to-br from-stone-50 to-stone-100/80 px-4 py-2 text-sm text-stone-700 shadow-sm shadow-black/5 dark:from-stone-900 dark:to-stone-800 dark:text-stone-200 dark:shadow-black/20">
               支持系列、标签、关键词筛选
             </div>
-            <div className="rounded-full border border-[var(--border)] bg-gradient-to-br from-amber-50 to-orange-50/70 px-4 py-2 text-sm text-stone-700 shadow-sm shadow-black/5 dark:from-stone-900 dark:to-amber-950/40 dark:text-stone-200 dark:shadow-black/20">
-              支持网格与列表双视图
-            </div>
+            <Link
+              href="/blog/graph"
+              className="group inline-flex items-center gap-2 rounded-full border border-amber-300/60 bg-gradient-to-br from-amber-50 to-orange-50/70 px-4 py-2 text-sm font-medium text-amber-900 shadow-sm shadow-amber-500/10 transition-all hover:border-amber-400 hover:shadow-md dark:border-amber-500/25 dark:from-amber-500/[0.08] dark:to-orange-500/[0.04] dark:text-amber-200 dark:hover:border-amber-400/40"
+            >
+              <svg
+                className="h-3.5 w-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="5" cy="6" r="2" />
+                <circle cx="19" cy="6" r="2" />
+                <circle cx="12" cy="18" r="2" />
+                <path d="M7 7l4 9" />
+                <path d="M17 7l-4 9" />
+                <path d="M7 6h10" />
+              </svg>
+              文章关系图谱
+              <svg
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
           </div>
         </div>
       </header>

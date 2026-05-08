@@ -2,7 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AGENT_PANEL_OPEN } from '@/components/agent/agent-launcher';
+import {
+  AGENT_PANEL_OPEN,
+  AGENT_PANEL_SEND,
+  type AgentPanelSendDetail,
+} from '@/components/agent/agent-launcher';
 
 /**
  * 命令面板（Command Palette / Cmd+K）。
@@ -162,6 +166,31 @@ const NAV_ITEMS: CommandItem[] = [
     ),
   },
   {
+    id: 'graph',
+    label: '文章关系图谱',
+    description: '可视化所有文章的相似度网络',
+    href: '/blog/graph',
+    group: '导航',
+    icon: (
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="5" cy="6" r="2.5" />
+        <circle cx="19" cy="6" r="2.5" />
+        <circle cx="12" cy="18" r="2.5" />
+        <path d="M7 7l4 9" />
+        <path d="M17 7l-4 9" />
+        <path d="M7.5 6h9" />
+      </svg>
+    ),
+  },
+  {
     id: 'github',
     label: 'GitHub 仓库',
     description: '查看源代码',
@@ -266,6 +295,24 @@ export function CommandPalette() {
     active?.scrollIntoView({ block: 'nearest' });
   }, [activeIndex, open]);
 
+  /** 把当前未命中的 query 转交给 AI 向导：打开抽屉并直接发送 */
+  const askAgent = useCallback(
+    (rawQuery: string) => {
+      const prompt = rawQuery.trim();
+      if (!prompt) return;
+      close();
+      window.dispatchEvent(new CustomEvent(AGENT_PANEL_OPEN));
+      window.setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent<AgentPanelSendDetail>(AGENT_PANEL_SEND, {
+            detail: { prompt },
+          }),
+        );
+      }, 60);
+    },
+    [close],
+  );
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -275,8 +322,13 @@ export function CommandPalette() {
       setActiveIndex((i) => Math.max(0, i - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
+      /** 命中条目优先；未命中且有查询时降级到「问 AI 向导」 */
       const item = flatItems[activeIndex];
-      if (item) execute(item);
+      if (item) {
+        execute(item);
+      } else if (query.trim()) {
+        askAgent(query);
+      }
     } else if (e.key === 'Escape') {
       close();
     }
@@ -340,8 +392,43 @@ export function CommandPalette() {
 
           <div ref={listRef} className="max-h-[50vh] overflow-y-auto p-2">
             {flatItems.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-stone-500">
-                未找到匹配结果
+              <div className="space-y-3 px-4 py-6">
+                <p className="text-center text-sm text-stone-500">
+                  未匹配到导航条目
+                </p>
+                {query.trim() ? (
+                  <button
+                    type="button"
+                    onClick={() => askAgent(query)}
+                    className="group flex w-full items-center gap-3 rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 to-orange-50/40 px-4 py-3 text-left text-sm transition-all hover:border-amber-300 hover:shadow-md hover:shadow-amber-500/10 dark:border-amber-500/20 dark:from-amber-500/[0.08] dark:to-orange-500/[0.04]"
+                  >
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-sm">
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.75"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1v1a4 4 0 0 1-8 0v-1H7a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z" />
+                        <path d="M9 14c.8.8 2 1.2 3 1.2s2.2-.4 3-1.2" />
+                      </svg>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-stone-900 dark:text-stone-50">
+                        让 AI 向导回答「{query.trim()}」
+                      </span>
+                      <span className="mt-0.5 block text-xs text-stone-500 dark:text-stone-400">
+                        Noob 会用站内全文检索找答案，并附上文章链接
+                      </span>
+                    </span>
+                    <kbd className="hidden rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-stone-400 sm:inline">
+                      ↵
+                    </kbd>
+                  </button>
+                ) : null}
               </div>
             ) : (
               Array.from(groups.entries()).map(([group, items]) => (

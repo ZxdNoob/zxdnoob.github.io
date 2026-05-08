@@ -24,7 +24,9 @@ import { parseNavigateHref } from '@/lib/agent/navigate-target';
 import {
   clientFetchChangelog,
   clientFetchPostContent,
+  clientFetchPostSearch,
   clientFetchPosts,
+  clientFetchRelevantPassages,
   clientFetchResume,
   isAgentLLMConfigured,
   type AgentMessage,
@@ -70,30 +72,51 @@ export function useAgent(options: UseAgentOptions = {}) {
    */
   const [llmConfigured] = useState<boolean>(() => isAgentLLMConfigured());
 
-  /** 把 set_theme 工具的副作用对齐到根布局的 inline script + ThemeToggle 行为 */
+  /**
+   * 把 set_theme 工具的副作用对齐到根布局的 inline script + ThemeToggle 行为。
+   * 现代浏览器使用 View Transitions API 平滑切换；老浏览器仍用旧分支（无动画但行为一致）。
+   */
   const setTheme = useCallback((mode: 'light' | 'dark' | 'system') => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    root.classList.add('theme-changing');
-    if (mode === 'system') {
-      try {
-        localStorage.removeItem('theme');
-      } catch {
-        /* ignore */
+    const apply = () => {
+      if (mode === 'system') {
+        try {
+          localStorage.removeItem('theme');
+        } catch {
+          /* ignore */
+        }
+        const isDark = window.matchMedia(
+          '(prefers-color-scheme: dark)',
+        ).matches;
+        root.classList.toggle('dark', isDark);
+        root.style.colorScheme = isDark ? 'dark' : 'light';
+      } else {
+        try {
+          localStorage.setItem('theme', mode);
+        } catch {
+          /* ignore */
+        }
+        const isDark = mode === 'dark';
+        root.classList.toggle('dark', isDark);
+        root.style.colorScheme = isDark ? 'dark' : 'light';
       }
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.classList.toggle('dark', isDark);
-      root.style.colorScheme = isDark ? 'dark' : 'light';
-    } else {
-      try {
-        localStorage.setItem('theme', mode);
-      } catch {
-        /* ignore */
-      }
-      const isDark = mode === 'dark';
-      root.classList.toggle('dark', isDark);
-      root.style.colorScheme = isDark ? 'dark' : 'light';
+    };
+
+    type DocWithVT = Document & {
+      startViewTransition?: (cb: () => void) => { finished: Promise<void> };
+    };
+    const doc = document as DocWithVT;
+    if (typeof doc.startViewTransition === 'function') {
+      root.classList.add('theme-flipping');
+      const t = doc.startViewTransition(apply);
+      void t.finished.finally(() => root.classList.remove('theme-flipping'));
+      return;
     }
+
+    /** 兜底：旧浏览器走原有过渡禁用方案 */
+    root.classList.add('theme-changing');
+    apply();
     window.setTimeout(() => root.classList.remove('theme-changing'), 120);
   }, []);
 
@@ -140,6 +163,8 @@ export function useAgent(options: UseAgentOptions = {}) {
       fetchPostContent: clientFetchPostContent,
       fetchChangelog: clientFetchChangelog,
       fetchResume: clientFetchResume,
+      fetchPostSearch: clientFetchPostSearch,
+      fetchRelevantPassages: clientFetchRelevantPassages,
     }),
     [navigate, setTheme, openCommandPalette, copyToClipboard],
   );

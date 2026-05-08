@@ -525,3 +525,59 @@ html.theme-changing *::after {
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 8px;
 }
+
+/* ========== View Transitions API（主题切换 / 路由切换） ========== */
+/**
+ * View Transitions API 是 Chromium-126+ / Safari TP 等现代浏览器原生支持的
+ * 「DOM 状态切换」API。我们用它做两件事：
+ * 1) 主题切换：旧画面淡出，新画面淡入，像高端 App 一样平滑
+ * 2) 跨页路由切换：Next 16 已自动接入 view-transitions（启用 turbopack），
+ *    本规则进一步用 cubic-bezier 替换默认线性曲线
+ *
+ * 兼容：未支持的浏览器会忽略 ::view-transition*，行为完全一致。
+ */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* 主题切换专用：让浅/深色之间像「淡出 + 淡入」叠加 */
+  html.theme-flipping::view-transition-old(root) {
+    animation: fade-out 240ms cubic-bezier(0.4, 0, 0.6, 1) both;
+  }
+  html.theme-flipping::view-transition-new(root) {
+    animation: fade-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0ms !important;
+  }
+}
+
+/* ========== Markdown <mark> 高亮（Agent 工具卡片 / RAG 段落） ========== */
+mark {
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(245, 158, 11, 0.35) 60%
+  );
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: 2px;
+}
+.dark mark {
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(245, 158, 11, 0.4) 60%
+  );
+}
