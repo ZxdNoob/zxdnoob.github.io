@@ -719,7 +719,7 @@ const SEED_RELEASE_016: Partial<ChangelogReleaseEntity> = {
 };
 
 const SEED_RELEASE_017: Partial<ChangelogReleaseEntity> = {
-  date: '2026-05-08T18:00:00',
+  date: '2026-05-08T21:37:30',
   title: '混合检索、阅读增强与 PWA / OG（Web 0.1.2 / API 0.0.9）',
   webVersion: '0.1.2',
   apiVersion: '0.0.9',
