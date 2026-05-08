@@ -68,10 +68,13 @@ async function networkFirst(request) {
     if (cached) return cached;
     /** 兜底返回首页，避免页面空白；标记为 redirect = 'manual' 防止历史污染 */
     const fallback = await cache.match('/');
-    return fallback ?? new Response('离线模式：暂未缓存该页面。', {
-      status: 503,
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    });
+    return (
+      fallback ??
+      new Response('离线模式：暂未缓存该页面。', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      })
+    );
   }
 }
 
