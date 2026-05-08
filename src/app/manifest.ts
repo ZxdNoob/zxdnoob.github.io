@@ -1,6 +1,11 @@
 import type { MetadataRoute } from 'next';
 import { site } from '@/lib/site';
 
+// Static export (output: export) requires routes to be statically analyzable.
+// Explicitly mark this metadata route as static to avoid build-time errors.
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 /**
  * PWA Manifest（`/manifest.webmanifest`）。
  *
