@@ -4,7 +4,15 @@
  * 主题切换：system / light / dark，读写 `localStorage.theme`，与根布局内联脚本一致。
  * 含旧版 Safari `matchMedia` 回退与无 Pointer Events 环境的点击兼容。
  */
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { createPortal } from 'react-dom';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -39,6 +47,31 @@ const OPTIONS: Array<{
     Icon: MoonIcon,
   },
 ];
+
+const MENU_WIDTH = 260;
+const MENU_GAP = 8;
+/** 约等于面板高度，用于贴底导航时改为向上展开 */
+const MENU_EST_HEIGHT = 300;
+
+function computeThemeMenuPosition(trigger: DOMRect): {
+  top: number;
+  left: number;
+} {
+  const edge = MENU_GAP;
+  let left = trigger.right - MENU_WIDTH;
+  left = Math.max(edge, Math.min(left, window.innerWidth - MENU_WIDTH - edge));
+
+  const spaceBelow = window.innerHeight - trigger.bottom - edge;
+  const spaceAbove = trigger.top - edge;
+  const belowTop = trigger.bottom + MENU_GAP;
+  const aboveTop = trigger.top - MENU_EST_HEIGHT - MENU_GAP;
+
+  let top = belowTop;
+  if (spaceBelow < 140 && spaceAbove > spaceBelow) {
+    top = Math.max(edge, aboveTop);
+  }
+  return { top, left };
+}
 
 /** 根据当前模式解析是否应用 `dark` class（system 时读取系统偏好）。 */
 function resolveIsDark(mode: ThemeMode): boolean {
@@ -79,8 +112,13 @@ export function ThemeToggle() {
   const [mode, setMode] = useState<ThemeMode>('system');
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
+    null,
+  );
   const popoverId = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('theme') as ThemeMode | null;
@@ -122,6 +160,23 @@ export function ThemeToggle() {
     localStorage.setItem('theme', mode);
   }, [mode, mounted, syncSystem]);
 
+  const syncMenuPosition = useCallback(() => {
+    const btn = triggerRef.current;
+    if (!btn) return;
+    setMenuPos(computeThemeMenuPosition(btn.getBoundingClientRect()));
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    syncMenuPosition();
+    window.addEventListener('resize', syncMenuPosition);
+    window.addEventListener('scroll', syncMenuPosition, true);
+    return () => {
+      window.removeEventListener('resize', syncMenuPosition);
+      window.removeEventListener('scroll', syncMenuPosition, true);
+    };
+  }, [open, syncMenuPosition]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -130,10 +185,11 @@ export function ThemeToggle() {
     }
 
     function onPointerDown(e: Event) {
-      const root = rootRef.current;
-      if (!root) return;
       const target = e.target as Node | null;
-      if (target && !root.contains(target)) setOpen(false);
+      if (!target) return;
+      if (rootRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setOpen(false);
     }
 
     window.addEventListener('keydown', onKeyDown);
@@ -150,98 +206,128 @@ export function ThemeToggle() {
     };
   }, [open]);
 
-  if (!mounted) {
-    return <div className="h-9 w-9" aria-hidden />;
-  }
-
   return (
-    <div className="relative" ref={rootRef}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
-        aria-label={BUTTON_LABELS[mode]}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={popoverId}
-      >
-        {mode === 'system' ? (
-          <SystemIcon />
-        ) : mode === 'light' ? (
-          <SunIcon />
-        ) : (
-          <MoonIcon />
-        )}
-      </button>
+    <div
+      className="relative flex h-9 w-9 shrink-0 items-center justify-center"
+      ref={rootRef}
+      suppressHydrationWarning
+    >
+      {mounted ? (
+        <>
+          <button
+            ref={triggerRef}
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
+            aria-label={BUTTON_LABELS[mode]}
+            aria-haspopup="menu"
+            aria-expanded={open}
+            aria-controls={popoverId}
+          >
+            {mode === 'system' ? (
+              <SystemIcon />
+            ) : mode === 'light' ? (
+              <SunIcon />
+            ) : (
+              <MoonIcon />
+            )}
+          </button>
 
-      {open && (
-        <div
-          id={popoverId}
-          role="menu"
-          aria-label="选择主题"
-          className="absolute right-0 mt-2 w-[260px] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xl ring-1 ring-black/5 dark:ring-white/10"
-        >
-          <div className="px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-stone-400 dark:text-stone-500">
-            主题
-          </div>
-          <div className="p-2">
-            {OPTIONS.map((opt) => {
-              const active = opt.mode === mode;
-              return (
-                <button
-                  key={opt.mode}
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={active}
-                  onClick={() => {
-                    setMode(opt.mode);
-                    setOpen(false);
+          {open && menuPos
+            ? createPortal(
+                <div
+                  ref={menuRef}
+                  id={popoverId}
+                  role="menu"
+                  aria-label="选择主题"
+                  style={{
+                    position: 'fixed',
+                    top: menuPos.top,
+                    left: menuPos.left,
+                    width: MENU_WIDTH,
                   }}
-                  className={[
-                    'flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
-                    active
-                      ? 'bg-stone-100 text-stone-900 dark:bg-stone-800/80 dark:text-stone-50'
-                      : 'text-stone-700 hover:bg-stone-50 dark:text-stone-200 dark:hover:bg-stone-800/40',
-                  ].join(' ')}
+                  className="z-[110] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-xl ring-1 ring-black/5 dark:ring-white/10"
                 >
-                  <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-stone-600 dark:text-stone-300">
-                    <opt.Icon />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2">
-                      <span className="text-sm font-semibold">{opt.label}</span>
-                      {active ? (
-                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
-                          已选
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className="mt-0.5 block text-xs leading-relaxed text-stone-500 dark:text-stone-500">
-                      {opt.description}
-                    </span>
-                  </span>
-                  {active ? (
-                    <svg
-                      className="mt-1 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden
-                    >
-                      <path d="M20 6 9 17l-5-5" />
-                    </svg>
-                  ) : (
-                    <span className="mt-1 h-4 w-4 shrink-0" aria-hidden />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+                  <div className="px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-stone-400 dark:text-stone-500">
+                    主题
+                  </div>
+                  <div className="grid grid-cols-1 gap-1.5 p-2">
+                    {OPTIONS.map((opt) => {
+                      const active = opt.mode === mode;
+                      return (
+                        <button
+                          key={opt.mode}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={active}
+                          onClick={() => {
+                            setMode(opt.mode);
+                            setOpen(false);
+                          }}
+                          className={[
+                            'group/item flex w-full items-start gap-3 rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-colors',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)]',
+                            active
+                              ? 'border-amber-300/70 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-500/15 dark:text-amber-100'
+                              : 'border-[var(--border)] bg-[var(--surface)] text-stone-600 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900 dark:text-stone-300 dark:hover:border-stone-600 dark:hover:bg-stone-800/40 dark:hover:text-stone-100',
+                          ].join(' ')}
+                        >
+                          <span
+                            className={[
+                              'mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors',
+                              active
+                                ? 'border-amber-300/60 bg-amber-100/70 text-amber-900 dark:border-amber-400/35 dark:bg-amber-500/20 dark:text-amber-100'
+                                : 'border-[var(--border)] bg-[var(--background)] text-stone-600 group-hover/item:border-stone-300 group-hover/item:bg-stone-100/90 dark:bg-stone-900/40 dark:text-stone-300 dark:group-hover/item:border-stone-600 dark:group-hover/item:bg-stone-800/70',
+                            ].join(' ')}
+                          >
+                            <opt.Icon />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-center gap-2">
+                              <span className="text-sm font-semibold tracking-tight">
+                                {opt.label}
+                              </span>
+                              {active ? (
+                                <span className="sr-only">（当前已选）</span>
+                              ) : null}
+                            </span>
+                            <span
+                              className={[
+                                'mt-0.5 block text-xs leading-relaxed',
+                                active
+                                  ? 'text-amber-900/75 dark:text-amber-200/80'
+                                  : 'text-stone-500 dark:text-stone-500',
+                              ].join(' ')}
+                            >
+                              {opt.description}
+                            </span>
+                          </span>
+                          <span className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center">
+                            {active ? (
+                              <svg
+                                className="h-4 w-4 text-amber-600 dark:text-amber-400"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.25"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden
+                              >
+                                <path d="M20 6 9 17l-5-5" />
+                              </svg>
+                            ) : null}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>,
+                document.body,
+              )
+            : null}
+        </>
+      ) : null}
     </div>
   );
 }

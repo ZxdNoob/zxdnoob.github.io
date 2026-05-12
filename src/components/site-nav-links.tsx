@@ -2,10 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { COMMAND_PALETTE_TOGGLE } from '@/components/command-palette';
-import { ThemeToggle } from '@/components/theme-toggle';
 
+/**
+ * 站点主导航链接。
+ *
+ * 由 `SiteHeader`（顶部悬浮 Dock）和移动端折叠面板共同使用。该组件只负责渲染
+ * 链接列表，不再耦合搜索 / 主题切换 / 抽屉等控件 —— 这些被上移至 `SiteHeader`，
+ * 以便适配「顶 / 底 / 左 / 右」四种悬浮位置。
+ */
 const nav = [
   { href: '/', label: '首页' },
   { href: '/blog', label: '文章' },
@@ -19,160 +23,83 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function SearchTrigger({ onOpen }: { onOpen: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)]/60 text-stone-400 transition-colors hover:border-stone-300 hover:text-stone-600 dark:text-stone-500 dark:hover:border-stone-600 dark:hover:text-stone-300 lg:h-auto lg:w-auto lg:gap-2 lg:px-3 lg:py-1.5 lg:text-xs"
-      aria-label="搜索"
-    >
-      <svg
-        className="h-3.5 w-3.5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
-      <span className="hidden font-mono text-[10px] lg:inline">⌘K</span>
-    </button>
-  );
+export type NavOrientation = 'horizontal' | 'vertical';
+
+interface SiteNavLinksProps {
+  /** 横向（顶 / 底悬浮）或纵向（左 / 右悬浮）。 */
+  orientation?: NavOrientation;
+  /** 字号档位，纵向模式忽略此项以保证窄边栏可读。 */
+  size?: 'sm' | 'md';
+  /** 点击链接后的回调（用于关闭移动端抽屉等场景）。 */
+  onNavigate?: () => void;
+  className?: string;
+  /** 控制 ARIA 标签，避免重复 landmark；默认 'nav'。 */
+  as?: 'nav' | 'div';
+  ariaLabel?: string;
 }
 
-export function SiteNavLinks() {
+export function SiteNavLinks({
+  orientation = 'horizontal',
+  size = 'md',
+  onNavigate,
+  className = '',
+  as = 'nav',
+  ariaLabel = '主导航',
+}: SiteNavLinksProps) {
   const pathname = usePathname() ?? '';
-  const [mobileOpenPathname, setMobileOpenPathname] = useState<string | null>(
-    null,
-  );
-  const mobileOpen = mobileOpenPathname === pathname;
+  const vertical = orientation === 'vertical';
 
-  const openCommandPalette = useCallback(() => {
-    setMobileOpenPathname(null);
-    window.dispatchEvent(new CustomEvent(COMMAND_PALETTE_TOGGLE));
-  }, []);
+  const listCls = [
+    'flex',
+    vertical
+      ? 'flex-col items-stretch gap-0.5'
+      : 'flex-row items-center gap-0.5',
+    className,
+  ].join(' ');
 
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [mobileOpen]);
+  const items = nav.map((item) => {
+    const active = isActive(pathname, item.href);
+    const baseCls = [
+      'relative font-medium transition-colors',
+      vertical
+        ? 'rounded-xl px-2 py-2 text-center text-[11px] leading-tight'
+        : size === 'sm'
+          ? 'rounded-full px-3 py-1.5 text-xs'
+          : 'rounded-full px-3 py-2 text-sm lg:px-4',
+      active
+        ? 'cursor-default text-stone-900 dark:text-stone-50'
+        : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50',
+    ].join(' ');
+    const content = (
+      <>
+        {active ? (
+          <span className="absolute inset-0 rounded-[inherit] bg-stone-100 dark:bg-stone-800/80" />
+        ) : null}
+        <span className="relative block whitespace-nowrap">{item.label}</span>
+      </>
+    );
+    return active ? (
+      <span key={item.href} aria-current="page" className={baseCls}>
+        {content}
+      </span>
+    ) : (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={onNavigate}
+        className={baseCls}
+      >
+        {content}
+      </Link>
+    );
+  });
 
-  return (
-    <>
-      {/* Desktop */}
-      <nav className="hidden items-center gap-1 md:flex">
-        {nav.map((item) => {
-          const active = isActive(pathname, item.href);
-          const className = `relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-            active
-              ? 'cursor-default text-stone-900 dark:text-stone-50'
-              : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50'
-          }`;
-
-          const content = (
-            <>
-              {active && (
-                <span className="absolute inset-0 rounded-full bg-stone-100 dark:bg-stone-800/80" />
-              )}
-              <span className="relative">{item.label}</span>
-            </>
-          );
-
-          return active ? (
-            <span key={item.href} aria-current="page" className={className}>
-              {content}
-            </span>
-          ) : (
-            <Link key={item.href} href={item.href} className={className}>
-              {content}
-            </Link>
-          );
-        })}
+  if (as === 'nav') {
+    return (
+      <nav aria-label={ariaLabel} className={listCls}>
+        {items}
       </nav>
-
-      {/* Controls */}
-      <div className="flex items-center gap-1.5">
-        <SearchTrigger onOpen={openCommandPalette} />
-        <ThemeToggle />
-        <button
-          type="button"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 md:hidden dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
-          onClick={() => setMobileOpenPathname(mobileOpen ? null : pathname)}
-          aria-label={mobileOpen ? '关闭菜单' : '打开菜单'}
-          aria-expanded={mobileOpen}
-        >
-          <svg
-            className="h-5 w-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-          >
-            {mobileOpen ? (
-              <>
-                <path d="M18 6L6 18" />
-                <path d="M6 6l12 12" />
-              </>
-            ) : (
-              <>
-                <path d="M4 8h16" />
-                <path d="M4 16h16" />
-              </>
-            )}
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div className="fixed inset-0 top-16 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm dark:bg-black/40"
-            onClick={() => setMobileOpenPathname(null)}
-            aria-hidden
-          />
-          <nav className="relative mx-4 mt-2 space-y-1 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3 shadow-xl">
-            {nav.map((item) => {
-              const active = isActive(pathname, item.href);
-              const className = `flex items-center rounded-xl px-4 py-3 text-base font-medium transition-colors ${
-                active
-                  ? 'cursor-default bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-50'
-                  : 'text-stone-600 hover:bg-stone-50 dark:text-stone-400 dark:hover:bg-stone-800/50'
-              }`;
-
-              if (active) {
-                return (
-                  <span
-                    key={item.href}
-                    aria-current="page"
-                    className={className}
-                  >
-                    {item.label}
-                  </span>
-                );
-              }
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpenPathname(null)}
-                  className={className}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      )}
-    </>
-  );
+    );
+  }
+  return <div className={listCls}>{items}</div>;
 }

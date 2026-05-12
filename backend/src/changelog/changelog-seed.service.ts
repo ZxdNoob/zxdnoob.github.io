@@ -81,6 +81,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_015,
       SEED_RELEASE_016,
       SEED_RELEASE_017,
+      SEED_RELEASE_018,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -769,6 +770,46 @@ const SEED_RELEASE_017: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：前端版本升级至 0.1.2；后端版本升级至 0.0.9，并在版本历史中同步记录。',
+    },
+  ],
+};
+
+const SEED_RELEASE_018: Partial<ChangelogReleaseEntity> = {
+  date: '2026-05-12T19:13:09',
+  title: '悬浮导航 Dock 体验优化（Web 0.1.3 / API 仍为 0.0.9）',
+  webVersion: '0.1.3',
+  apiVersion: '0.0.9',
+  sortOrder: 17,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '`public/theme-init.js`（beforeInteractive）在 hydration 前读取 `site-nav-dock-v1`，同步写入 `--nav-pad-*`、`data-nav-dock` 与折叠标记，正文边距与根节点状态首屏即与记忆位置一致。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '悬浮导航条在读完 localStorage 并完成 store 同步前保持不可见（`visibility`/`opacity`/`pointer-events`），再在记忆边缘位置显示，避免先出现在默认顶栏再跳动；`layout` 内 `noscript` 样式在无 JS 时强制显示 `[data-site-header]`。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '首帧布局对齐后通过 `queueMicrotask`/`requestAnimationFrame` 再开启显隐与位置相关过渡，避免从默认位动画滑向记忆位的不自然感。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '在位置设置菜单中选择顶/底/左/右后自动关闭下拉菜单，减少一次手动点击。',
+    },
+    {
+      kind: 'docs',
+      surface: 'web',
+      text: '更新 `globals.css` 与根布局注释，说明 `--nav-pad-*` 可由首屏脚本与 `SiteHeader` 共同写入。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：前端版本升级至 0.1.3；API 版本保持 0.0.9（无后端发版）。Breaking changes：无。',
     },
   ],
 };

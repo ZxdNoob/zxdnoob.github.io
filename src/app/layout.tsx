@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
+import Script from 'next/script';
 import { AgentLauncher } from '@/components/agent/agent-launcher';
 import { BfcacheRevealRestore } from '@/components/bfcache-reveal-restore';
 import { CommandPalette } from '@/components/command-palette';
@@ -19,7 +20,7 @@ import './globals.css';
  * ## 这个文件负责什么？
  * - **SEO/社交卡片**：`metadata` / `viewport` 统一配置，子路由按需覆盖
  * - **字体体系**：使用 `next/font` 生成 CSS 变量，避免 FOUT 并提升性能
- * - **主题初始化**：在 hydration 前写入 `html.dark`，避免首屏“闪白/闪黑”
+ * - **首屏初始化**：`public/theme-init.js` + `next/script`（beforeInteractive）在 hydration 前写入 `html.dark`、导航 dock 的 `--nav-pad-*` / `data-nav-dock`
  * - **全站 UI 壳**：头部/页脚/Toast/命令面板（Cmd+K）
  * - **质感层**：`grain-overlay` 为整站添加轻微颗粒（仅视觉，不影响交互）
  *
@@ -69,20 +70,6 @@ export const viewport: Viewport = {
   ],
 };
 
-/**
- * 主题首屏脚本（同步执行）。
- *
- * 约束：
- * - 不能依赖 React（因为 React 还没加载）
- * - 不能使用复杂逻辑（避免阻塞首屏）
- *
- * 行为：
- * - 若 localStorage 里显式设置了 theme（light/dark）就优先使用
- * - 否则回退到系统 prefers-color-scheme
- * - 同步写入 `html.classList` 与 `color-scheme`，让表单控件/滚动条也匹配主题
- */
-const THEME_SCRIPT = `!function(){try{var d=document.documentElement,t=localStorage.getItem("theme"),s=matchMedia("(prefers-color-scheme:dark)").matches,i=(t==="dark"||(t!=="light"&&s));d.classList.toggle("dark",i);d.style.colorScheme=i?"dark":"light"}catch(e){}}()`;
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -98,13 +85,15 @@ export default async function RootLayout({
       className={`${sans.variable} ${serif.variable} h-full scroll-smooth antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script
-          id="theme-init"
-          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
-        />
-      </head>
       <body className="grain-overlay flex min-h-full flex-col bg-[var(--background)] font-sans text-[var(--foreground)]">
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          src="/theme-init.js"
+        />
+        <noscript>
+          <style>{`[data-site-header]{opacity:1!important;visibility:visible!important;pointer-events:auto!important}`}</style>
+        </noscript>
         <BfcacheRevealRestore />
         {showViewStats ? <SiteViewRecorder /> : null}
         <SiteHeader />

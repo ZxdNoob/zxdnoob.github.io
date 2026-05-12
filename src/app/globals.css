@@ -79,6 +79,19 @@ html {
 
 body {
   font-family: var(--font-sans);
+  /* 让正文自动避让悬浮导航占据的边距。`--nav-pad-*` 由 `public/theme-init.js`
+    （首屏前）与 `SiteHeader` 写入 <html>；缺省为 0，等价于「未挂载 / 沉浸阅读」。 */
+  padding-top: var(--nav-pad-top, 0px);
+  padding-bottom: var(--nav-pad-bottom, 0px);
+  padding-left: var(--nav-pad-left, 0px);
+  padding-right: var(--nav-pad-right, 0px);
+  transition: padding 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 
 /* ========== Grain / Noise Texture Overlay ========== */
@@ -103,6 +116,8 @@ html.reading-immersive [data-site-footer] {
 
 html.reading-immersive body {
   background: var(--background);
+  /* 沉浸阅读模式下导航被隐藏，正文回收四向边距以充满视口。 */
+  padding: 0;
 }
 
 html.theme-changing *,
