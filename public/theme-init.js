@@ -23,7 +23,8 @@ void (function () {
       try {
         var o = JSON.parse(raw);
         var p = o && o.position;
-        if (p === 'top' || p === 'bottom' || p === 'left' || p === 'right') pos = p;
+        if (p === 'top' || p === 'bottom' || p === 'left' || p === 'right')
+          pos = p;
         if (o && o.collapsed === true) collapsed = true;
       } catch {
         /* ignore */
