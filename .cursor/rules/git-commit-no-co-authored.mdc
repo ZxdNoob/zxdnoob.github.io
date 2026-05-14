@@ -1,0 +1,13 @@
+---
+description: Git 提交信息不得包含 Cursor Co-authored-by trailer
+alwaysApply: true
+---
+
+# Git 提交信息
+
+在为本仓库创建或改写 **git commit**（含 `git commit --amend`）时：
+
+- **禁止**在提交说明末尾追加 `Co-authored-by: Cursor <cursoragent@cursor.com>` 或任何类似的 Cursor / 代理 Co-authored-by 行。
+- 提交正文以项目既有风格为准（例如 `🚀 feat(web): …` 与分段说明）；不要自动添加未由用户要求的 trailer。
+
+若用户明确要求加入特定署名行，再按其原文添加。
