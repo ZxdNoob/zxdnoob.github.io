@@ -82,6 +82,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_016,
       SEED_RELEASE_017,
       SEED_RELEASE_018,
+      SEED_RELEASE_019,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -810,6 +811,41 @@ const SEED_RELEASE_018: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：前端版本升级至 0.1.3；API 版本保持 0.0.9（无后端发版）。Breaking changes：无。',
+    },
+  ],
+};
+
+const SEED_RELEASE_019: Partial<ChangelogReleaseEntity> = {
+  date: '2026-05-14T21:25:02',
+  title: '悬浮导航窄屏布局与拖拽体验（Web 0.1.4 / API 仍为 0.0.9）',
+  webVersion: '0.1.4',
+  apiVersion: '0.0.9',
+  sortOrder: 18,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '窄屏（视口宽度小于 Tailwind `md`，与 `max-width: 767px` 一致）下 Dock 固定为顶栏：`SiteHeader` 与 `applyDockVars` 使用 `effectiveNavDockState`，`public/theme-init.js` 首屏写入的 `--nav-pad-*` / `data-nav-dock` 与之对齐；隐藏抓手与「悬浮位置」菜单；折叠态仅支持点击展开。订阅 `matchMedia` 在横竖屏与窗口缩放时重新应用边距变量。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '横栏布局在 `md` 以下内联主导航收入汉堡时，Logo 与工具区之间不再出现两道紧贴的竖向分隔线。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '拖拽起手用 `getBoundingClientRect` 计算 Dock 几何中心相对指针的偏移，拖动过程中以中心跟手，避免按下瞬间整条栏跳到指针正下方。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '拖拽路径补充 `setPointerCapture` 与抓手/折叠球的 `touch-action: none`，减轻触摸环境下页面滚动与指针丢失导致的拖动中断。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：前端版本升级至 0.1.4；API 版本保持 0.0.9（无后端发版）。Breaking changes：无。',
     },
   ],
 };

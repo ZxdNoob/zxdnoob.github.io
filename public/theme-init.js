@@ -30,6 +30,13 @@ void (function () {
         /* ignore */
       }
     }
+    // 与 `SiteHeader` / `effectiveNavDockState` 一致：窄屏固定顶栏，避免首屏左右 padding 与桌面记忆错位
+    if (
+      typeof matchMedia !== 'undefined' &&
+      matchMedia('(max-width: 767px)').matches
+    ) {
+      pos = 'top';
+    }
     var offset = collapsed ? '68px' : '84px';
     d.style.setProperty('--nav-pad-top', pos === 'top' ? offset : '0px');
     d.style.setProperty('--nav-pad-bottom', pos === 'bottom' ? offset : '0px');

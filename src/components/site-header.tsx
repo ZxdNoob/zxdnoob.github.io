@@ -25,9 +25,9 @@ import { site } from '@/lib/site';
  * 站点顶部悬浮导航 Dock。
  *
  * ## 能做什么
- * - **拖拽**：按住左侧抓手把整条导航拖到屏幕任意边缘，松手自动吸附最近边
+ * - **拖拽**：按住左侧抓手拖动；以整条导航的几何中心为锚，保持按下点相对中心的偏移，避免起手时整条栏跳到指针下方
  * - **收起 / 展开**：折叠成一颗仅显示 Logo 的小圆点；折叠态可单击展开，或按住后拖动
- * - **位置自定义**：顶部 / 底部 / 左侧 / 右侧 四档悬浮，可通过抓手或位置菜单切换
+ * - **位置自定义**：桌面端可顶部 / 底部 / 左侧 / 右侧 四档悬浮（抓手或位置菜单）；窄屏（未满 Tailwind `md`，即宽度小于 768px）固定顶部，不占左右栏宽且不开放改位置
  * - **状态记忆**：位置与折叠态存储在 `localStorage:site-nav-dock-v1`
  *
  * ## 实现要点
@@ -35,11 +35,11 @@ import { site } from '@/lib/site';
  *   CSS 变量，配合 `body` 的 padding 让正文不会被导航遮挡
  * - 用 `useSyncExternalStore` 存储 Dock；首帧客户端快照须与 SSR 一致（默认顶栏），
  *   hydration 后在 `useLayoutEffect` 里再读 localStorage，避免竖栏/横栏 DOM 不一致
- * - `public/theme-init.js`（beforeInteractive）与读完存储后都会写 `--nav-pad-*` / `data-nav-dock`，
- *   减少正文边距与根标记错位
+ * - 窄屏（`max-width: 767px`，与 Tailwind `md` 一致）下布局位置强制为 `top`，`--nav-pad-*` 与 DOM 使用 `effectiveNavDockState`；`useSyncExternalStore` 订阅 `matchMedia` 以便横竖屏与窗口缩放时与 `applyDockVars` 同步
  * - 首屏在读完 localStorage 并写入 store **之前** Dock 保持不可见（opacity + inert），避免先出现在默认顶栏；
  *   同步后再显示在记忆位置；其后用 `dockMotionReady` 再打开位置类过渡
- * - 拖拽期间只更新临时坐标，不写入 storage；松手时统一 `setDockState` 触发吸附动画
+ * - 拖拽期间只更新临时坐标，不写入 storage；松手时统一 `setDockState` 触发吸附动画；起手用 `getBoundingClientRect` 计算中心与指针的偏移，避免视觉跳变
+ * - 触摸拖拽依赖 `setPointerCapture` + `touch-action: none`，避免浏览器滚动抢走指针或中断 `pointermove`
  * - 保留旧的 `data-site-header` 属性，沉浸阅读模式仍能隐藏整条导航
  */
 
@@ -51,6 +51,38 @@ interface DockState {
 
 const STORAGE_KEY = 'site-nav-dock-v1';
 const DEFAULT_STATE: DockState = { position: 'top', collapsed: false };
+
+/** 与 Tailwind `md`（min-width: 768px）一致：视口小于 `md` 时使用移动端导航规则 */
+const NAV_MOBILE_MQ = '(max-width: 767px)';
+
+function isNavMobileViewport(): boolean {
+  return (
+    typeof window !== 'undefined' && window.matchMedia(NAV_MOBILE_MQ).matches
+  );
+}
+
+function effectiveNavDockState(state: DockState): DockState {
+  if (isNavMobileViewport()) {
+    return { ...state, position: 'top' };
+  }
+  return state;
+}
+
+function subscribeNavMobileLayout(onStoreChange: () => void): () => void {
+  if (typeof window === 'undefined') return () => {};
+  const mq = window.matchMedia(NAV_MOBILE_MQ);
+  mq.addEventListener('change', onStoreChange);
+  return () => mq.removeEventListener('change', onStoreChange);
+}
+
+function getNavMobileLayoutSnapshot(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia(NAV_MOBILE_MQ).matches;
+}
+
+function getNavMobileLayoutServerSnapshot(): boolean {
+  return false;
+}
 
 const POSITION_LABEL: Record<DockPosition, string> = {
   top: '顶部',
@@ -93,26 +125,35 @@ function persistState(state: DockState) {
 function applyDockVars(state: DockState) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
+  const layout = effectiveNavDockState(state);
   const offset = state.collapsed ? '68px' : '84px';
   root.style.setProperty(
     '--nav-pad-top',
-    state.position === 'top' ? offset : '0px',
+    layout.position === 'top' ? offset : '0px',
   );
   root.style.setProperty(
     '--nav-pad-bottom',
-    state.position === 'bottom' ? offset : '0px',
+    layout.position === 'bottom' ? offset : '0px',
   );
   root.style.setProperty(
     '--nav-pad-left',
-    state.position === 'left' ? offset : '0px',
+    layout.position === 'left' ? offset : '0px',
   );
   root.style.setProperty(
     '--nav-pad-right',
-    state.position === 'right' ? offset : '0px',
+    layout.position === 'right' ? offset : '0px',
   );
-  root.setAttribute('data-nav-dock', state.position);
+  root.setAttribute('data-nav-dock', layout.position);
   if (state.collapsed) root.setAttribute('data-nav-collapsed', '');
   else root.removeAttribute('data-nav-collapsed');
+}
+
+function safeReleasePointerCapture(el: Element, pointerId: number) {
+  try {
+    if (el.hasPointerCapture(pointerId)) el.releasePointerCapture(pointerId);
+  } catch {
+    /* noop: capture 可能已被释放或元素已卸载 */
+  }
 }
 
 /** 取离指针最近的视口边缘，作为拖拽落点。 */
@@ -185,6 +226,14 @@ export function SiteHeader() {
     getDockServerSnapshot,
   );
 
+  const navMobileLayout = useSyncExternalStore(
+    subscribeNavMobileLayout,
+    getNavMobileLayoutSnapshot,
+    getNavMobileLayoutServerSnapshot,
+  );
+
+  const layoutState = effectiveNavDockState(state);
+
   // 用 pathname 锚定 open 态：路由切换后 `xxxOpen === pathname` 自动变 false，
   // 无需在 effect 里调用 setState 来「重置」这些 UI 状态。
   const [menuOpenAt, setMenuOpenAt] = useState<string | null>(null);
@@ -194,14 +243,17 @@ export function SiteHeader() {
   /** 首帧同步后再开启 top/left 等过渡，避免与显隐打架 */
   const [dockMotionReady, setDockMotionReady] = useState(false);
   const [drag, setDrag] = useState<{
-    x: number;
-    y: number;
+    pointerX: number;
+    pointerY: number;
+    /** 导航条中心 x 减指针 x（起手时确定，拖动中不变） */
+    grabToCenterX: number;
+    grabToCenterY: number;
     edge: DockPosition;
   } | null>(null);
   const dockRef = useRef<HTMLElement | null>(null);
   const menuId = useId();
 
-  const menuOpen = menuOpenAt === pathname;
+  const menuOpen = menuOpenAt === pathname && !navMobileLayout;
   const mobileOpen = mobileOpenAt === pathname;
 
   // 首帧必须与 SSR 一致（默认顶栏）；同步读 localStorage 延到 layout effect，避免 hydration mismatch。
@@ -225,6 +277,11 @@ export function SiteHeader() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!dockStoreHydrated) return;
+    applyDockVars(getDockSnapshot());
+  }, [navMobileLayout]);
 
   // 锁定背景滚动（仅在移动端折叠面板打开时）。
   useEffect(() => {
@@ -267,52 +324,96 @@ export function SiteHeader() {
     setMenuOpenAt(null);
   }, []);
 
-  const beginDrag = useCallback((startX: number, startY: number) => {
-    setMobileOpenAt(null);
-    setMenuOpenAt(null);
-    setDrag({
-      x: startX,
-      y: startY,
-      edge: nearestEdge(startX, startY),
-    });
+  const beginDrag = useCallback(
+    (
+      startX: number,
+      startY: number,
+      pointerCapture?: { captureEl: Element; pointerId: number },
+    ) => {
+      if (isNavMobileViewport()) return;
+      setMobileOpenAt(null);
+      setMenuOpenAt(null);
+      const header = dockRef.current;
+      let grabToCenterX = 0;
+      let grabToCenterY = 0;
+      if (header) {
+        const r = header.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          grabToCenterX = r.left + r.width / 2 - startX;
+          grabToCenterY = r.top + r.height / 2 - startY;
+        }
+      }
 
-    const prevCursor = document.body.style.cursor;
-    const prevSelect = document.body.style.userSelect;
-    document.body.style.cursor = 'grabbing';
-    document.body.style.userSelect = 'none';
-
-    function onMove(ev: PointerEvent) {
+      const cx0 = startX + grabToCenterX;
+      const cy0 = startY + grabToCenterY;
       setDrag({
-        x: ev.clientX,
-        y: ev.clientY,
-        edge: nearestEdge(ev.clientX, ev.clientY),
+        pointerX: startX,
+        pointerY: startY,
+        grabToCenterX,
+        grabToCenterY,
+        edge: nearestEdge(cx0, cy0),
       });
-    }
-    function onUp(ev: PointerEvent) {
-      const edge = nearestEdge(ev.clientX, ev.clientY);
-      setDockState((s) => ({ ...s, position: edge }));
-      setDrag(null);
-      document.body.style.cursor = prevCursor;
-      document.body.style.userSelect = prevSelect;
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      window.removeEventListener('pointercancel', onUp);
-    }
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('pointercancel', onUp);
-  }, []);
+
+      const prevCursor = document.body.style.cursor;
+      const prevSelect = document.body.style.userSelect;
+      document.body.style.cursor = 'grabbing';
+      document.body.style.userSelect = 'none';
+
+      function onMove(ev: PointerEvent) {
+        const cx = ev.clientX + grabToCenterX;
+        const cy = ev.clientY + grabToCenterY;
+        setDrag({
+          pointerX: ev.clientX,
+          pointerY: ev.clientY,
+          grabToCenterX,
+          grabToCenterY,
+          edge: nearestEdge(cx, cy),
+        });
+      }
+      function onUp(ev: PointerEvent) {
+        const cx = ev.clientX + grabToCenterX;
+        const cy = ev.clientY + grabToCenterY;
+        const edge = nearestEdge(cx, cy);
+        setDockState((s) => ({ ...s, position: edge }));
+        setDrag(null);
+        document.body.style.cursor = prevCursor;
+        document.body.style.userSelect = prevSelect;
+        if (pointerCapture) {
+          safeReleasePointerCapture(
+            pointerCapture.captureEl,
+            pointerCapture.pointerId,
+          );
+        }
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+      }
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    },
+    [],
+  );
 
   const startDragFromHandle = useCallback(
-    (e: ReactPointerEvent) => {
+    (e: ReactPointerEvent<HTMLButtonElement>) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (isNavMobileViewport()) return;
       e.preventDefault();
-      beginDrag(e.clientX, e.clientY);
+      const el = e.currentTarget;
+      const pointerId = e.pointerId;
+      try {
+        el.setPointerCapture(pointerId);
+      } catch {
+        /* 个别环境不支持或 pointerId 无效 */
+      }
+      beginDrag(e.clientX, e.clientY, { captureEl: el, pointerId });
     },
     [beginDrag],
   );
 
-  const vertical = state.position === 'left' || state.position === 'right';
+  const vertical =
+    layoutState.position === 'left' || layoutState.position === 'right';
   const { collapsed } = state;
 
   const dockChromeVisible = dockRevealed || Boolean(drag);
@@ -320,12 +421,12 @@ export function SiteHeader() {
   const posStyle: CSSProperties = useMemo(() => {
     if (drag) {
       return {
-        left: drag.x,
-        top: drag.y,
+        left: drag.pointerX + drag.grabToCenterX,
+        top: drag.pointerY + drag.grabToCenterY,
         transform: 'translate(-50%, -50%)',
       };
     }
-    switch (state.position) {
+    switch (layoutState.position) {
       case 'top':
         return { top: 12, left: '50%', transform: 'translateX(-50%)' };
       case 'bottom':
@@ -335,7 +436,7 @@ export function SiteHeader() {
       case 'right':
         return { right: 12, top: '50%', transform: 'translateY(-50%)' };
     }
-  }, [drag, state.position]);
+  }, [drag, layoutState.position]);
 
   return (
     <>
@@ -344,7 +445,7 @@ export function SiteHeader() {
       <header
         ref={dockRef}
         data-site-header
-        data-nav-dock={state.position}
+        data-nav-dock={layoutState.position}
         data-nav-collapsed={collapsed ? '' : undefined}
         style={posStyle}
         className={[
@@ -365,13 +466,15 @@ export function SiteHeader() {
       >
         {collapsed ? (
           <CollapsedDock
+            allowReposition={!navMobileLayout}
             onExpand={() => setDockState((s) => ({ ...s, collapsed: false }))}
             onBeginDrag={beginDrag}
           />
         ) : (
           <ExpandedDock
             vertical={vertical}
-            position={state.position}
+            position={layoutState.position}
+            allowReposition={!navMobileLayout}
             menuOpen={menuOpen}
             menuId={menuId}
             mobileOpen={mobileOpen}
@@ -391,7 +494,7 @@ export function SiteHeader() {
 
       {dockRevealed && mobileOpen && !vertical && !collapsed ? (
         <MobileNavOverlay
-          position={state.position}
+          position={layoutState.position}
           onClose={() => setMobileOpenAt(null)}
         />
       ) : null}
@@ -406,10 +509,12 @@ export function SiteHeader() {
 interface ExpandedDockProps {
   vertical: boolean;
   position: DockPosition;
+  /** 为 false 时隐藏抓手与「悬浮位置」菜单（窄屏固定顶栏） */
+  allowReposition: boolean;
   menuOpen: boolean;
   menuId: string;
   mobileOpen: boolean;
-  onStartDrag: (e: ReactPointerEvent) => void;
+  onStartDrag: (e: ReactPointerEvent<HTMLButtonElement>) => void;
   onToggleMenu: () => void;
   onToggleMobile: () => void;
   onOpenCommand: () => void;
@@ -421,6 +526,7 @@ interface ExpandedDockProps {
 function ExpandedDock({
   vertical,
   position,
+  allowReposition,
   menuOpen,
   menuId,
   mobileOpen,
@@ -440,7 +546,9 @@ function ExpandedDock({
           : 'flex flex-row items-center gap-1.5 px-2 py-2'
       }
     >
-      <DragHandle vertical={vertical} onPointerDown={onStartDrag} />
+      {allowReposition ? (
+        <DragHandle vertical={vertical} onPointerDown={onStartDrag} />
+      ) : null}
 
       <Link
         href="/"
@@ -464,23 +572,32 @@ function ExpandedDock({
         ) : null}
       </Link>
 
-      <Separator vertical={vertical} />
-
-      <div
-        className={
-          vertical
-            ? 'flex flex-col items-stretch gap-0.5'
-            : 'hidden items-center gap-0.5 md:flex'
-        }
-      >
-        <SiteNavLinks
-          as="div"
-          orientation={vertical ? 'vertical' : 'horizontal'}
-          onNavigate={onClosePopovers}
-        />
-      </div>
-
-      <Separator vertical={vertical} />
+      {vertical ? (
+        <>
+          <Separator vertical />
+          <div className="flex flex-col items-stretch gap-0.5">
+            <SiteNavLinks
+              as="div"
+              orientation="vertical"
+              onNavigate={onClosePopovers}
+            />
+          </div>
+          <Separator vertical />
+        </>
+      ) : (
+        <>
+          {/* md 以下主导航进汉堡，此处若保留双竖杠会像多出一道分隔 */}
+          <Separator vertical={false} className="hidden md:block" />
+          <div className="hidden items-center gap-0.5 md:flex">
+            <SiteNavLinks
+              as="div"
+              orientation="horizontal"
+              onNavigate={onClosePopovers}
+            />
+          </div>
+          <Separator vertical={false} />
+        </>
+      )}
 
       <div
         className={
@@ -511,25 +628,27 @@ function ExpandedDock({
 
         <ThemeToggle />
 
-        <div className="relative flex min-w-0 shrink-0 justify-center">
-          <IconButton
-            ariaLabel="导航位置设置"
-            ariaHasPopup="menu"
-            ariaExpanded={menuOpen}
-            ariaControls={menuId}
-            onClick={onToggleMenu}
-            active={menuOpen}
-            icon={<SettingsIcon />}
-          />
-          {menuOpen ? (
-            <DockMenu
-              id={menuId}
-              vertical={vertical}
-              position={position}
-              onPick={onSetPosition}
+        {allowReposition ? (
+          <div className="relative flex min-w-0 shrink-0 justify-center">
+            <IconButton
+              ariaLabel="导航位置设置"
+              ariaHasPopup="menu"
+              ariaExpanded={menuOpen}
+              ariaControls={menuId}
+              onClick={onToggleMenu}
+              active={menuOpen}
+              icon={<SettingsIcon />}
             />
-          ) : null}
-        </div>
+            {menuOpen ? (
+              <DockMenu
+                id={menuId}
+                vertical={vertical}
+                position={position}
+                onPick={onSetPosition}
+              />
+            ) : null}
+          </div>
+        ) : null}
 
         <IconButton
           ariaLabel="收起导航"
@@ -554,26 +673,55 @@ function ExpandedDock({
 }
 
 function CollapsedDock({
+  allowReposition,
   onExpand,
   onBeginDrag,
 }: {
+  allowReposition: boolean;
   onExpand: () => void;
-  onBeginDrag: (x: number, y: number) => void;
+  onBeginDrag: (
+    x: number,
+    y: number,
+    pointerCapture?: { captureEl: Element; pointerId: number },
+  ) => void;
 }) {
   /**
    * 折叠态：
    * - 轻点 → 展开导航
-   * - 按住后移动 ≥4px → 进入拖拽流程，松手吸附最近边
+   * - 桌面：按住后移动 ≥4px → 进入拖拽流程，松手吸附最近边
+   * - 窄屏：仅可点击展开，不进入改位置拖拽
    */
   const downRef = useRef<{ x: number; y: number; dragging: boolean } | null>(
     null,
   );
 
-  const onPointerDown = (e: ReactPointerEvent) => {
+  if (!allowReposition) {
+    return (
+      <button
+        type="button"
+        onClick={onExpand}
+        aria-label="展开导航"
+        title="点击展开"
+        className="group flex h-12 w-12 cursor-pointer items-center justify-center rounded-full text-stone-700 transition-colors hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800/60"
+      >
+        <SiteLogo className="h-5 w-4 transition-transform duration-300 group-hover:scale-110" />
+      </button>
+    );
+  }
+
+  const onPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const el = e.currentTarget;
     const startX = e.clientX;
     const startY = e.clientY;
+    const pointerId = e.pointerId;
     downRef.current = { x: startX, y: startY, dragging: false };
+
+    try {
+      el.setPointerCapture(pointerId);
+    } catch {
+      /* noop */
+    }
 
     function onMove(ev: PointerEvent) {
       const ref = downRef.current;
@@ -583,12 +731,13 @@ function CollapsedDock({
       if (Math.hypot(dx, dy) >= 4) {
         ref.dragging = true;
         cleanup();
-        onBeginDrag(ev.clientX, ev.clientY);
+        onBeginDrag(ev.clientX, ev.clientY, { captureEl: el, pointerId });
       }
     }
-    function onUp() {
+    function onUp(ev: PointerEvent) {
       const ref = downRef.current;
       cleanup();
+      safeReleasePointerCapture(el, ev.pointerId);
       if (!ref) return;
       if (!ref.dragging) onExpand();
       downRef.current = null;
@@ -610,22 +759,29 @@ function CollapsedDock({
       onPointerDown={onPointerDown}
       aria-label="展开导航（按住可拖拽）"
       title="点击展开 · 按住可拖动位置"
-      className="group flex h-12 w-12 cursor-grab items-center justify-center rounded-full text-stone-700 transition-colors hover:bg-stone-100 active:cursor-grabbing dark:text-stone-200 dark:hover:bg-stone-800/60"
+      className="group flex h-12 w-12 touch-none cursor-grab items-center justify-center rounded-full text-stone-700 transition-colors hover:bg-stone-100 active:cursor-grabbing dark:text-stone-200 dark:hover:bg-stone-800/60"
     >
       <SiteLogo className="h-5 w-4 transition-transform duration-300 group-hover:scale-110" />
     </button>
   );
 }
 
-function Separator({ vertical }: { vertical: boolean }) {
+function Separator({
+  vertical,
+  className,
+}: {
+  vertical: boolean;
+  className?: string;
+}) {
   return (
     <span
       aria-hidden
-      className={
+      className={[
         vertical
           ? 'mx-1 h-px shrink-0 bg-[var(--border)]/60'
-          : 'mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]/60'
-      }
+          : 'mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]/60',
+        className ?? '',
+      ].join(' ')}
     />
   );
 }
@@ -635,7 +791,7 @@ function DragHandle({
   onPointerDown,
 }: {
   vertical: boolean;
-  onPointerDown: (e: ReactPointerEvent) => void;
+  onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => void;
 }) {
   return (
     <button
@@ -644,7 +800,7 @@ function DragHandle({
       aria-label="按住拖动以改变导航位置"
       title="按住拖动 ↕ 或 ↔ 任意边缘"
       className={[
-        'inline-flex shrink-0 cursor-grab items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700 active:cursor-grabbing dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-200',
+        'inline-flex shrink-0 touch-none cursor-grab items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700 active:cursor-grabbing dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-200',
         vertical ? 'h-6 w-full' : 'h-9 w-5',
       ].join(' ')}
     >
