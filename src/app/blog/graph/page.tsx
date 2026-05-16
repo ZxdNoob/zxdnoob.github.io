@@ -23,6 +23,14 @@ export const metadata: Metadata = {
 
 export default async function PostsGraphPage() {
   const data = await fetchPostsGraph(1.0);
+  /** 图谱数据变化时整组件 remount，缩放/pan 状态回到默认（避免在 effect 里同步 setViewBox） */
+  const postsGraphKey =
+    data.nodes.length === 0
+      ? 'empty'
+      : [...data.nodes]
+          .map((n) => n.slug)
+          .sort()
+          .join('|');
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 sm:pt-16 lg:px-8">
@@ -65,7 +73,7 @@ export default async function PostsGraphPage() {
         </div>
       </header>
 
-      <PostsGraph data={data} />
+      <PostsGraph key={postsGraphKey} data={data} />
     </main>
   );
 }

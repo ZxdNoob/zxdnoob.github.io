@@ -1,0 +1,25 @@
+---
+description: 注释须符合仓库风格；改动须通过 Prettier 与 ESLint
+alwaysApply: true
+---
+
+# 注释规范
+
+在**新增或实质性修改**的代码上编写注释，并与本仓库既有写法一致：
+
+- **模块 / 组件 / 导出函数**：文件顶部或紧邻声明处使用 `/** … */`；需要分层说明时，在块注释内用 `##` 小节标题（与现有组件一致）。
+- **非显而易见的逻辑**（边界条件、为何这样写、与外部系统/配置的约定）：在相关代码**上方**用简短的 `/** … */` 说明意图与约束，**中文**表述即可。
+- **避免**：复述标识符或一行代码的字面含义；冗长教程式注释；删除或弱化原有、仍有价值的注释。
+
+参考现有风格：`src/components/post-body.tsx`、`src/components/giscus-comments.tsx` 等文件中的块注释与行旁说明。
+
+---
+
+# 格式化与 Lint
+
+对本会话中**改动过的文件**，在收尾前确保校验通过（修复后再交付）：
+
+- **前端 / 仓库根目录**：在项目根执行 `npm run format:check` 与 `npm run lint`；未通过时用 `npm run format`、`npm run lint:fix` 修正。
+- **动了 `backend/`**：另在根目录执行 `npm run format:check --prefix backend` 与 `npm run lint --prefix backend`（backend 的 Prettier 配置与忽略路径与根目录不同，以子项目脚本为准）。
+
+不要求为「绝对无告警的全仓库」跑腿扫一遍，但**本次 diff 涉及的路径**必须满足上述检查。

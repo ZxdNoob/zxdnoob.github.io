@@ -83,6 +83,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_017,
       SEED_RELEASE_018,
       SEED_RELEASE_019,
+      SEED_RELEASE_020,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -846,6 +847,46 @@ const SEED_RELEASE_019: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：前端版本升级至 0.1.4；API 版本保持 0.0.9（无后端发版）。Breaking changes：无。',
+    },
+  ],
+};
+
+const SEED_RELEASE_020: Partial<ChangelogReleaseEntity> = {
+  date: '2026-05-16T10:08:12',
+  title: '文章关系图谱画布增强（Web 0.1.5 / API 仍为 0.0.9）',
+  webVersion: '0.1.5',
+  apiVersion: '0.0.9',
+  sortOrder: 19,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '`/blog/graph`：图谱数据变更时用稳定 `key` remount `<PostsGraph>`，缩放与平移回到默认，避免在数据 effect 内同步改写 viewBox。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '力导向画布交互对齐常见白板：空白 / 中键 / 空格+左键拖动画布；触控板双指平移；Ctrl/Meta+滚轮与捏合缩放；Shift+滚轮将纵向滚动转为横向平移；悬浮工具栏与键盘 `+`/`−`/`0`/方向键缩放与复位。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '系列筛选支持多选；顶栏胶囊在宽度不足时出现「更多」下拉（`ResizeObserver` 动态测算可容纳数量）。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '悬停卡片可捕获指针以点击「阅读全文」；短延迟收起降低误触；Esc 关闭卡片；输入框 / 工具栏 / tooltip 内不误触画布快捷键。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '`PostsGraph`：力学迭代封装在 `GraphSimulation`，渲染侧以 snapshot 浅拷贝同步坐标，兼容 React 19 不变性约束。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：前端版本升级至 0.1.5；API 版本保持 0.0.9（无后端发版）。Breaking changes：无。',
     },
   ],
 };
