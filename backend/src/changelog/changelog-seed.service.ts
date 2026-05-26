@@ -84,6 +84,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_018,
       SEED_RELEASE_019,
       SEED_RELEASE_020,
+      SEED_RELEASE_021,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -887,6 +888,41 @@ const SEED_RELEASE_020: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：前端版本升级至 0.1.5；API 版本保持 0.0.9（无后端发版）。Breaking changes：无。',
+    },
+  ],
+};
+
+const SEED_RELEASE_021: Partial<ChangelogReleaseEntity> = {
+  date: '2026-05-26T11:25:02',
+  title: '文章关系图谱移动端体验（Web 0.1.6 / API 仍为 0.0.9）',
+  webVersion: '0.1.6',
+  apiVersion: '0.0.9',
+  sortOrder: 20,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '窄屏（`< md`）下 `/blog/graph` 使用移动端专属交互：`useMobileViewport` 切换 `PostsGraph` 布局；点选节点打开底部详情 Sheet（系列 / 阅读时长 / 标签 /「阅读全文」），不再依赖 hover 浮卡；系列筛选收入底部 Sheet 多选列表。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '移动端画布：`min(72dvh, 560px)` 可视高度、加大节点透明点击区、底部缩放工具条（44px 触控目标）；`useGraphPinchZoom` 双指捏合缩放；节点不进入力导向拖拽，避免与单指平移冲突。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '底部 Sheet 打开时 `useBodyScrollLock`（`position: fixed` + 恢复 scrollY）锁定页面滚动；列表区 `useSheetScrollContain` 在顶/底边界拦截 touch 滚动链，修复系列筛选向上滑动时背后页面跟着滚的穿透问题。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '抽取 `posts-graph-viewbox.ts` 共享 viewBox / 缩放常量；`posts-graph-mobile.tsx` 承载移动端 UI 与捏合逻辑；图谱页窄屏文案与页头间距适配。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：前端版本升级至 0.1.6；API 版本保持 0.0.9（无后端发版）。Breaking changes：无。',
     },
   ],
 };

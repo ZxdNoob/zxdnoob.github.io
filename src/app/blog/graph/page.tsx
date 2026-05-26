@@ -33,8 +33,8 @@ export default async function PostsGraphPage() {
           .join('|');
 
   return (
-    <main className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-      <header className="mb-8">
+    <main className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-16 lg:px-8">
+      <header className="mb-5 sm:mb-8">
         <Link
           href="/blog"
           className="group inline-flex items-center text-sm font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -57,16 +57,21 @@ export default async function PostsGraphPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
               Knowledge Graph
             </p>
-            <h1 className="mt-2 font-serif text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-50 sm:text-4xl">
+            <h1 className="mt-2 font-serif text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-50 sm:text-4xl">
               文章关系图谱
             </h1>
-            <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-600 dark:text-stone-400">
-              用 char-trigram Jaccard + 标签 /
-              系列加权，实时计算每两篇文章的「相似度」。
-              点是文章，连线越粗表示主题越接近。
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600 dark:text-stone-400 sm:mt-3 sm:text-base">
+              <span className="md:hidden">
+                圆点代表文章，连线越粗主题越近；点选节点可看详情。
+              </span>
+              <span className="hidden md:inline">
+                用 char-trigram Jaccard + 标签 /
+                系列加权，实时计算每两篇文章的「相似度」。
+                点是文章，连线越粗表示主题越接近。
+              </span>
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/80 px-3 py-1.5 text-xs text-stone-500 dark:text-stone-400">
+          <div className="flex w-full items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/80 px-3 py-1.5 text-xs text-stone-500 sm:w-auto dark:text-stone-400">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
             {data.nodes.length} 节点 · {data.links.length} 条边
           </div>

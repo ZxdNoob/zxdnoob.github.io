@@ -22,6 +22,12 @@
  * - 画布平移：空白处左键拖动；任意处中键拖动；按住空格左键拖动（含节点上方，避免误拖力学）；触控板双指滑动（不含 Ctrl/Meta 的 wheel）
  * - Shift + 滚轮：纵向滑动转为横向平移（兼容仅有 deltaY 的鼠标滚轮）
  * - Esc：关闭悬停卡片（不影响缩放）
+ *
+ * ## 移动端（< md）
+ * - 节点点选 → 底部 sheet 详情（无 hover 浮卡）
+ * - 节点不进入力导向拖拽，避免与画布平移冲突
+ * - 系列筛选收入底部 sheet；工具条贴底、触控目标加大
+ * - 双指捏合缩放（见 `posts-graph-mobile.tsx`）
  */
 
 import Link from 'next/link';
@@ -34,6 +40,26 @@ import {
   useRef,
   useState,
 } from 'react';
+import {
+  MOBILE_GRAPH_HELP,
+  MOBILE_GRAPH_VIEWPORT_CLASS,
+  PostsGraphFilterSheet,
+  PostsGraphMobileControls,
+  PostsGraphMobileZoomToolbar,
+  PostsGraphNodeSheet,
+  useGraphPinchZoom,
+  useMobileGraphZoomHandlers,
+} from '@/components/posts-graph-mobile';
+import {
+  DEFAULT_VIEW_BOX,
+  HEIGHT,
+  WIDTH,
+  clampGraphViewBox,
+  zoomViewBoxAtPoint,
+  zoomViewBoxCenter,
+  type GraphViewBox,
+} from '@/components/posts-graph-viewbox';
+import { useMobileViewport } from '@/lib/use-mobile-viewport';
 import type { GraphLink, GraphNode, PostsGraph } from '@/lib/posts';
 
 interface SimNode extends GraphNode {
@@ -51,71 +77,8 @@ interface SimLink extends GraphLink {
   rest: number;
 }
 
-const WIDTH = 1100;
-const HEIGHT = 640;
 const PAD = 40;
 const MAX_ITERATIONS = 280;
-
-/** 与固定 viewBox `0 0 WIDTH HEIGHT` 对应的可见区域（捏合缩放时改宽高与偏移） */
-type GraphViewBox = {
-  minX: number;
-  minY: number;
-  width: number;
-  height: number;
-};
-
-const DEFAULT_VIEW_BOX: GraphViewBox = {
-  minX: 0,
-  minY: 0,
-  width: WIDTH,
-  height: HEIGHT,
-};
-
-/** 相对完整画布的缩放范围（宽为 WIDTH 的倍数） */
-const VIEW_MIN_WIDTH = WIDTH / 18;
-const VIEW_MAX_WIDTH = WIDTH * 12;
-
-function clampGraphViewBox(vb: GraphViewBox): GraphViewBox {
-  const w = clamp(vb.width, VIEW_MIN_WIDTH, VIEW_MAX_WIDTH);
-  const h = w * (HEIGHT / WIDTH);
-  const minXM = Math.min(0, WIDTH - w);
-  const maxXM = Math.max(0, WIDTH - w);
-  const minYM = Math.min(0, HEIGHT - h);
-  const maxYM = Math.max(0, HEIGHT - h);
-  return {
-    minX: clamp(vb.minX, minXM, maxXM),
-    minY: clamp(vb.minY, minYM, maxYM),
-    width: w,
-    height: h,
-  };
-}
-
-/** widthMultiplier > 1 → 放大（可视区域变窄） */
-function zoomViewBoxAtPoint(
-  vb: GraphViewBox,
-  cx: number,
-  cy: number,
-  widthMultiplier: number,
-): GraphViewBox {
-  const nw = clamp(vb.width / widthMultiplier, VIEW_MIN_WIDTH, VIEW_MAX_WIDTH);
-  const ratio = nw / vb.width;
-  return clampGraphViewBox({
-    minX: cx - (cx - vb.minX) * ratio,
-    minY: cy - (cy - vb.minY) * ratio,
-    width: nw,
-    height: nw * (HEIGHT / WIDTH),
-  });
-}
-
-function zoomViewBoxCenter(
-  vb: GraphViewBox,
-  direction: 'in' | 'out',
-): GraphViewBox {
-  const cx = vb.minX + vb.width / 2;
-  const cy = vb.minY + vb.height / 2;
-  const step = 1.2;
-  return zoomViewBoxAtPoint(vb, cx, cy, direction === 'in' ? step : 1 / step);
-}
 
 function pickHue(series: string, palette: string[]): number {
   if (!series || series === '未分类') return -1;
@@ -372,6 +335,7 @@ const WHEEL_ZOOM_SENSITIVITY = 0.00165;
 
 export function PostsGraph({ data }: { data: PostsGraph }) {
   const router = useRouter();
+  const isMobile = useMobileViewport();
   const svgRef = useRef<SVGSVGElement | null>(null);
   const graphViewportRef = useRef<HTMLDivElement | null>(null);
   const canvasPanRef = useRef<{
@@ -389,6 +353,11 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
   );
 
   const [hovered, setHovered] = useState<string | null>(null);
+  /** 移动端点选节点，驱动底部详情 sheet */
+  const [mobileSelectedSlug, setMobileSelectedSlug] = useState<string | null>(
+    null,
+  );
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [canvasPanning, setCanvasPanning] = useState(false);
   const [selectedSeriesSlugs, setSelectedSeriesSlugs] = useState<string[]>([]);
@@ -425,6 +394,14 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
   const [viewBox, setViewBox] = useState<GraphViewBox>(() => ({
     ...DEFAULT_VIEW_BOX,
   }));
+
+  const {
+    zoomIn: mobileZoomIn,
+    zoomOut: mobileZoomOut,
+    reset: mobileResetView,
+  } = useMobileGraphZoomHandlers(setViewBox, DEFAULT_VIEW_BOX);
+
+  useGraphPinchZoom(isMobile, graphViewportRef, svgRef, setViewBox);
 
   /** 系列调色板（顺序稳定，不因 nodes 顺序波动而跳） */
   const seriesPalette = useMemo(() => {
@@ -477,6 +454,7 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
   }, [seriesPalette]);
 
   useEffect(() => {
+    if (isMobile) return;
     const track = chipsTrackRef.current;
     if (!track) return;
     const schedule = () => queueMicrotask(() => recalcInlineSeriesCap());
@@ -484,7 +462,7 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
     ro.observe(track);
     schedule();
     return () => ro.disconnect();
-  }, [recalcInlineSeriesCap, selectedSeriesSlugs]);
+  }, [isMobile, recalcInlineSeriesCap, selectedSeriesSlugs]);
 
   useEffect(() => {
     if (!moreSeriesMenuOpen) return;
@@ -576,7 +554,7 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
         const factor = Math.exp(e.deltaY * WHEEL_ZOOM_SENSITIVITY);
         setViewBox((prev) => {
           const { minX, minY, width: w } = prev;
-          const nw = clamp(w * factor, VIEW_MIN_WIDTH, VIEW_MAX_WIDTH);
+          const nw = w * factor;
           const ratio = nw / w;
           return clampGraphViewBox({
             minX: p.x - (p.x - minX) * ratio,
@@ -660,6 +638,16 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
       if (e.code === 'Escape') {
         if (!viewportHot || isTypingShortcutConflict(e.target)) return;
         e.preventDefault();
+        if (isMobile) {
+          if (mobileFilterOpen) {
+            setMobileFilterOpen(false);
+            return;
+          }
+          if (mobileSelectedSlug) {
+            setMobileSelectedSlug(null);
+            return;
+          }
+        }
         cancelHoverDismiss();
         setHovered(null);
         return;
@@ -746,7 +734,7 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
       window.removeEventListener('keyup', onKeyUp);
       window.removeEventListener('blur', clearSpacePan);
     };
-  }, [cancelHoverDismiss]);
+  }, [cancelHoverDismiss, isMobile, mobileFilterOpen, mobileSelectedSlug]);
 
   const replay = useCallback(() => {
     simRef.current.shake();
@@ -766,19 +754,23 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
     return { x: p.x, y: p.y };
   }, []);
 
-  const beginCanvasPan = useCallback((e: React.PointerEvent<Element>) => {
-    if (e.button !== 0 && e.button !== 1) return;
-    e.preventDefault();
-    const el = e.currentTarget;
-    canvasPanCaptureElRef.current = el;
-    el.setPointerCapture(e.pointerId);
-    canvasPanRef.current = {
-      pointerId: e.pointerId,
-      lastClientX: e.clientX,
-      lastClientY: e.clientY,
-    };
-    setCanvasPanning(true);
-  }, []);
+  const beginCanvasPan = useCallback(
+    (e: React.PointerEvent<Element>) => {
+      if (e.button !== 0 && e.button !== 1) return;
+      e.preventDefault();
+      if (isMobile) setMobileSelectedSlug(null);
+      const el = e.currentTarget;
+      canvasPanCaptureElRef.current = el;
+      el.setPointerCapture(e.pointerId);
+      canvasPanRef.current = {
+        pointerId: e.pointerId,
+        lastClientX: e.clientX,
+        lastClientY: e.clientY,
+      };
+      setCanvasPanning(true);
+    },
+    [isMobile],
+  );
 
   const handleSvgPointerMove = useCallback(
     (e: React.PointerEvent<SVGElement>) => {
@@ -845,6 +837,15 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
 
   const onNodePointerDown = useCallback(
     (e: React.PointerEvent<SVGCircleElement>, slug: string) => {
+      if (isMobile) {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+        setMobileSelectedSlug(slug);
+        cancelHoverDismiss();
+        setHovered(null);
+        return;
+      }
       if (spacePanHeldRef.current && e.button === 0) {
         beginCanvasPan(e);
         return;
@@ -865,7 +866,7 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
       setDraggingId(slug);
       replay();
     },
-    [beginCanvasPan, replay, toSvgCoords],
+    [beginCanvasPan, cancelHoverDismiss, isMobile, replay, toSvgCoords],
   );
 
   if (data.nodes.length === 0) {
@@ -883,6 +884,9 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
     filteringSeries && !effectiveSeriesSelection.includes(n.series);
   const slugToIdx = new Map(nodes.map((n, i) => [n.slug, i]));
   const hoveredNode = hovered ? nodes[slugToIdx.get(hovered) ?? -1] : null;
+  const mobileSelectedNode = mobileSelectedSlug
+    ? nodes[slugToIdx.get(mobileSelectedSlug) ?? -1]
+    : null;
   const zoomPercent = Math.round((WIDTH / viewBox.width) * 100);
 
   const inlineSeriesLimit = Math.min(inlineSeriesCap, seriesPalette.length);
@@ -897,7 +901,20 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
+      {isMobile ? (
+        <PostsGraphMobileControls
+          filteringSeries={filteringSeries}
+          selectedCount={effectiveSeriesSelection.length}
+          onOpenFilters={() => setMobileFilterOpen(true)}
+          onReplay={replay}
+        />
+      ) : null}
+      <div
+        className={[
+          'flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start',
+          isMobile ? 'hidden' : '',
+        ].join(' ')}
+      >
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <button
             type="button"
@@ -1057,52 +1074,68 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
         role="application"
         aria-label="文章关系图谱画布"
         aria-describedby="posts-graph-help"
-        className="relative overflow-hidden overscroll-contain rounded-3xl border border-[var(--border)] bg-[var(--surface)]/40 outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)] dark:focus-visible:ring-offset-stone-950"
-        style={{ aspectRatio: `${WIDTH}/${HEIGHT}` }}
+        className={
+          isMobile
+            ? MOBILE_GRAPH_VIEWPORT_CLASS
+            : 'relative overflow-hidden overscroll-contain rounded-3xl border border-[var(--border)] bg-[var(--surface)]/40 outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)] dark:focus-visible:ring-offset-stone-950'
+        }
+        style={isMobile ? undefined : { aspectRatio: `${WIDTH}/${HEIGHT}` }}
         onPointerDownCapture={() => {
           graphViewportRef.current?.focus({ preventScroll: true });
         }}
       >
-        <div className="pointer-events-none absolute right-3 top-3 z-20">
-          <div
-            data-graph-toolbar="true"
-            role="toolbar"
-            aria-label="画布缩放与复位"
-            className="pointer-events-auto flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--surface)]/95 p-0.5 text-stone-700 shadow-lg backdrop-blur-md dark:text-stone-200"
-          >
-            <button
-              type="button"
-              aria-label="缩小"
-              title="缩小 · 快捷键 −"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg font-semibold leading-none transition-colors hover:bg-stone-100 active:bg-stone-200 dark:hover:bg-stone-800 dark:active:bg-stone-700"
-              onClick={() => setViewBox((vb) => zoomViewBoxCenter(vb, 'out'))}
+        {isMobile ? (
+          <PostsGraphMobileZoomToolbar
+            zoomPercent={zoomPercent}
+            onZoomIn={mobileZoomIn}
+            onZoomOut={mobileZoomOut}
+            onReset={mobileResetView}
+          />
+        ) : (
+          <div className="pointer-events-none absolute right-3 top-3 z-20">
+            <div
+              data-graph-toolbar="true"
+              role="toolbar"
+              aria-label="画布缩放与复位"
+              className="pointer-events-auto flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--surface)]/95 p-0.5 text-stone-700 shadow-lg backdrop-blur-md dark:text-stone-200"
             >
-              −
-            </button>
-            <span className="min-w-[3rem] px-1 text-center font-mono text-[11px] font-semibold tabular-nums text-stone-500 dark:text-stone-400">
-              {zoomPercent}%
-            </span>
-            <button
-              type="button"
-              aria-label="放大"
-              title="放大 · 快捷键 +"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg font-semibold leading-none transition-colors hover:bg-stone-100 active:bg-stone-200 dark:hover:bg-stone-800 dark:active:bg-stone-700"
-              onClick={() => setViewBox((vb) => zoomViewBoxCenter(vb, 'in'))}
-            >
-              +
-            </button>
-            <span className="mx-0.5 h-5 w-px bg-[var(--border)]" aria-hidden />
-            <button
-              type="button"
-              aria-label="重置画布视图"
-              title="复位视图 · 0 · Esc 关闭卡片"
-              className="shrink-0 rounded-full px-2 py-1.5 text-[11px] font-semibold transition-colors hover:bg-stone-100 active:bg-stone-200 dark:hover:bg-stone-800 dark:active:bg-stone-700"
-              onClick={() => setViewBox({ ...DEFAULT_VIEW_BOX })}
-            >
-              复位视图
-            </button>
+              <button
+                type="button"
+                aria-label="缩小"
+                title="缩小 · 快捷键 −"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg font-semibold leading-none transition-colors hover:bg-stone-100 active:bg-stone-200 dark:hover:bg-stone-800 dark:active:bg-stone-700"
+                onClick={() => setViewBox((vb) => zoomViewBoxCenter(vb, 'out'))}
+              >
+                −
+              </button>
+              <span className="min-w-[3rem] px-1 text-center font-mono text-[11px] font-semibold tabular-nums text-stone-500 dark:text-stone-400">
+                {zoomPercent}%
+              </span>
+              <button
+                type="button"
+                aria-label="放大"
+                title="放大 · 快捷键 +"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg font-semibold leading-none transition-colors hover:bg-stone-100 active:bg-stone-200 dark:hover:bg-stone-800 dark:active:bg-stone-700"
+                onClick={() => setViewBox((vb) => zoomViewBoxCenter(vb, 'in'))}
+              >
+                +
+              </button>
+              <span
+                className="mx-0.5 h-5 w-px bg-[var(--border)]"
+                aria-hidden
+              />
+              <button
+                type="button"
+                aria-label="重置画布视图"
+                title="复位视图 · 0 · Esc 关闭卡片"
+                className="shrink-0 rounded-full px-2 py-1.5 text-[11px] font-semibold transition-colors hover:bg-stone-100 active:bg-stone-200 dark:hover:bg-stone-800 dark:active:bg-stone-700"
+                onClick={() => setViewBox({ ...DEFAULT_VIEW_BOX })}
+              >
+                复位视图
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         <svg
           ref={svgRef}
@@ -1160,20 +1193,31 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
           <g>
             {nodes.map((n) => {
               const dimmed = isDimmed(n);
-              const isHovered = hovered === n.slug;
+              const isHovered = !isMobile && hovered === n.slug;
+              const isSelected = isMobile && mobileSelectedSlug === n.slug;
               const fill =
                 n.hue >= 0 ? `hsl(${n.hue} 72% 52%)` : 'hsl(30 4% 60%)';
               return (
                 <g key={n.slug} opacity={dimmed ? 0.18 : 1}>
-                  {isHovered ? (
+                  {isHovered || isSelected ? (
                     <circle
                       cx={n.x}
                       cy={n.y}
-                      r={n.r + 8}
+                      r={n.r + (isMobile ? 10 : 8)}
                       fill="none"
                       stroke={fill}
                       strokeOpacity={0.4}
-                      strokeWidth={6}
+                      strokeWidth={isMobile ? 7 : 6}
+                    />
+                  ) : null}
+                  {isMobile ? (
+                    <circle
+                      cx={n.x}
+                      cy={n.y}
+                      r={n.r + 12}
+                      fill="transparent"
+                      className="cursor-pointer"
+                      onPointerDown={(e) => onNodePointerDown(e, n.slug)}
                     />
                   ) : null}
                   <circle
@@ -1183,21 +1227,32 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
                     fill={fill}
                     stroke="white"
                     strokeWidth={1.6}
+                    pointerEvents={isMobile ? 'none' : 'auto'}
                     style={{
-                      cursor:
-                        canvasPanning || draggingId === n.slug
+                      cursor: isMobile
+                        ? 'pointer'
+                        : canvasPanning || draggingId === n.slug
                           ? 'grabbing'
                           : 'grab',
-                      filter: isHovered
-                        ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.18))'
-                        : undefined,
+                      filter:
+                        isHovered || isSelected
+                          ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.18))'
+                          : undefined,
                     }}
-                    onPointerDown={(e) => onNodePointerDown(e, n.slug)}
-                    onMouseEnter={() => {
-                      cancelHoverDismiss();
-                      setHovered(n.slug);
-                    }}
-                    onMouseLeave={() => scheduleHoverDismiss()}
+                    onPointerDown={
+                      isMobile ? undefined : (e) => onNodePointerDown(e, n.slug)
+                    }
+                    onMouseEnter={
+                      isMobile
+                        ? undefined
+                        : () => {
+                            cancelHoverDismiss();
+                            setHovered(n.slug);
+                          }
+                    }
+                    onMouseLeave={
+                      isMobile ? undefined : () => scheduleHoverDismiss()
+                    }
                   />
                 </g>
               );
@@ -1205,7 +1260,7 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
           </g>
         </svg>
 
-        {hoveredNode ? (
+        {!isMobile && hoveredNode ? (
           <div
             role="tooltip"
             className="pointer-events-auto absolute z-10 max-w-[260px] rounded-2xl border border-[var(--border)] bg-[var(--surface)]/95 px-3 py-2 text-sm shadow-lg backdrop-blur-sm"
@@ -1258,15 +1313,38 @@ export function PostsGraph({ data }: { data: PostsGraph }) {
         ) : null}
       </div>
 
+      <PostsGraphNodeSheet
+        open={isMobile && mobileSelectedNode != null}
+        node={
+          mobileSelectedNode
+            ? {
+                title: mobileSelectedNode.title,
+                series: mobileSelectedNode.series,
+                readingMinutes: mobileSelectedNode.readingMinutes,
+                tags: mobileSelectedNode.tags,
+                url: mobileSelectedNode.url,
+              }
+            : null
+        }
+        onClose={() => setMobileSelectedSlug(null)}
+      />
+
+      <PostsGraphFilterSheet
+        open={isMobile && mobileFilterOpen}
+        seriesPalette={seriesPalette}
+        selectedSlugs={effectiveSeriesSelection}
+        onToggle={toggleSeriesSlug}
+        onClear={clearSeriesSelection}
+        onClose={() => setMobileFilterOpen(false)}
+      />
+
       <p
         id="posts-graph-help"
-        className="text-xs text-stone-500 dark:text-stone-500"
+        className="text-xs leading-relaxed text-stone-500 dark:text-stone-500"
       >
-        节点 = 文章；边 = 内容相似度（trigram Jaccard）+ 标签 / 系列加权 ·
-        系列可多选；宽度不足时出现「更多」下拉勾选其余系列 ·
-        空白拖动画布，按住空格可在节点上拖画布（避免误拖节点）；双指滑动平移；Shift+滚轮横向平移；
-        捏合或 Ctrl+滚轮缩放；方向键微调；Esc 关闭卡片 ·
-        悬停可读摘要；单击节点打开文章（小幅拖动仍视为拖拽）。
+        {isMobile
+          ? MOBILE_GRAPH_HELP
+          : `节点 = 文章；边 = 内容相似度（trigram Jaccard）+ 标签 / 系列加权 · 系列可多选；宽度不足时出现「更多」下拉勾选其余系列 · 空白拖动画布，按住空格可在节点上拖画布（避免误拖节点）；双指滑动平移；Shift+滚轮横向平移；捏合或 Ctrl+滚轮缩放；方向键微调；Esc 关闭卡片 · 悬停可读摘要；单击节点打开文章（小幅拖动仍视为拖拽）。`}
       </p>
     </div>
   );
