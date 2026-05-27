@@ -1,8 +1,11 @@
 /**
- * 版本历史：类型与纯函数；列表数据由 `fetchChangelogEntries()` 从 Nest API 拉取。
+ * 版本历史：类型与纯函数；列表由 `fetchChangelogPage` / `fetchChangelogEntries` 从 Nest API 拉取。
  */
 
-import { getBackendBaseUrl } from './api';
+import { getBackendBaseUrl, getPublicApiBaseUrl } from './api';
+
+/** 版本历史页首屏与「加载更多」每批条数 */
+export const CHANGELOG_PAGE_SIZE = 8;
 
 export type ChangelogKind = 'feature' | 'fix' | 'breaking' | 'docs' | 'perf';
 
@@ -31,6 +34,28 @@ export type ChangelogYearGroup = {
   entries: ChangelogEntry[];
 };
 
+export type ChangelogScopeFilter = 'all' | 'web' | 'api';
+export type ChangelogKindFilter = 'all' | ChangelogKind;
+
+export type ChangelogPageQuery = {
+  limit?: number;
+  offset?: number;
+  scope?: ChangelogScopeFilter;
+  kind?: ChangelogKindFilter;
+};
+
+/** `GET /api/changelog?limit=&offset=` 分页响应 */
+export type ChangelogPageResult = {
+  entries: ChangelogEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+  years: number[];
+  latestWeb?: string;
+  latestApi?: string;
+};
+
 type ChangelogApiRow = {
   id: string;
   date: string;
@@ -40,28 +65,139 @@ type ChangelogApiRow = {
   items: ChangelogItem[];
 };
 
+function mapChangelogRow(row: ChangelogApiRow): ChangelogEntry {
+  return {
+    id: row.id,
+    date: row.date,
+    title: row.title,
+    webVersion: row.webVersion,
+    apiVersion: row.apiVersion,
+    items: Array.isArray(row.items) ? row.items : [],
+  };
+}
+
+function changelogFetchInit(): RequestInit {
+  return process.env.STATIC_EXPORT === '1'
+    ? { cache: 'force-cache' }
+    : { cache: 'no-store' };
+}
+
+function buildChangelogPageUrl(
+  base: string,
+  query: ChangelogPageQuery,
+): string {
+  const params = new URLSearchParams();
+  params.set('limit', String(query.limit ?? CHANGELOG_PAGE_SIZE));
+  params.set('offset', String(query.offset ?? 0));
+  if (query.scope && query.scope !== 'all') {
+    params.set('scope', query.scope);
+  }
+  if (query.kind && query.kind !== 'all') {
+    params.set('kind', query.kind);
+  }
+  return `${base}/api/changelog?${params.toString()}`;
+}
+
+function parseChangelogPageBody(data: unknown): ChangelogPageResult | null {
+  if (data == null || typeof data !== 'object') return null;
+  const body = data as {
+    entries?: ChangelogApiRow[];
+    total?: number;
+    limit?: number;
+    offset?: number;
+    hasMore?: boolean;
+    years?: number[];
+    latestWeb?: string;
+    latestApi?: string;
+  };
+  if (!Array.isArray(body.entries)) return null;
+  return {
+    entries: body.entries.map(mapChangelogRow),
+    total: typeof body.total === 'number' ? body.total : body.entries.length,
+    limit: typeof body.limit === 'number' ? body.limit : CHANGELOG_PAGE_SIZE,
+    offset: typeof body.offset === 'number' ? body.offset : 0,
+    hasMore: Boolean(body.hasMore),
+    years: Array.isArray(body.years)
+      ? body.years.filter((y): y is number => typeof y === 'number')
+      : [],
+    latestWeb: body.latestWeb,
+    latestApi: body.latestApi,
+  };
+}
+
+const emptyChangelogPage = (
+  query: ChangelogPageQuery,
+): ChangelogPageResult => ({
+  entries: [],
+  total: 0,
+  limit: query.limit ?? CHANGELOG_PAGE_SIZE,
+  offset: query.offset ?? 0,
+  hasMore: false,
+  years: [],
+});
+
 /**
- * 从后端 `GET /api/changelog` 拉取全部发布记录（服务端组件中调用，`no-store`）。
+ * 分页拉取版本历史（服务端 RSC / 构建期使用）。
+ */
+export async function fetchChangelogPage(
+  query: ChangelogPageQuery = {},
+): Promise<ChangelogPageResult> {
+  const base = getBackendBaseUrl();
+  try {
+    const res = await fetch(
+      buildChangelogPageUrl(base, query),
+      changelogFetchInit(),
+    );
+    if (!res.ok) return emptyChangelogPage(query);
+    const parsed = parseChangelogPageBody(await res.json());
+    return parsed ?? emptyChangelogPage(query);
+  } catch {
+    return emptyChangelogPage(query);
+  }
+}
+
+/** 浏览器端分页拉取（版本历史页「加载更多」与筛选重置）。 */
+export async function fetchChangelogPageClient(
+  query: ChangelogPageQuery = {},
+): Promise<ChangelogPageResult> {
+  const base = resolveChangelogBrowserApiBase();
+  if (!base) return emptyChangelogPage(query);
+  try {
+    const res = await fetch(buildChangelogPageUrl(base, query), {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) return emptyChangelogPage(query);
+    const parsed = parseChangelogPageBody(await res.json());
+    return parsed ?? emptyChangelogPage(query);
+  } catch {
+    return emptyChangelogPage(query);
+  }
+}
+
+function resolveChangelogBrowserApiBase(): string | null {
+  const explicit = getPublicApiBaseUrl();
+  if (explicit) return explicit;
+  if (typeof window !== 'undefined') {
+    const { hostname, protocol } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:4000`;
+    }
+  }
+  return null;
+}
+
+/**
+ * 从后端 `GET /api/changelog` 拉取全部发布记录（Agent 等需要全量列表的场景）。
  */
 export async function fetchChangelogEntries(): Promise<ChangelogEntry[]> {
   const base = getBackendBaseUrl();
   try {
-    const init: RequestInit =
-      process.env.STATIC_EXPORT === '1'
-        ? { cache: 'force-cache' }
-        : { cache: 'no-store' };
-    const res = await fetch(`${base}/api/changelog`, init);
+    const res = await fetch(`${base}/api/changelog`, changelogFetchInit());
     if (!res.ok) return [];
     const data = (await res.json()) as ChangelogApiRow[];
     if (!Array.isArray(data)) return [];
-    return data.map((row) => ({
-      id: row.id,
-      date: row.date,
-      title: row.title,
-      webVersion: row.webVersion,
-      apiVersion: row.apiVersion,
-      items: Array.isArray(row.items) ? row.items : [],
-    }));
+    return data.map(mapChangelogRow);
   } catch {
     return [];
   }

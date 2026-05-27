@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { ChangelogView } from '@/components/changelog/changelog-view';
-import { fetchChangelogEntries, sortChangelogEntries } from '@/lib/changelog';
+import { CHANGELOG_PAGE_SIZE, fetchChangelogPage } from '@/lib/changelog';
 import { site } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -13,15 +13,25 @@ export const metadata: Metadata = {
 };
 
 /**
- * 版本历史：数据来自 Nest `GET /api/changelog`（SQLite）。
+ * 版本历史：首屏分页来自 `GET /api/changelog?limit=&offset=`，其余由客户端加载。
  */
 export default async function ChangelogPage() {
-  const raw = await fetchChangelogEntries();
-  const entries = sortChangelogEntries(raw);
+  const page = await fetchChangelogPage({
+    limit: CHANGELOG_PAGE_SIZE,
+    offset: 0,
+  });
 
   return (
     <main className="min-h-[60vh]">
-      <ChangelogView entries={entries} />
+      <ChangelogView
+        initialEntries={page.entries}
+        initialTotal={page.total}
+        initialHasMore={page.hasMore}
+        initialYears={page.years}
+        latestWeb={page.latestWeb}
+        latestApi={page.latestApi}
+        pageSize={CHANGELOG_PAGE_SIZE}
+      />
     </main>
   );
 }

@@ -85,6 +85,7 @@ export class ChangelogSeedService implements OnModuleInit {
       SEED_RELEASE_019,
       SEED_RELEASE_020,
       SEED_RELEASE_021,
+      SEED_RELEASE_022,
     ];
     const toInsert: Partial<ChangelogReleaseEntity>[] = [];
     const toUpdate: Partial<ChangelogReleaseEntity>[] = [];
@@ -923,6 +924,46 @@ const SEED_RELEASE_021: Partial<ChangelogReleaseEntity> = {
       kind: 'docs',
       surface: 'both',
       text: 'Release info（共通）：前端版本升级至 0.1.6；API 版本保持 0.0.9（无后端发版）。Breaking changes：无。',
+    },
+  ],
+};
+
+const SEED_RELEASE_022: Partial<ChangelogReleaseEntity> = {
+  date: '2026-05-27T12:13:52',
+  title: '版本历史页体验与分页 API（Web 0.1.7 / API 0.0.10）',
+  webVersion: '0.1.7',
+  apiVersion: '0.0.10',
+  sortOrder: 21,
+  items: [
+    {
+      kind: 'feature',
+      surface: 'api',
+      text: '`GET /api/changelog?limit=&offset=` 返回分页对象（`entries`、`total`、`hasMore`、`years`、全局 `latestWeb` / `latestApi`）；支持 `scope`（web/api）与 `kind` 筛选；无查询参数时仍返回完整数组，兼容 Agent 等旧客户端。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '版本历史页首屏仅 SSR 最近 8 条发布记录，其余通过「加载更多」按需拉取；筛选切换时从 offset=0 重新请求，避免只过滤已加载片段。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '页面布局与交互重构：用户向 Hero 文案、2×2 统计卡片、横向滑动筛选 Chips（更大触控目标）、时间轴移动端年份标题；发布卡片抽至 `changelog-release-card.tsx`。',
+    },
+    {
+      kind: 'feature',
+      surface: 'web',
+      text: '年份快捷跳转：目标年份未加载时自动连续分页直至可滚动定位；锚点 `scroll-margin` 与桌面侧栏年份 sticky 使用 `--changelog-sticky-offset` 避让吸顶区。',
+    },
+    {
+      kind: 'fix',
+      surface: 'web',
+      text: '筛选栏吸顶：新增 `.sticky-below-site-nav`，`top` 与 `--nav-pad-top` 同步（随导航折叠动画），`z-index` 低于悬浮 Dock；筛选与年份跳转合并为同一吸顶块，修复移动端被导航遮挡与吸顶留白问题。',
+    },
+    {
+      kind: 'docs',
+      surface: 'both',
+      text: 'Release info（共通）：前端版本升级至 0.1.7；后端版本升级至 0.0.10，并在版本历史中同步记录。Breaking changes：无（分页为可选查询参数）。',
     },
   ],
 };

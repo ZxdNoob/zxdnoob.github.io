@@ -19,6 +19,11 @@ export default function ChangelogLoading() {
           </div>
         </div>
       </section>
+      <div className="border-b border-stone-200/80 dark:border-stone-800/80">
+        <div className="mx-auto max-w-4xl px-4 py-3 sm:px-6">
+          <div className="skeleton h-9 w-full max-w-md rounded-full" />
+        </div>
+      </div>
       <div className="mx-auto max-w-4xl px-4 pb-24 pt-10 sm:px-6">
         <div className="space-y-8">
           {[0, 1, 2].map((i) => (

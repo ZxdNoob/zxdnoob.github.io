@@ -21,3 +21,16 @@ export type ChangelogReleaseDto = {
   apiVersion?: string;
   items: ChangelogItemPayload[];
 };
+
+/** `GET /api/changelog?limit=&offset=` 分页响应（无查询参数时仍返回数组，兼容旧客户端）。 */
+export type ChangelogListPageDto = {
+  entries: ChangelogReleaseDto[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+  /** 当前筛选条件下所有条目涉及的年份（新在前），供年份跳转 */
+  years: number[];
+  latestWeb?: string;
+  latestApi?: string;
+};

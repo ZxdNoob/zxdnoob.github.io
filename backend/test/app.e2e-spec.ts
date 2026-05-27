@@ -58,6 +58,22 @@ describe('App (e2e)', () => {
       });
   });
 
+  it('GET /api/changelog?limit=&offset= paginated', () => {
+    return request(app.getHttpServer())
+      .get('/api/changelog?limit=2&offset=0')
+      .expect(200)
+      .expect((res) => {
+        const body = res.body as {
+          entries: unknown[];
+          total: number;
+          hasMore: boolean;
+        };
+        expect(Array.isArray(body.entries)).toBe(true);
+        expect(typeof body.total).toBe('number');
+        expect(typeof body.hasMore).toBe('boolean');
+      });
+  });
+
   it('GET /api/resume', () => {
     return request(app.getHttpServer())
       .get('/api/resume')

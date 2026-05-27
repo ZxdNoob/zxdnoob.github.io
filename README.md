@@ -233,7 +233,8 @@ NEXT_PUBLIC_AGENT_MODEL=deepseek-chat
   - `GET /api/posts`：已发布文章摘要（含 `readingMinutes`）
   - `GET /api/posts/:slug`：单篇文章（含 Markdown 正文）
 - **版本历史**
-  - `GET /api/changelog`：发布记录（新在前）
+  - `GET /api/changelog`：全部发布记录（新在前，兼容旧客户端）
+  - `GET /api/changelog?limit=&offset=`：分页列表（可选 `scope`、`kind` 筛选；含 `total`、`hasMore`、`years` 与最新 semver 摘要）
 - **简历**
   - `GET /api/resume`：完整 JSON（`ResumePayload`）
 - **浏览量**

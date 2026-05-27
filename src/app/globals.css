@@ -94,6 +94,65 @@ body {
   }
 }
 
+/**
+ * 吸顶工具条：贴在悬浮导航下缘（与 body 的 `--nav-pad-top` 同源，随折叠态同步）。
+ * z-index 30，低于 SiteHeader（z-50），避免挡住导航交互。
+ */
+:root {
+  /* 筛选双行 + 可选年份行的大致高度，供锚点滚动与侧栏 sticky 留白 */
+  --changelog-sticky-stack: 7.25rem;
+  --changelog-sticky-offset: calc(
+    var(--nav-pad-top, 0px) + var(--changelog-sticky-stack)
+  );
+}
+
+@media (min-width: 640px) {
+  :root {
+    --changelog-sticky-stack: 8rem;
+    --changelog-sticky-offset: calc(
+      var(--nav-pad-top, 0px) + var(--changelog-sticky-stack)
+    );
+  }
+}
+
+.sticky-below-site-nav {
+  position: sticky;
+  z-index: 30;
+  top: var(--nav-pad-top, 0px);
+  transition: top 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-nav-dock='bottom'] .sticky-below-site-nav,
+html[data-nav-dock='left'] .sticky-below-site-nav,
+html[data-nav-dock='right'] .sticky-below-site-nav,
+html.reading-immersive .sticky-below-site-nav {
+  top: 0;
+}
+
+.sticky-changelog-year-rail {
+  position: sticky;
+  top: var(--changelog-sticky-offset);
+  transition: top 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-nav-dock='bottom'] .sticky-changelog-year-rail,
+html[data-nav-dock='left'] .sticky-changelog-year-rail,
+html[data-nav-dock='right'] .sticky-changelog-year-rail,
+html.reading-immersive .sticky-changelog-year-rail {
+  top: var(--changelog-sticky-stack);
+}
+
+.scroll-mt-changelog-sticky {
+  scroll-margin-top: var(--changelog-sticky-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticky-below-site-nav,
+  .sticky-changelog-year-rail {
+    transition: none;
+  }
+}
+
 /* ========== Grain / Noise Texture Overlay ========== */
 .grain-overlay::before {
   content: '';
